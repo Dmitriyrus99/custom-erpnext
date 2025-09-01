@@ -15,7 +15,8 @@ class ServiceRequest(Document):
 
 	def on_update(self):
 		self.check_sla_breach()
-		self.update_timestamps()
+		if self.update_timestamps():
+			frappe.db.commit()
 
 	def set_customer_and_project(self):
 		if self.is_new() or self.has_value_changed("service_object"):
@@ -83,11 +84,14 @@ class ServiceRequest(Document):
 			)
 
 	def update_timestamps(self):
+		updated = False
 		if self.status == "In Progress" and not self.actual_start_datetime:
-			self.actual_start_datetime = frappe.utils.now()
+			self.db_set("actual_start_datetime", frappe.utils.now(), commit=False)
+			updated = True
 		elif self.status == "Completed" and not self.actual_end_datetime:
-			self.actual_end_datetime = frappe.utils.now()
-		self.save()
+			self.db_set("actual_end_datetime", frappe.utils.now(), commit=False)
+			updated = True
+		return updated
 
 
 @frappe.whitelist()
