@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-08-20 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "status",
+  "type",
+  "priority",
+  "customer",
+  "project",
+  "service_object",
+  "description",
+  "assignment_section",
+  "assigned_to",
+  "timestamps_section",
+  "reported_datetime",
+  "actual_start_datetime",
+  "actual_end_datetime",
+  "linked_report"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nIn Progress\nCompleted\nClosed\nCancelled",
+   "default": "Open",
+   "reqd": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Routine Maintenance\nEmergency"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Service Project",
+   "read_only": 1
+  },
+  {
+   "fieldname": "service_object",
+   "fieldtype": "Link",
+   "label": "Service Object",
+   "options": "Service Object"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "fieldname": "assignment_section",
+   "fieldtype": "Section Break",
+   "label": "Assignment"
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "fieldname": "timestamps_section",
+   "fieldtype": "Section Break",
+   "label": "Timestamps"
+  },
+  {
+   "fieldname": "reported_datetime",
+   "fieldtype": "Datetime",
+   "label": "Reported Datetime",
+   "default": "Now"
+  },
+  {
+   "fieldname": "actual_start_datetime",
+   "fieldtype": "Datetime",
+   "label": "Actual Start Datetime"
+  },
+  {
+   "fieldname": "actual_end_datetime",
+   "fieldtype": "Datetime",
+   "label": "Actual End Datetime"
+  },
+  {
+   "fieldname": "linked_report",
+   "fieldtype": "Link",
+   "label": "Service Report",
+   "options": "Service Report",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-08-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ferum Custom",
+ "name": "Service Request",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "write": 1,
+   "role": "Project Manager"
+  },
+  {
+   "read": 1,
+   "write": 1,
+   "role": "Service Engineer"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Client"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "workflow_name": "Service Request Workflow"
+}

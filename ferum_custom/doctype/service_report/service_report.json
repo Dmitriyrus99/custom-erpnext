@@ -1,0 +1,59 @@
+{
+  "name": "ServiceReport",
+  "doctype": "DocType",
+  "autoname": "SRPT-.####",
+  "is_submittable": 1,
+  "fields": [
+    {
+      "fieldname": "service_request",
+      "fieldtype": "Link",
+      "label": "Service Request",
+      "options": "ServiceRequest",
+      "reqd": 1
+    },
+    {
+      "fieldname": "report_date",
+      "fieldtype": "Date",
+      "label": "Report Date",
+      "reqd": 1,
+      "default": "today"
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Draft\nSubmitted\nApproved\nArchived\nCancelled",
+      "default": "Draft"
+    },
+    {
+      "fieldname": "total_amount",
+      "fieldtype": "Currency",
+      "label": "Total Amount",
+      "read_only": 1
+    },
+    {
+      "fieldname": "work_items",
+      "fieldtype": "Table",
+      "label": "Work Items",
+      "options": "ServiceReportWorkItem"
+    },
+    {
+      "fieldname": "documents",
+      "fieldtype": "Table",
+      "label": "Documents",
+      "options": "ServiceReportDocumentItem"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1
+    }
+  ]
+}

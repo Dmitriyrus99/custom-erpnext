@@ -1,3 +1,4 @@
+
 .DS_Store
 *.pyc
 *.egg-info
@@ -5,3 +6,25 @@
 tags
 node_modules
 __pycache__
+*.env
+.env
+
+# Bench and environment artifacts
+apps.json
+config
+logs/
+docker-compose.yml
+compose*.yaml
+Caddyfile
+Dockerfile
+backup-job.yml
+
+# Git internals accidentally committed
+objects/
+refs/
+hooks/
+info/
+index
+HEAD
+FETCH_HEAD
+description

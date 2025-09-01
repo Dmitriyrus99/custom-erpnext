@@ -1,0 +1,34 @@
+{
+  "name": "ServiceReportDocumentItem",
+  "doctype": "DocType",
+  "is_submittable": 0,
+  "istable": 1,
+  "fields": [
+    {
+      "fieldname": "custom_attachment",
+      "fieldtype": "Link",
+      "label": "Attachment",
+      "options": "CustomAttachment",
+      "reqd": 1
+    },
+    {
+      "fieldname": "file_type",
+      "fieldtype": "Data",
+      "label": "File Type",
+      "read_only": 1,
+      "fetch_from": "custom_attachment.file_type"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    }
+  ]
+}

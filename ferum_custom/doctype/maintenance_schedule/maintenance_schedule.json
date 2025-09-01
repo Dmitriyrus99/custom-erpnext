@@ -1,0 +1,74 @@
+{
+  "name": "MaintenanceSchedule",
+  "doctype": "DocType",
+  "autoname": "MSCH-.####",
+  "is_submittable": 0,
+  "fields": [
+    {
+      "fieldname": "schedule_name",
+      "fieldtype": "Data",
+      "label": "Schedule Name",
+      "reqd": 1
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer",
+      "reqd": 1
+    },
+    {
+      "fieldname": "service_project",
+      "fieldtype": "Link",
+      "label": "Service Project",
+      "options": "ServiceProject"
+    },
+    {
+      "fieldname": "frequency",
+      "fieldtype": "Select",
+      "label": "Frequency",
+      "options": "Daily\nWeekly\nMonthly\nAnnually",
+      "reqd": 1
+    },
+    {
+      "fieldname": "start_date",
+      "fieldtype": "Date",
+      "label": "Start Date",
+      "reqd": 1
+    },
+    {
+      "fieldname": "end_date",
+      "fieldtype": "Date",
+      "label": "End Date"
+    },
+    {
+      "fieldname": "next_due_date",
+      "fieldtype": "Date",
+      "label": "Next Due Date",
+      "reqd": 1
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Text",
+      "label": "Description"
+    },
+    {
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Items",
+      "options": "MaintenanceScheduleItem"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    }
+  ]
+}

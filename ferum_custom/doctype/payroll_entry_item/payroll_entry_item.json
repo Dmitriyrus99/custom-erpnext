@@ -1,0 +1,45 @@
+{
+  "name": "PayrollEntryItem",
+  "doctype": "DocType",
+  "is_submittable": 0,
+  "istable": 1,
+  "fields": [
+    {
+      "fieldname": "employee",
+      "fieldtype": "Link",
+      "label": "Employee",
+      "options": "Employee",
+      "reqd": 1
+    },
+    {
+      "fieldname": "base_salary",
+      "fieldtype": "Currency",
+      "label": "Base Salary",
+      "reqd": 1
+    },
+    {
+      "fieldname": "advance",
+      "fieldtype": "Currency",
+      "label": "Advance",
+      "default": 0
+    },
+    {
+      "fieldname": "net_salary",
+      "fieldtype": "Currency",
+      "label": "Net Salary",
+      "read_only": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    }
+  ]
+}

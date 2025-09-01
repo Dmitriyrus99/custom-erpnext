@@ -1,0 +1,49 @@
+{
+  "name": "ServiceObject",
+  "doctype": "DocType",
+  "autoname": "field:object_name",
+  "fields": [
+    {
+      "fieldname": "object_name",
+      "fieldtype": "Data",
+      "label": "Object Name",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "address",
+      "fieldtype": "Small Text",
+      "label": "Address"
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer",
+      "reqd": 1
+    },
+    {
+      "fieldname": "type",
+      "fieldtype": "Data",
+      "label": "Type"
+    },
+    {
+      "fieldname": "project",
+      "fieldtype": "Link",
+      "label": "Project",
+      "options": "ServiceProject"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    }
+  ]
+}

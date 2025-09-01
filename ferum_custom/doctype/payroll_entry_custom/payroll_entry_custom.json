@@ -1,0 +1,51 @@
+{
+  "name": "PayrollEntryCustom",
+  "doctype": "DocType",
+  "autoname": "PEC-.####",
+  "is_submittable": 1,
+  "fields": [
+    {
+      "fieldname": "period_start",
+      "fieldtype": "Date",
+      "label": "Period Start",
+      "reqd": 1
+    },
+    {
+      "fieldname": "period_end",
+      "fieldtype": "Date",
+      "label": "Period End",
+      "reqd": 1
+    },
+    {
+      "fieldname": "total_payroll_amount",
+      "fieldtype": "Currency",
+      "label": "Total Payroll Amount",
+      "read_only": 1
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Draft\nCompleted",
+      "default": "Draft"
+    },
+    {
+      "fieldname": "employees",
+      "fieldtype": "Table",
+      "label": "Employees",
+      "options": "PayrollEntryItem"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1
+    }
+  ]
+}

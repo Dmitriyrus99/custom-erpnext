@@ -1,0 +1,59 @@
+{
+  "name": "CustomAttachment",
+  "doctype": "DocType",
+  "autoname": "CA-.####",
+  "fields": [
+    {
+      "fieldname": "file_name",
+      "fieldtype": "Data",
+      "label": "File Name",
+      "reqd": 1
+    },
+    {
+      "fieldname": "file_url",
+      "fieldtype": "Data",
+      "label": "File URL (Google Drive)",
+      "reqd": 1
+    },
+    {
+      "fieldname": "file_type",
+      "fieldtype": "Data",
+      "label": "File Type"
+    },
+    {
+      "fieldname": "uploaded_by",
+      "fieldtype": "Link",
+      "label": "Uploaded By",
+      "options": "User",
+      "default": "eval:frappe.session.user"
+    },
+    {
+      "fieldname": "uploaded_on",
+      "fieldtype": "Datetime",
+      "label": "Uploaded On",
+      "default": "eval:frappe.utils.nowdatetime()"
+    },
+    {
+      "fieldname": "linked_doctype",
+      "fieldtype": "Data",
+      "label": "Linked DocType"
+    },
+    {
+      "fieldname": "linked_docname",
+      "fieldtype": "Data",
+      "label": "Linked DocName"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    }
+  ]
+}
