@@ -16,8 +16,7 @@
       "fieldname": "report_date",
       "fieldtype": "Date",
       "label": "Report Date",
-      "reqd": 1,
-      "default": "today"
+      "reqd": 1
     },
     {
       "fieldname": "status",

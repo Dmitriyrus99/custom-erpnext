@@ -4,6 +4,10 @@ from frappe.model.document import Document
 
 
 class ServiceReport(Document):
+	def before_insert(self):
+		if not self.report_date:
+			self.report_date = frappe.utils.today()
+
 	def validate(self):
 		self.calculate_total_amount()
 		self.validate_attachments()
