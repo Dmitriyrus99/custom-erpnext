@@ -1,6 +1,7 @@
 {
   "name": "ServiceReport",
   "doctype": "DocType",
+  "module": "Ferum Custom",
   "autoname": "SRPT-.####",
   "is_submittable": 1,
   "fields": [
