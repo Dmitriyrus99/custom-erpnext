@@ -35,7 +35,9 @@ from backend.bot.telegram_bot import send_telegram_message
 class Invoice(Document):
 	def after_insert(self):
 		self.notify_on_subcontractor_invoice()
-		enqueue("ferum_custom.doctype.invoice.invoice.sync_to_google_sheets", queue="short", doc=self)
+		enqueue(
+			"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets", queue="short", doc=self
+		)
 
 	def on_update(self):
 		pass  # Handled by hooks
@@ -82,4 +84,6 @@ def sync_to_google_sheets(doc):
 
 def on_invoice_update(doc, method):
 	if doc.docstatus == 1 and doc.status == "Paid":  # Submitted and Paid
-		enqueue("ferum_custom.doctype.invoice.invoice.sync_to_google_sheets", queue="short", doc=doc)
+		enqueue(
+			"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets", queue="short", doc=doc
+		)
