@@ -77,7 +77,7 @@ class ServiceRequest(Document):
 
 			# Enqueue the notification sending to a background job
 			frappe.enqueue(
-				"ferum_custom.doctype.service_request.service_request.send_sla_breach_notifications",
+				"ferum_custom.ferum_custom.doctype.service_request.service_request.send_sla_breach_notifications",
 				service_request_name=self.name,
 				message=message,
 			)
