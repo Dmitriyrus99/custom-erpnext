@@ -1,6 +1,7 @@
 {
   "name": "PayrollEntryCustom",
   "doctype": "DocType",
+  "module": "Ferum Custom",
   "autoname": "PEC-.####",
   "is_submittable": 1,
   "fields": [

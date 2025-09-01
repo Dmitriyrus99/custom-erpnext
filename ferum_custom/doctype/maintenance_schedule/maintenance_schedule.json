@@ -1,6 +1,7 @@
 {
   "name": "MaintenanceSchedule",
   "doctype": "DocType",
+  "module": "Ferum Custom",
   "autoname": "MSCH-.####",
   "is_submittable": 0,
   "fields": [

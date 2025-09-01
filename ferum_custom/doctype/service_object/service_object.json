@@ -1,6 +1,7 @@
 {
   "name": "ServiceObject",
   "doctype": "DocType",
+  "module": "Ferum Custom",
   "autoname": "field:object_name",
   "fields": [
     {

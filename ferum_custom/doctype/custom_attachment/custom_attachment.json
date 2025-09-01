@@ -1,6 +1,7 @@
 {
   "name": "CustomAttachment",
   "doctype": "DocType",
+  "module": "Ferum Custom",
   "autoname": "CA-.####",
   "fields": [
     {
