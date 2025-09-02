@@ -1,5 +1,5 @@
 {
-  "name": "ServiceReportDocumentItem",
+  "name": "Service Report Document Item",
   "doctype": "DocType",
   "module": "Ferum Custom",
   "is_submittable": 0,
@@ -9,7 +9,7 @@
       "fieldname": "custom_attachment",
       "fieldtype": "Link",
       "label": "Attachment",
-      "options": "CustomAttachment",
+      "options": "Custom Attachment",
       "reqd": 1
     },
     {

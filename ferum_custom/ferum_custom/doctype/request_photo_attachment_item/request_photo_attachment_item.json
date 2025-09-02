@@ -1,5 +1,5 @@
 {
-  "name": "RequestPhotoAttachmentItem",
+  "name": "Request Photo Attachment Item",
   "doctype": "DocType",
   "module": "Ferum Custom",
   "is_submittable": 0,

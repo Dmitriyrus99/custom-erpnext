@@ -2,10 +2,16 @@
 # For license information, please see license.txt
 
 import frappe
-import gspread
+try:
+	import gspread  # type: ignore[import-untyped]
+except Exception:
+	gspread = None  # Optional dependency; handled at runtime
 from frappe.model.document import Document
 from frappe.utils.background_jobs import enqueue
-from google.oauth2.service_account import Credentials
+try:
+	from google.oauth2.service_account import Credentials  # type: ignore[import-untyped]
+except Exception:
+	Credentials = None  # type: ignore[assignment]
 
 # --- Google Sheets Integration ---
 
@@ -14,9 +20,15 @@ GOOGLE_SHEETS_CREDENTIALS_PATH = frappe.conf.get("google_sheets_credentials_path
 GOOGLE_SHEET_NAME = "Ferum Invoices Tracker"
 
 
+
 def get_google_sheet():
 	"""Connects to Google Sheets and returns the worksheet object."""
-	if not GOOGLE_SHEETS_INTEGRATION_ENABLED or not GOOGLE_SHEETS_CREDENTIALS_PATH:
+	if (
+		not GOOGLE_SHEETS_INTEGRATION_ENABLED
+		or not GOOGLE_SHEETS_CREDENTIALS_PATH
+		or gspread is None
+		or Credentials is None
+	):
 		return None
 	try:
 		scopes = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -29,14 +41,26 @@ def get_google_sheet():
 		return None
 
 
-from backend.bot.telegram_bot import send_telegram_message
+try:
+	from backend.bot.telegram_bot import send_telegram_message  # type: ignore[import-not-found]
+except Exception:
+	def send_telegram_message(*args, **kwargs):  # fallback no-op
+		try:
+			frappe.log_error(
+				"Telegram bot integration unavailable. Message suppressed.",
+				"Telegram Integration",
+			)
+		except Exception:
+			pass
 
 
 class Invoice(Document):
 	def after_insert(self):
 		self.notify_on_subcontractor_invoice()
 		enqueue(
-			"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets", queue="short", doc=self
+			"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets",
+			queue="short",
+			docname=self.name,
 		)
 
 	def on_update(self):
@@ -48,14 +72,16 @@ class Invoice(Document):
 			send_telegram_message(message)
 
 
+
 @frappe.whitelist()
-def sync_to_google_sheets(doc):
+def sync_to_google_sheets(docname: str):
 	"""Syncs the invoice data to a Google Sheet."""
 	sheet = get_google_sheet()
 	if not sheet:
 		return
 
 	try:
+		doc = frappe.get_doc("Invoice", docname)
 		# Check if invoice already exists
 		cell = sheet.find(doc.name)
 		row_data = [
@@ -85,5 +111,7 @@ def sync_to_google_sheets(doc):
 def on_invoice_update(doc, method):
 	if doc.docstatus == 1 and doc.status == "Paid":  # Submitted and Paid
 		enqueue(
-			"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets", queue="short", doc=doc
+			"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets",
+			queue="short",
+			docname=doc.name,
 		)

@@ -1,5 +1,5 @@
 {
-  "name": "MaintenanceSchedule",
+  "name": "Maintenance Schedule",
   "doctype": "DocType",
   "module": "Ferum Custom",
   "autoname": "MSCH-.####",
@@ -22,7 +22,7 @@
       "fieldname": "service_project",
       "fieldtype": "Link",
       "label": "Service Project",
-      "options": "ServiceProject"
+      "options": "Service Project"
     },
     {
       "fieldname": "frequency",
@@ -57,7 +57,7 @@
       "fieldname": "items",
       "fieldtype": "Table",
       "label": "Items",
-      "options": "MaintenanceScheduleItem"
+      "options": "Maintenance Schedule Item"
     }
   ],
   "permissions": [

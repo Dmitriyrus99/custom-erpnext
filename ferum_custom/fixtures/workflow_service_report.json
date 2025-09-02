@@ -1,0 +1,28 @@
+[
+  {
+    "doctype": "Workflow",
+    "workflow_name": "Service Report Workflow",
+    "document_type": "Service Report",
+    "is_active": 1,
+    "override_status": 1,
+    "state_field": "status",
+    "send_email_alert": 0,
+    "allow_self_approval": 0,
+    "states": [
+      {"doctype": "Workflow Document State", "state": "Draft", "doc_status": 0, "allow_edit": "Service Engineer"},
+      {"doctype": "Workflow Document State", "state": "Submitted", "doc_status": 1, "allow_edit": "Project Manager"},
+      {"doctype": "Workflow Document State", "state": "Approved", "doc_status": 1, "allow_edit": "Project Manager"},
+      {"doctype": "Workflow Document State", "state": "Archived", "doc_status": 1, "allow_edit": "System Manager"},
+      {"doctype": "Workflow Document State", "state": "Cancelled", "doc_status": 2, "allow_edit": "System Manager"}
+    ],
+    "transitions": [
+      {"doctype": "Workflow Transition", "state": "Draft", "action": "Submit", "next_state": "Submitted", "allowed": "Service Engineer"},
+      {"doctype": "Workflow Transition", "state": "Draft", "action": "Submit", "next_state": "Submitted", "allowed": "Project Manager"},
+      {"doctype": "Workflow Transition", "state": "Submitted", "action": "Approve", "next_state": "Approved", "allowed": "Project Manager"},
+      {"doctype": "Workflow Transition", "state": "Approved", "action": "Archive", "next_state": "Archived", "allowed": "System Manager"},
+      {"doctype": "Workflow Transition", "state": "Submitted", "action": "Reopen", "next_state": "Draft", "allowed": "Project Manager"},
+      {"doctype": "Workflow Transition", "state": "Draft", "action": "Cancel", "next_state": "Cancelled", "allowed": "Project Manager"},
+      {"doctype": "Workflow Transition", "state": "Submitted", "action": "Cancel", "next_state": "Cancelled", "allowed": "Project Manager"}
+    ]
+  }
+]

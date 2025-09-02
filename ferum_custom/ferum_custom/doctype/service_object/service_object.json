@@ -1,5 +1,5 @@
 {
-  "name": "ServiceObject",
+  "name": "Service Object",
   "doctype": "DocType",
   "module": "Ferum Custom",
   "autoname": "field:object_name",
@@ -32,7 +32,7 @@
       "fieldname": "project",
       "fieldtype": "Link",
       "label": "Project",
-      "options": "ServiceProject"
+      "options": "Service Project"
     }
   ],
   "permissions": [

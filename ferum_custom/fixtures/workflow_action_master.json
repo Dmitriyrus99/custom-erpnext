@@ -1,0 +1,11 @@
+[
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Start Work"},
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Complete"},
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Close"},
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Cancel"},
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Submit"},
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Approve"},
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Archive"},
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Reopen"},
+  {"doctype": "Workflow Action Master", "workflow_action_name": "Activate"}
+]

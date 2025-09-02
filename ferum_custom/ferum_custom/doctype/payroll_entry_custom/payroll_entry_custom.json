@@ -1,5 +1,5 @@
 {
-  "name": "PayrollEntryCustom",
+  "name": "Payroll Entry Custom",
   "doctype": "DocType",
   "module": "Ferum Custom",
   "autoname": "PEC-.####",

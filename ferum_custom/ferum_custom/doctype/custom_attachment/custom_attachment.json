@@ -1,5 +1,5 @@
 {
-  "name": "CustomAttachment",
+  "name": "Custom Attachment",
   "doctype": "DocType",
   "module": "Ferum Custom",
   "autoname": "CA-.####",
@@ -25,14 +25,12 @@
       "fieldname": "uploaded_by",
       "fieldtype": "Link",
       "label": "Uploaded By",
-      "options": "User",
-      "default": "eval:frappe.session.user"
+      "options": "User"
     },
     {
       "fieldname": "uploaded_on",
       "fieldtype": "Datetime",
-      "label": "Uploaded On",
-      "default": "eval:frappe.utils.nowdatetime()"
+      "label": "Uploaded On"
     },
     {
       "fieldname": "linked_doctype",

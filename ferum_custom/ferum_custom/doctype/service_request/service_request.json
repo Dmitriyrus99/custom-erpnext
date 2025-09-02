@@ -19,6 +19,7 @@
   "reported_datetime",
   "actual_start_datetime",
   "actual_end_datetime",
+  "sla_deadline",
   "linked_report"
  ],
  "fields": [
@@ -104,6 +105,12 @@
    "fieldname": "actual_end_datetime",
    "fieldtype": "Datetime",
    "label": "Actual End Datetime"
+  },
+  {
+   "fieldname": "sla_deadline",
+   "fieldtype": "Datetime",
+   "label": "SLA Deadline",
+   "read_only": 1
   },
   {
    "fieldname": "linked_report",

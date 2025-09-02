@@ -1,5 +1,5 @@
 {
-  "name": "ServiceReportWorkItem",
+  "name": "Service Report Work Item",
   "doctype": "DocType",
   "module": "Ferum Custom",
   "is_submittable": 0,

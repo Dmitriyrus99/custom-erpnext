@@ -25,10 +25,10 @@ class ServiceProject(Document):
 			# Check if ServiceObject is already linked to another active project
 			# Exclude current project from the check
 			existing_link = frappe.db.get_value(
-				"ProjectObjectItem",
+				"Project Object Item",
 				{
 					"service_object": item.service_object,
-					"parenttype": "ServiceProject",
+					"parenttype": "Service Project",
 					"parent": ["!=", self.name],  # Exclude current project
 				},
 				"parent",
@@ -39,3 +39,4 @@ class ServiceProject(Document):
 						f"Service Object {item.service_object} is already linked to active project {existing_link}."
 					)
 				)
+

@@ -5,7 +5,7 @@ from frappe.utils import add_days, add_months, add_years, getdate, nowdate
 def generate_service_requests_from_schedule():
 	today = nowdate()
 	maintenance_schedules = frappe.get_list(
-		"MaintenanceSchedule",
+		"Maintenance Schedule",
 		filters={
 			"next_due_date": ["<=", today],
 			"docstatus": 0,  # Draft or active schedules
@@ -15,29 +15,24 @@ def generate_service_requests_from_schedule():
 
 	for schedule_data in maintenance_schedules:
 		try:
-			schedule = frappe.get_doc("MaintenanceSchedule", schedule_data.name)
+			schedule = frappe.get_doc("Maintenance Schedule", schedule_data.name)
 			if schedule.end_date and getdate(schedule.end_date) < getdate(today):
 				# Schedule has ended, skip it
 				continue
 
 			for item in schedule.items:
-				service_request = frappe.new_doc("ServiceRequest")
+				service_request = frappe.new_doc("Service Request")
 				service_request.customer = schedule.customer
-				service_request.service_project = schedule.service_project
+				service_request.project = schedule.service_project
 				service_request.service_object = item.service_object
-				service_request.subject = (
-					f"Scheduled Maintenance for {item.service_object} ({schedule.schedule_name})"
-				)
-				service_request.description = (
-					item.description or f"Routine maintenance as per schedule {schedule.schedule_name}"
+				service_request.title = f"Scheduled Maintenance for {item.service_object} ({schedule.schedule_name})"
+				service_request.description = item.description or (
+					f"Routine maintenance as per schedule {schedule.schedule_name}"
 				)
 				service_request.status = "Open"
-				service_request.save()
-				frappe.log_by_activity(
-					doctype="ServiceRequest",
-					name=service_request.name,
-					text=f"Created from Maintenance Schedule {schedule.name}",
-					status="Success",
+				service_request.insert()
+				frappe.logger().info(
+					f"Service Request {service_request.name} created from Maintenance Schedule {schedule.name}"
 				)
 
 			# Update next_due_date for the schedule
