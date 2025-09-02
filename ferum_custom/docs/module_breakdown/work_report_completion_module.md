@@ -25,7 +25,7 @@ Automation & Hooks:
 ### On ServiceReport before_save
 
 - calculate total.
-- Sum up all amount in the WorkItem table, or if rate * quantity, ensure each line’s amount is computed, then sum.
+- Sum up all amount in the WorkItem table, or if rate \* quantity, ensure each line’s amount is computed, then sum.
 - This populates ServiceReport.total_amount field.
 
 ### On ServiceReport validate

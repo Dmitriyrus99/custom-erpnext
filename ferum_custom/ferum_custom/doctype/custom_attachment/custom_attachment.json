@@ -13,7 +13,7 @@
     {
       "fieldname": "file_url",
       "fieldtype": "Data",
-      "label": "File URL (Google Drive)",
+      "label": "File URL",
       "reqd": 1
     },
     {
@@ -53,6 +53,32 @@
       "submit": 0,
       "cancel": 0,
       "amend": 0
+    },
+    {
+      "role": "Project Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1
+    },
+    {
+      "role": "Office Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    },
+    {
+      "role": "Service Engineer",
+      "read": 1,
+      "create": 1
+    },
+    {
+      "role": "Chief Accountant",
+      "read": 1
+    },
+    {
+      "role": "Client",
+      "read": 1
     }
   ]
 }

@@ -135,26 +135,12 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-scheduler_events = {
-	"daily": [
-		"ferum_custom.ferum_custom.doctype.maintenance_schedule.maintenance_schedule.generate_service_requests_from_schedule",
-	],
-	"hourly": [
-		"ferum_custom.ferum_custom.doctype.service_request.service_request.check_all_slas",
-	],
-}
-
 # Testing
 # -------
 
 # before_tests = "ferum_custom.install.before_tests"
 
 # Doc Events
-doc_events = {
-	"Invoice": {
-		"on_update": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
-	}
-}
 
 # Overriding Methods
 # ------------------------------
@@ -217,25 +203,54 @@ doc_events = {
 # }
 scheduler_events = {
 	"daily": [
-		"ferum_custom.ferum_custom.ferum_custom.doctype.maintenance_schedule.maintenance_schedule.generate_service_requests_from_schedule",
+		"ferum_custom.ferum_custom.doctype.service_maintenance_schedule.service_maintenance_schedule.generate_service_requests_from_schedule",
 	],
 	"hourly": [
-		"ferum_custom.ferum_custom.ferum_custom.doctype.service_request.service_request.check_all_slas",
+		"ferum_custom.ferum_custom.doctype.service_request.service_request.check_all_slas",
 	],
 }
 
 doc_events = {
 	"Invoice": {
-		"on_update": "ferum_custom.ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
+		"on_update": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
 	}
 }
 
 # Ship workflows as fixtures
 fixtures = [
-	{"doctype": "Workflow Action Master", "filters": [["workflow_action_name", "in", [
-		"Start Work", "Complete", "Close", "Cancel", "Submit", "Approve", "Archive", "Reopen", "Activate"
-	]]]},
-	{"doctype": "Workflow", "filters": [["name", "in", [
-		"Service Request Workflow", "Service Report Workflow", "Service Project Workflow"
-	]]]},
+	{
+		"doctype": "Workflow Action Master",
+		"filters": [
+			[
+				"workflow_action_name",
+				"in",
+				[
+					"Start Work",
+					"Complete",
+					"Close",
+					"Cancel",
+					"Submit",
+					"Approve",
+					"Archive",
+					"Reopen",
+					"Activate",
+				],
+			]
+		],
+	},
+	{
+		"doctype": "Workflow",
+		"filters": [
+			[
+				"name",
+				"in",
+				["Service Request Workflow", "Service Report Workflow", "Service Project Workflow"],
+			]
+		],
+	},
+]
+
+# Request hooks (JWT optional)
+before_request = [
+	"ferum_custom.ferum_custom.api.auth.jwt_before_request",
 ]

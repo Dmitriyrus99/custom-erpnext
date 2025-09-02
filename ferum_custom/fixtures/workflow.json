@@ -1,0 +1,236 @@
+[
+  {
+    "doctype": "Workflow",
+    "name": "Service Request Workflow",
+    "workflow_name": "Service Request Workflow",
+    "document_type": "Service Request",
+    "is_active": 1,
+    "workflow_state_field": "status",
+    "states": [
+      {
+        "state": "Open",
+        "doc_status": 0,
+        "allow_edit": "Project Manager",
+        "color": "Gray"
+      },
+      {
+        "state": "In Progress",
+        "doc_status": 0,
+        "allow_edit": "Service Engineer",
+        "color": "Blue"
+      },
+      {
+        "state": "Completed",
+        "doc_status": 0,
+        "allow_edit": "System Manager",
+        "color": "Green"
+      },
+      {
+        "state": "Closed",
+        "doc_status": 0,
+        "allow_edit": "System Manager",
+        "color": "Gray"
+      }
+    ],
+    "transitions": [
+      {
+        "state": "Open",
+        "action": "Start Work",
+        "next_state": "In Progress",
+        "allowed": "Service Engineer",
+        "allow_self_approval": 1,
+        "condition": "doc.assigned_to"
+      },
+      {
+        "state": "Open",
+        "action": "Start Work",
+        "next_state": "In Progress",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": "doc.assigned_to"
+      },
+      {
+        "state": "In Progress",
+        "action": "Complete",
+        "next_state": "Completed",
+        "allowed": "Service Engineer",
+        "allow_self_approval": 1,
+        "condition": "doc.linked_report"
+      },
+      {
+        "state": "In Progress",
+        "action": "Complete",
+        "next_state": "Completed",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": "doc.linked_report"
+      },
+      {
+        "state": "Completed",
+        "action": "Close",
+        "next_state": "Closed",
+        "allowed": "System Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      }
+    ]
+  },
+  {
+    "doctype": "Workflow",
+    "name": "Service Report Workflow",
+    "workflow_name": "Service Report Workflow",
+    "document_type": "Service Report",
+    "is_active": 1,
+    "workflow_state_field": "status",
+    "states": [
+      {
+        "state": "Draft",
+        "doc_status": 0,
+        "allow_edit": "Project Manager",
+        "color": "Gray"
+      },
+      {
+        "state": "Submitted",
+        "doc_status": 1,
+        "allow_edit": "Project Manager",
+        "color": "Blue"
+      },
+      {
+        "state": "Approved",
+        "doc_status": 1,
+        "allow_edit": "System Manager",
+        "color": "Green"
+      },
+      {
+        "state": "Archived",
+        "doc_status": 1,
+        "allow_edit": "System Manager",
+        "color": "Gray"
+      },
+      {
+        "state": "Cancelled",
+        "doc_status": 2,
+        "allow_edit": "System Manager",
+        "color": "Red"
+      }
+    ],
+    "transitions": [
+      {
+        "state": "Draft",
+        "action": "Submit",
+        "next_state": "Submitted",
+        "allowed": "Service Engineer",
+        "allow_self_approval": 1,
+        "condition": "doc.work_items"
+      },
+      {
+        "state": "Draft",
+        "action": "Submit",
+        "next_state": "Submitted",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": "doc.work_items"
+      },
+      {
+        "state": "Submitted",
+        "action": "Approve",
+        "next_state": "Approved",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Approved",
+        "action": "Archive",
+        "next_state": "Archived",
+        "allowed": "System Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Submitted",
+        "action": "Cancel",
+        "next_state": "Cancelled",
+        "allowed": "System Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Submitted",
+        "action": "Reopen",
+        "next_state": "Draft",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      }
+    ]
+  },
+  {
+    "doctype": "Workflow",
+    "name": "Service Project Workflow",
+    "workflow_name": "Service Project Workflow",
+    "document_type": "Service Project",
+    "is_active": 1,
+    "workflow_state_field": "status",
+    "states": [
+      {
+        "state": "Planned",
+        "doc_status": 0,
+        "allow_edit": "Project Manager",
+        "color": "Gray"
+      },
+      {
+        "state": "Active",
+        "doc_status": 0,
+        "allow_edit": "Project Manager",
+        "color": "Blue"
+      },
+      {
+        "state": "Completed",
+        "doc_status": 0,
+        "allow_edit": "System Manager",
+        "color": "Green"
+      },
+      {
+        "state": "Cancelled",
+        "doc_status": 0,
+        "allow_edit": "System Manager",
+        "color": "Red"
+      }
+    ],
+    "transitions": [
+      {
+        "state": "Planned",
+        "action": "Activate",
+        "next_state": "Active",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": "doc.customer"
+      },
+      {
+        "state": "Active",
+        "action": "Complete",
+        "next_state": "Completed",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Active",
+        "action": "Cancel",
+        "next_state": "Cancelled",
+        "allowed": "System Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Completed",
+        "action": "Reopen",
+        "next_state": "Active",
+        "allowed": "System Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      }
+    ]
+  }
+]

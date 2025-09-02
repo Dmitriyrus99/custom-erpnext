@@ -1,0 +1,44 @@
+<template>
+	<div class="container">
+		<h2>Create Service Request</h2>
+		<div>
+			<div class="mb-2"><label>Title</label><input id="title" class="form-control" /></div>
+			<div class="mb-2">
+				<label>Description</label
+				><textarea id="description" class="form-control"></textarea>
+			</div>
+			<div class="mb-2">
+				<label>Service Object (optional)</label
+				><input
+					id="service_object"
+					class="form-control"
+					placeholder="Service Object name"
+				/>
+			</div>
+			<button id="submit" class="btn btn-primary">Submit</button>
+			<div id="msg" class="mt-2"></div>
+		</div>
+		<p class="mt-3"><a href="/portal">Back to list</a></p>
+	</div>
+</template>
+<script>
+	frappe.ready(() => {
+		document.getElementById("submit").addEventListener("click", () => {
+			const title = document.getElementById("title").value;
+			const description = document.getElementById("description").value;
+			const service_object = document.getElementById("service_object").value || null;
+			frappe
+				.call({
+					method: "ferum_custom.ferum_custom.api.service.create_service_request",
+					args: { title, description, service_object },
+				})
+				.then((r) => {
+					document.getElementById("msg").innerHTML =
+						`Created: <a href="/app/service-request/${r.message}">${r.message}</a>`;
+				})
+				.catch((e) => {
+					document.getElementById("msg").innerText = e.message || "Error";
+				});
+		});
+	});
+</script>

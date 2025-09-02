@@ -5,6 +5,7 @@
 ![Project & Contract Management BPMN](../images/project_contract_management_process.svg)
 
 This process begins when a new service project/contract is won or approved, and it covers all steps to set up the project in the system and align all parties.
+
 - The Project Manager (PM) receives information about a new contract (e.g.
 - after winning a tender) and gathers the contract documentation and technical scope.
 - The PM contacts the client to confirm details – sending a welcome email with contact information (copying the department head) and making an introductory call.

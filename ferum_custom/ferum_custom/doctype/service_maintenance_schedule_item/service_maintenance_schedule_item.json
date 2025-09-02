@@ -1,0 +1,17 @@
+{
+  "name": "Service Maintenance Schedule Item",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "is_submittable": 0,
+  "istable": 1,
+  "fields": [
+    {
+      "fieldname": "service_object",
+      "fieldtype": "Link",
+      "label": "Service Object",
+      "options": "Service Object",
+      "reqd": 1
+    },
+    { "fieldname": "description", "fieldtype": "Text", "label": "Description" }
+  ]
+}

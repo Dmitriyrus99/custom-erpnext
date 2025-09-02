@@ -4,8 +4,10 @@
 - The diagram below shows the typical sequence from project initiation through payroll.
 
 - ```mermaid
-flowchart LR
-    A[Project & Contract] --> B[Service Request] --> C[Work Reporting] --> D[Invoicing & Payments] --> E[HR & Payroll]
+  flowchart LR
+      A[Project & Contract] --> B[Service Request] --> C[Work Reporting] --> D[Invoicing & Payments] --> E[HR & Payroll]
+  ```
+
 ```
 
 Document & Attachment Management along with Monitoring, Analytics & Security support all stages of the process chain.
@@ -19,3 +21,4 @@ Document & Attachment Management along with Monitoring, Analytics & Security sup
 - [HR & Payroll Management](hr_payroll_management.md)
 - [Document & Attachment Management](document_attachment_management.md)
 - [Monitoring, Analytics & Security](monitoring_analytics_security_bp.md)
+```

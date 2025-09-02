@@ -5,13 +5,14 @@
 ![HR & Payroll BPMN](../images/hr_payroll_management_process.svg)
 
 This process deals with tracking employee work and calculating salaries, handled largely within the ERPNext HR module but with customizations for the company’s needs.
+
 - The company has a relatively small staff (under 20 employees), so simplicity and accuracy are key.
 
 ### Time & Attendance Tracking
 
 - The HR department (Administrative office) maintains records of each employee’s work schedule, absences, and overtime.
 - This may involve keeping a roster or using ERPNext’s built-in Attendance and Leave Application doctypes.
-- By the  end of each pay period (monthly or quarterly), they should have data on each employee’s working days, leave days, sick leave, etc..
+- By the end of each pay period (monthly or quarterly), they should have data on each employee’s working days, leave days, sick leave, etc..
 - In our system, some of this data might be entered directly (e.g., Office Manager enters sick leaves into the system, or employees apply for leave via the portal).
 
 ### Payroll Entry Preparation

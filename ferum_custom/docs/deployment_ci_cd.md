@@ -34,4 +34,3 @@ To reproduce the checks locally run:
 ```bash
 pre-commit run --files <changed files>
 ```
-

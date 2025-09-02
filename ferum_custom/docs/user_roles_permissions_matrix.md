@@ -162,16 +162,16 @@ CustomAttachment / attachments:
 
 A permissions matrix can be depicted as:
 
-Role →	Admin	Director	Accountant	Dept Head (Service/Sales)	Project Manager	Engineer	Office Manager	Client
+Role → Admin Director Accountant Dept Head (Service/Sales) Project Manager Engineer Office Manager Client
 
-- Projects (ServiceProject)	C/R/W (all)	R (approve)	R	R/W (approve)	C/R/W (own)	R (assigned)	R	R (own)
-Service Objects	C/R/W	R	R	R	C/R/W (as part of project)	R (if needed)	R	(n/a)
-Service Requests	C/R/W (all)	R (monitor)	R	R (oversight)	C/R/W (for projects)	R/W (status for assigned)	C/R (all projects)	C/R (own)
-Service Reports	C/R/W (all)	R	R	R (review)	C/R/W (projects)	C/R (create for own tasks)	R	R (their projects’ final report)
-Attachments	R/W (all)	R	R	R	R/W (for their projects)	C/R (add photos)	C/R/W (docs for any project)	R (download files of their own projects/requests)
-Invoices	C/R/W (all)	R (approve payments)	C/R/W (financials)	R (monitor project costs)	C/R (create for project)	-	C/R (create on behalf of PM)	- (not internal invoices)
-Payroll	C/R/W	R (view summary)	C/R/W	-	-	-	-	-
-User & Settings	C/R/W (manage users)	-	-	-	-	-	-	-
+- Projects (ServiceProject) C/R/W (all) R (approve) R R/W (approve) C/R/W (own) R (assigned) R R (own)
+  Service Objects C/R/W R R R C/R/W (as part of project) R (if needed) R (n/a)
+  Service Requests C/R/W (all) R (monitor) R R (oversight) C/R/W (for projects) R/W (status for assigned) C/R (all projects) C/R (own)
+  Service Reports C/R/W (all) R R R (review) C/R/W (projects) C/R (create for own tasks) R R (their projects’ final report)
+  Attachments R/W (all) R R R R/W (for their projects) C/R (add photos) C/R/W (docs for any project) R (download files of their own projects/requests)
+  Invoices C/R/W (all) R (approve payments) C/R/W (financials) R (monitor project costs) C/R (create for project) - C/R (create on behalf of PM) - (not internal invoices)
+  Payroll C/R/W R (view summary) C/R/W - - - - -
+  User & Settings C/R/W (manage users) - - - - - - -
 
 ### (Key
 

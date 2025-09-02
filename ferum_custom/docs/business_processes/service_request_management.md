@@ -5,6 +5,7 @@
 ![Service Request Management BPMN](../images/service_request_management_process.svg)
 
 This is the core daily workflow where maintenance issues are reported and resolved.
+
 - A Service Request can be initiated by the Client (e.g.
 - via a customer portal or by messaging the bot), or internally by an Office Manager (if a client calls or emails) or Project Manager (for scheduled maintenance tasks).
 - In all cases, the request is logged as a ServiceRequest document in ERPNext (or via the equivalent API endpoint).

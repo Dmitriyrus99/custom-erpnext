@@ -5,6 +5,7 @@
 ![Document & Attachment Management BPMN](../images/document_attachment_management_process.svg)
 
 Throughout all the above processes, a lot of files and documents are generated – contracts, acts, invoices, photos, etc.
+
 - This part of the system manages those files to ensure they are stored securely and accessible to those who need them, while keeping the ERP database lean.
 
 ### Uploading & Linking

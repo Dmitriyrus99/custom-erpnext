@@ -1,0 +1,23 @@
+{
+  "label": "Service Maintenance",
+  "public": 1,
+  "module": "Ferum Custom",
+  "doctype": "Workspace",
+  "content": [
+    {
+      "type": "shortcut",
+      "label": "Schedules",
+      "link_to": "List/Service Maintenance Schedule"
+    },
+    {
+      "type": "shortcut",
+      "label": "Schedule Items",
+      "link_to": "List/Service Maintenance Schedule Item"
+    },
+    {
+      "type": "shortcut",
+      "label": "Service Requests",
+      "link_to": "List/Service Request"
+    }
+  ]
+}

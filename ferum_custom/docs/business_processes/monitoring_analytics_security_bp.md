@@ -5,6 +5,7 @@
 ![Monitoring, Analytics & Security BPMN](../images/monitoring_analytics_security_process.svg)
 
 This final process area covers how the system is monitored and how it provides analytical insights, as well as overarching security measures to keep the system reliable and safe.
+
 - Unlike previous processes, many of these are continuous or event-triggered system functions rather than user-driven workflows.
 
 ### System Monitoring & Logs

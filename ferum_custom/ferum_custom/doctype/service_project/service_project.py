@@ -40,3 +40,20 @@ class ServiceProject(Document):
 					)
 				)
 
+
+def get_permission_query_conditions(user: str | None = None) -> str | None:
+	user = user or frappe.session.user
+	if "System Manager" in frappe.get_roles(user):
+		return None
+	return "`tabService Project`.project_manager=%(user)s or `tabService Project`.owner=%(user)s"
+
+
+def has_permission(doc, user: str | None = None) -> bool:
+	user = user or frappe.session.user
+	if "System Manager" in frappe.get_roles(user):
+		return True
+	if doc.project_manager == user:
+		return True
+	if doc.owner == user:
+		return True
+	return False

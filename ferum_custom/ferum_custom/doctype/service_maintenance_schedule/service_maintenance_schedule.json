@@ -1,8 +1,8 @@
 {
-  "name": "Maintenance Schedule",
+  "name": "Service Maintenance Schedule",
   "doctype": "DocType",
   "module": "Ferum Custom",
-  "autoname": "MSCH-.####",
+  "autoname": "SMSCH-.####",
   "is_submittable": 0,
   "fields": [
     {
@@ -37,27 +37,19 @@
       "label": "Start Date",
       "reqd": 1
     },
-    {
-      "fieldname": "end_date",
-      "fieldtype": "Date",
-      "label": "End Date"
-    },
+    { "fieldname": "end_date", "fieldtype": "Date", "label": "End Date" },
     {
       "fieldname": "next_due_date",
       "fieldtype": "Date",
       "label": "Next Due Date",
       "reqd": 1
     },
-    {
-      "fieldname": "description",
-      "fieldtype": "Text",
-      "label": "Description"
-    },
+    { "fieldname": "description", "fieldtype": "Text", "label": "Description" },
     {
       "fieldname": "items",
       "fieldtype": "Table",
       "label": "Items",
-      "options": "Maintenance Schedule Item"
+      "options": "Service Maintenance Schedule Item"
     }
   ],
   "permissions": [
@@ -66,10 +58,7 @@
       "read": 1,
       "write": 1,
       "create": 1,
-      "delete": 1,
-      "submit": 0,
-      "cancel": 0,
-      "amend": 0
+      "delete": 1
     }
   ]
 }

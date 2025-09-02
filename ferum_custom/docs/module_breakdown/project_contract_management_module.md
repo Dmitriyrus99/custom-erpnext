@@ -37,13 +37,13 @@ Automation & Hooks:
 
 - ensure date consistency and unique objects.
 - A method check_dates_and_amount validates dates and that total_amount is not negative.
-- _validate_unique_objects checks the objects table: no duplicate entries and that none of those objects are already linked to another project.
+- \_validate_unique_objects checks the objects table: no duplicate entries and that none of those objects are already linked to another project.
 - If a duplicate or conflict is found, it throws a clear error (e.g., “Service Object X is already linked to project Y”).
 
 ### On ServiceObject validate
 
 - ensure uniqueness of object name within a project.
-- The code _ensure_unique_per_project queries if another ServiceObject with the same name exists for the same project.
+- The code \_ensure_unique_per_project queries if another ServiceObject with the same name exists for the same project.
 - This prevents creating two ServiceObject records that refer to essentially the same asset under one project.
 
 ### On ServiceObject on_trash

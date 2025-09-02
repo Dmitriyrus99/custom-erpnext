@@ -74,7 +74,7 @@ Acceptance Criteria:
 
 - e.g., "Replaced 2 sprinkler heads - 2hrs labor".
 
-The system auto-calculates cost if applicable (for internal records, maybe rate*hr) and sums it.
+The system auto-calculates cost if applicable (for internal records, maybe rate\*hr) and sums it.
 
 PM attaches a photo of the new parts installed that the engineer sent afterward.
 

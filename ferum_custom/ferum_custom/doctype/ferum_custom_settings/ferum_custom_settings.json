@@ -1,0 +1,81 @@
+{
+  "name": "Ferum Custom Settings",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "issingle": 1,
+  "fields": [
+    {
+      "fieldname": "integration_section",
+      "fieldtype": "Section Break",
+      "label": "Integrations"
+    },
+    {
+      "fieldname": "enable_google_sheets_sync",
+      "fieldtype": "Check",
+      "label": "Enable Google Sheets Sync"
+    },
+    {
+      "fieldname": "google_service_account_json",
+      "fieldtype": "Attach",
+      "label": "Google Service Account JSON"
+    },
+    {
+      "fieldname": "google_sheet_name",
+      "fieldtype": "Data",
+      "label": "Google Sheet Name",
+      "default": "Ferum Invoices Tracker"
+    },
+    {
+      "fieldname": "erpnext_section",
+      "fieldtype": "Section Break",
+      "label": "ERPNext Integration"
+    },
+    {
+      "fieldname": "enable_auto_create_sales_invoice",
+      "fieldtype": "Check",
+      "label": "Auto-create Sales Invoice for Customer"
+    },
+    {
+      "fieldname": "default_item_code",
+      "fieldtype": "Link",
+      "label": "Default Item Code",
+      "options": "Item"
+    },
+    {
+      "fieldname": "income_account",
+      "fieldtype": "Link",
+      "label": "Income Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "cost_center",
+      "fieldtype": "Link",
+      "label": "Cost Center",
+      "options": "Cost Center"
+    },
+    {
+      "fieldname": "api_section",
+      "fieldtype": "Section Break",
+      "label": "API / Portal"
+    },
+    {
+      "fieldname": "enable_jwt",
+      "fieldtype": "Check",
+      "label": "Enable JWT Auth for API"
+    },
+    {
+      "fieldname": "jwt_secret",
+      "fieldtype": "Password",
+      "label": "JWT Secret"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
+  ]
+}

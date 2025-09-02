@@ -31,7 +31,7 @@ Server Scripts:
 ### On ServiceRequest validate
 
 - enforce workflow rules.
-- A custom method _validate_workflow_transition likely checks that status changes are logical (e.g., can’t skip stages).
+- A custom method \_validate_workflow_transition likely checks that status changes are logical (e.g., can’t skip stages).
 - Also, it ensures that setting status to Completed/Closed is only allowed if linked_report is not null.
 - If that condition fails, it throws an error reminding to attach a ServiceReport first.
 

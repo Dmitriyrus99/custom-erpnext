@@ -17,9 +17,7 @@ class ServiceObject(Document):
 	def on_trash(self):
 		# Prevent deletion if linked to an active Service Project or Service Request
 		# Check Service Projects via child table Project Object Item
-		parents = frappe.get_all(
-			"Project Object Item", filters={"service_object": self.name}, pluck="parent"
-		)
+		parents = frappe.get_all("Project Object Item", filters={"service_object": self.name}, pluck="parent")
 		if parents:
 			active_projects = frappe.get_all(
 				"Service Project",
@@ -41,3 +39,34 @@ class ServiceObject(Document):
 				f"Cannot delete Service Object. Linked to active Service Requests: {', '.join(active_requests)}"
 			)
 
+
+def get_permission_query_conditions(user: str | None = None) -> str | None:
+	user = user or frappe.session.user
+	roles = set(frappe.get_roles(user))
+	if "System Manager" in roles:
+		return None
+	if "Project Manager" in roles:
+		return "exists(select 1 from `tabProject Object Item` poi join `tabService Project` sp on sp.name=poi.parent where poi.service_object=`tabService Object`.name and sp.project_manager=%(user)s)"
+	# Allow owners to see their created objects
+	return "`tabService Object`.owner=%(user)s"
+
+
+def has_permission(doc, user: str | None = None) -> bool:
+	user = user or frappe.session.user
+	roles = set(frappe.get_roles(user))
+	if "System Manager" in roles:
+		return True
+	if doc.owner == user:
+		return True
+	if "Project Manager" in roles:
+		parents = frappe.db.sql(
+			"""
+			select sp.project_manager
+			from `tabProject Object Item` poi
+			left join `tabService Project` sp on sp.name = poi.parent
+			where poi.service_object=%s limit 1
+			""",
+			(doc.name,),
+		)
+		return bool(parents and parents[0][0] == user)
+	return False

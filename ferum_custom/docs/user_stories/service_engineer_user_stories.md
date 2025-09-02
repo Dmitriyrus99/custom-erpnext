@@ -55,7 +55,7 @@ But at least the status goes to Completed in the system, and actual end time is 
 
 ### The bot confirms "Request 77 marked Completed at 16
 
-- 05.
+- 5.
 - Don’t forget to submit your work report."
 
 - PM sees the update immediately.

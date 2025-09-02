@@ -1,6 +1,5 @@
 from frappe.model.document import Document
 
 
-class MaintenanceScheduleItem(Document):
+class ServiceMaintenanceScheduleItem(Document):
 	pass
-

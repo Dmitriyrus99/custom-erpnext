@@ -80,9 +80,7 @@ class ServiceRequest(Document):
 
 @frappe.whitelist()
 def check_all_slas():
-	open_requests = frappe.get_all(
-		"Service Request", filters={"status": ["not in", ["Completed", "Closed"]]}
-	)
+	open_requests = frappe.get_all("Service Request", filters={"status": ["not in", ["Completed", "Closed"]]})
 	for req in open_requests:
 		doc = frappe.get_doc("Service Request", req.name)
 		doc.check_sla_breach()
@@ -93,3 +91,35 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 		frappe.logger().warning(message)
 	except Exception:
 		pass
+
+
+def get_permission_query_conditions(user: str | None = None) -> str | None:
+	user = user or frappe.session.user
+	if "System Manager" in frappe.get_roles(user):
+		return None
+	conds = []
+	roles = set(frappe.get_roles(user))
+	if "Project Manager" in roles:
+		conds.append(
+			"exists(select 1 from `tabService Project` sp where sp.name = `tabService Request`.project and sp.project_manager=%(user)s)"
+		)
+	if "Service Engineer" in roles:
+		conds.append("`tabService Request`.assigned_to=%(user)s")
+	if "Client" in roles:
+		conds.append("`tabService Request`.owner=%(user)s")
+	if not conds:
+		return None
+	return "(" + ") or (".join(conds) + ")"
+
+
+def has_permission(doc, user: str | None = None) -> bool:
+	user = user or frappe.session.user
+	if "System Manager" in frappe.get_roles(user):
+		return True
+	if doc.assigned_to == user:
+		return True
+	if doc.project and frappe.db.get_value("Service Project", doc.project, "project_manager") == user:
+		return True
+	if doc.owner == user:
+		return True
+	return False
