@@ -15,6 +15,15 @@ class ServiceRequest(Document):
 	def on_update(self):
 		self.check_sla_breach()
 		self.update_timestamps()
+		# Audit: log status changes
+		try:
+			if self.has_value_changed("status"):
+				self.add_comment(
+					"Info",
+					_("Status changed to {status}").format(status=self.status or "-"),
+				)
+		except Exception:
+			pass
 
 	def set_customer_and_project(self):
 		if self.is_new() or self.has_value_changed("service_object"):

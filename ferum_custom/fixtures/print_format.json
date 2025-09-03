@@ -1,0 +1,24 @@
+[
+  {
+    "doctype": "Print Format",
+    "name": "Service Report Simple",
+    "module": "Ferum Custom",
+    "doc_type": "Service Report",
+    "custom_format": 1,
+    "disabled": 0,
+    "print_format_builder": 0,
+    "standard": "No",
+    "html": "<div class=\"print-format\">\n  <h2>{{ _('\u041e\u0442\u0447\u0451\u0442 \u043f\u043e \u0440\u0430\u0431\u043e\u0442\u0430\u043c') }}: {{ doc.name }}</h2>\n  <p><b>{{ _('\u0417\u0430\u044f\u0432\u043a\u0430') }}:</b> {{ doc.service_request or '-' }}</p>\n  <p><b>{{ _('\u0414\u0430\u0442\u0430 \u043e\u0442\u0447\u0451\u0442\u0430') }}:</b> {{ doc.report_date }}</p>\n  <hr/>\n  <h4>{{ _('\u0412\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u043d\u044b\u0435 \u0440\u0430\u0431\u043e\u0442\u044b') }}</h4>\n  <table class=\"table table-bordered\">\n    <thead>\n      <tr>\n        <th>#</th>\n        <th>{{ _('\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u0435') }}</th>\n        <th>{{ _('\u0427\u0430\u0441\u044b') }}</th>\n        <th>{{ _('\u0421\u0442\u0430\u0432\u043a\u0430') }}</th>\n        <th>{{ _('\u0421\u0443\u043c\u043c\u0430') }}</th>\n      </tr>\n    </thead>\n    <tbody>\n      {% for i, it in enumerate(doc.work_items, start=1) %}\n      <tr>\n        <td>{{ i }}</td>\n        <td>{{ it.description }}</td>\n        <td style=\"text-align:right\">{{ it.hours or it.qty or 0 }}</td>\n        <td style=\"text-align:right\">{{ it.rate or 0 }}</td>\n        <td style=\"text-align:right\">{{ it.total or (it.rate or 0) * (it.hours or it.qty or 0) }}</td>\n      </tr>\n      {% endfor %}\n    </tbody>\n    <tfoot>\n      <tr>\n        <th colspan=\"4\" style=\"text-align:right\">{{ _('\u0418\u0442\u043e\u0433\u043e') }}</th>\n        <th style=\"text-align:right\">{{ doc.total_amount or 0 }}</th>\n      </tr>\n    </tfoot>\n  </table>\n</div>"
+  },
+  {
+    "doctype": "Print Format",
+    "name": "Service Request Short",
+    "module": "Ferum Custom",
+    "doc_type": "Service Request",
+    "custom_format": 1,
+    "disabled": 0,
+    "print_format_builder": 0,
+    "standard": "No",
+    "html": "<div class=\"print-format\">\n  <h2>{{ _('\u0417\u0430\u044f\u0432\u043a\u0430 \u043d\u0430 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435') }}: {{ doc.name }}</h2>\n  <p><b>{{ _('\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435') }}:</b> {{ doc.title }}</p>\n  <p><b>{{ _('\u041f\u0440\u043e\u0435\u043a\u0442') }}:</b> {{ doc.project or '-' }}</p>\n  <p><b>{{ _('\u041a\u043b\u0438\u0435\u043d\u0442') }}:</b> {{ doc.customer or '-' }}</p>\n  <p><b>{{ _('\u0421\u0442\u0430\u0442\u0443\u0441') }}:</b> {{ doc.status }}</p>\n  <hr/>\n  <div>{{ doc.description or '' }}</div>\n</div>"
+  }
+]

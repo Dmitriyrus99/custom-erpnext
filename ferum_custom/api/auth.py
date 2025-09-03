@@ -2,6 +2,7 @@ import time
 import typing as t
 
 import frappe
+from frappe import _
 
 try:
 	import jwt  # type: ignore[import-untyped]
@@ -21,9 +22,9 @@ def login(username: str, password: str) -> dict:
 	"""Issue JWT for API usage (optional)."""
 	settings = _get_settings()
 	if not settings or not settings.enable_jwt:
-		frappe.throw("JWT is disabled")
+		frappe.throw(_("JWT is disabled"))
 	if jwt is None:
-		frappe.throw("pyjwt not installed on server")
+		frappe.throw(_("pyjwt not installed on server"))
 
 	lm = frappe.auth.LoginManager()
 	lm.authenticate(user=username, pwd=password)
@@ -31,7 +32,7 @@ def login(username: str, password: str) -> dict:
 
 	secret = settings.jwt_secret
 	if not secret:
-		frappe.throw("JWT secret not configured")
+		frappe.throw(_("JWT secret not configured"))
 	payload = {"sub": username, "iat": int(time.time()), "exp": int(time.time()) + 3600}
 	token = jwt.encode(payload, secret, algorithm="HS256")
 	return {"token": token}

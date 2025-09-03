@@ -86,7 +86,7 @@
       {
         "state": "Draft",
         "doc_status": 0,
-        "allow_edit": "Project Manager",
+        "allow_edit": "Service Engineer",
         "color": "Gray"
       },
       {
@@ -154,15 +154,8 @@
         "allowed": "System Manager",
         "allow_self_approval": 1,
         "condition": ""
-      },
-      {
-        "state": "Submitted",
-        "action": "Reopen",
-        "next_state": "Draft",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": ""
       }
+      
     ]
   },
   {
@@ -227,6 +220,83 @@
         "state": "Completed",
         "action": "Reopen",
         "next_state": "Active",
+        "allowed": "System Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      }
+    ]
+  }
+  ,
+  {
+    "doctype": "Workflow",
+    "name": "Invoice Workflow",
+    "workflow_name": "Invoice Workflow",
+    "document_type": "Invoice",
+    "is_active": 1,
+    "workflow_state_field": "status",
+    "states": [
+      {
+        "state": "Draft",
+        "doc_status": 0,
+        "allow_edit": "Project Manager",
+        "color": "Gray"
+      },
+      {
+        "state": "Sent",
+        "doc_status": 0,
+        "allow_edit": "Office Manager",
+        "color": "Blue"
+      },
+      {
+        "state": "Paid",
+        "doc_status": 1,
+        "allow_edit": "Chief Accountant",
+        "color": "Green"
+      },
+      {
+        "state": "Cancelled",
+        "doc_status": 2,
+        "allow_edit": "System Manager",
+        "color": "Red"
+      }
+    ],
+    "transitions": [
+      {
+        "state": "Draft",
+        "action": "Send",
+        "next_state": "Sent",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Draft",
+        "action": "Send",
+        "next_state": "Sent",
+        "allowed": "Office Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Sent",
+        "action": "Mark Paid",
+        "next_state": "Paid",
+        "allowed": "Chief Accountant",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Sent",
+        "action": "Reopen",
+        "next_state": "Draft",
+        "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Paid",
+        "action": "Cancel",
+        "next_state": "Cancelled",
         "allowed": "System Manager",
         "allow_self_approval": 1,
         "condition": ""

@@ -43,10 +43,10 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views (not needed for standard doctype controllers)
-# Leave empty unless you add extra client scripts in `public/js`
-# doctype_js = {
-# 	"Some DocType": "public/js/some_doctype.js",
-# }
+doctype_js = {
+    # Keep User.user_type consistent with assigned roles (Desk vs Website)
+    "User": "public/js/user.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -234,6 +234,9 @@ fixtures = [
 					"Archive",
 					"Reopen",
 					"Activate",
+					"Reject",
+					"Send",
+					"Mark Paid",
 				],
 			]
 		],
@@ -244,10 +247,60 @@ fixtures = [
 			[
 				"name",
 				"in",
-				["Service Request Workflow", "Service Report Workflow", "Service Project Workflow"],
+				[
+					"Service Request Workflow",
+					"Service Report Workflow",
+					"Service Project Workflow",
+					"Invoice Workflow",
+				],
 			]
 		],
 	},
+	{
+		"doctype": "Role",
+		"filters": [
+			[
+				"role_name",
+				"in",
+				[
+					"Office Manager",
+					"Chief Accountant",
+					"Service Engineer",
+					"Project Manager",
+					"Client",
+					"Department Head",
+				],
+			]
+		],
+	},
+	{
+		"doctype": "Print Format",
+		"filters": [["module", "=", "Ferum Custom"]],
+	},
+	{
+		"doctype": "Notification",
+		"filters": [["module", "=", "Ferum Custom"]],
+	},
+	{
+		"doctype": "Report",
+		"filters": [["module", "=", "Ferum Custom"]],
+	},
+    {
+        "doctype": "Role Profile",
+        "filters": [
+            [
+                "role_profile",
+                "in",
+                [
+                    "Project Manager",
+                    "Office Manager",
+                    "Service Engineer",
+                    "Chief Accountant",
+                    "Client",
+                ],
+            ]
+        ],
+    },
 ]
 
 # Request hooks (JWT optional)

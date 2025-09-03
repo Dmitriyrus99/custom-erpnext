@@ -87,6 +87,7 @@
   "module": "Ferum Custom",
   "name": "Invoice",
   "owner": "Administrator",
+  "is_submittable": 1,
   "permissions": [
     {
       "create": 1,
@@ -98,7 +99,9 @@
       "report": 1,
       "role": "System Manager",
       "share": 1,
-      "write": 1
+      "write": 1,
+      "submit": 1,
+      "cancel": 1
     },
     {
       "create": 1,
@@ -115,7 +118,8 @@
     {
       "read": 1,
       "write": 1,
-      "role": "Chief Accountant"
+      "role": "Chief Accountant",
+      "submit": 1
     }
   ],
   "sort_field": "modified",

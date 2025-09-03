@@ -34,7 +34,7 @@
       "fieldname": "employees",
       "fieldtype": "Table",
       "label": "Employees",
-      "options": "PayrollEntryItem"
+      "options": "Payroll Entry Item"
     }
   ],
   "permissions": [

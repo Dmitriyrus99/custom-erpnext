@@ -17,6 +17,17 @@ class ServiceReport(Document):
 	def on_submit(self):
 		self.update_service_request_on_submit()
 
+	def on_update(self):
+		# Audit: log status changes
+		try:
+			if self.has_value_changed("status"):
+				self.add_comment(
+					"Info",
+					_("Status changed to {status}").format(status=self.status or "-"),
+				)
+		except Exception:
+			pass
+
 	def calculate_total_amount(self):
 		self.total_amount = 0
 		for item in self.work_items:

@@ -110,6 +110,14 @@
       "read": 1,
       "write": 1,
       "role": "Project Manager"
+    },
+    {
+      "read": 1,
+      "role": "Office Manager"
+    },
+    {
+      "read": 1,
+      "role": "Service Engineer"
     }
   ],
   "sort_field": "modified",

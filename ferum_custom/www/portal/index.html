@@ -1,8 +1,8 @@
 <template>
 	<div class="container">
-		<h2>My Service Requests</h2>
+		<h2>{{ _("My Service Requests") }}</h2>
 		<div id="sr-list"></div>
-		<p><a href="/portal/new-request">Create New Request</a></p>
+		<p><a href="/portal/new-request">{{ _("Create New Request") }}</a></p>
 	</div>
 </template>
 <script>
@@ -16,7 +16,7 @@
 				const el = document.getElementById("sr-list");
 				const rows = (r.message && r.message.data) || [];
 				if (!rows.length) {
-					el.innerHTML = "<p>No requests yet.</p>";
+					el.innerHTML = `<p>${__("No requests yet.")}</p>`;
 					return;
 				}
 				el.innerHTML =

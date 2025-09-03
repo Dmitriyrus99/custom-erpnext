@@ -1,24 +1,26 @@
 <template>
 	<div class="container">
-		<h2>Create Service Request</h2>
+		<h2>{{ _("Create Service Request") }}</h2>
 		<div>
-			<div class="mb-2"><label>Title</label><input id="title" class="form-control" /></div>
 			<div class="mb-2">
-				<label>Description</label
+				<label>{{ _("Title") }}</label><input id="title" class="form-control" />
+			</div>
+			<div class="mb-2">
+				<label>{{ _("Description") }}</label
 				><textarea id="description" class="form-control"></textarea>
 			</div>
 			<div class="mb-2">
-				<label>Service Object (optional)</label
-				><input
+				<label>{{ _("Service Object (optional)") }}</label>
+				<input
 					id="service_object"
 					class="form-control"
-					placeholder="Service Object name"
+					placeholder="{{ _('Service Object name') }}"
 				/>
 			</div>
-			<button id="submit" class="btn btn-primary">Submit</button>
+			<button id="submit" class="btn btn-primary">{{ _("Submit") }}</button>
 			<div id="msg" class="mt-2"></div>
 		</div>
-		<p class="mt-3"><a href="/portal">Back to list</a></p>
+		<p class="mt-3"><a href="/portal">{{ _("Back to list") }}</a></p>
 	</div>
 </template>
 <script>
@@ -34,10 +36,10 @@
 				})
 				.then((r) => {
 					document.getElementById("msg").innerHTML =
-						`Created: <a href="/app/service-request/${r.message}">${r.message}</a>`;
+						`${__("Created:")} <a href="/app/service-request/${r.message}">${r.message}</a>`;
 				})
 				.catch((e) => {
-					document.getElementById("msg").innerText = e.message || "Error";
+					document.getElementById("msg").innerText = e.message || __("Error");
 				});
 		});
 	});

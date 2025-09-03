@@ -1,0 +1,42 @@
+[
+  {
+    "doctype": "Role Profile",
+    "name": "Project Manager",
+    "role_profile": "Project Manager",
+    "roles": [
+      { "doctype": "Has Role", "role": "Project Manager", "parentfield": "roles", "parenttype": "Role Profile" }
+    ]
+  },
+  {
+    "doctype": "Role Profile",
+    "name": "Office Manager",
+    "role_profile": "Office Manager",
+    "roles": [
+      { "doctype": "Has Role", "role": "Office Manager", "parentfield": "roles", "parenttype": "Role Profile" }
+    ]
+  },
+  {
+    "doctype": "Role Profile",
+    "name": "Service Engineer",
+    "role_profile": "Service Engineer",
+    "roles": [
+      { "doctype": "Has Role", "role": "Service Engineer", "parentfield": "roles", "parenttype": "Role Profile" }
+    ]
+  },
+  {
+    "doctype": "Role Profile",
+    "name": "Chief Accountant",
+    "role_profile": "Chief Accountant",
+    "roles": [
+      { "doctype": "Has Role", "role": "Chief Accountant", "parentfield": "roles", "parenttype": "Role Profile" }
+    ]
+  },
+  {
+    "doctype": "Role Profile",
+    "name": "Client",
+    "role_profile": "Client",
+    "roles": [
+      { "doctype": "Has Role", "role": "Client", "parentfield": "roles", "parenttype": "Role Profile" }
+    ]
+  }
+]

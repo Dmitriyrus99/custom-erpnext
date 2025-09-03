@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -12,7 +13,7 @@ class ServiceObject(Document):
 				and frappe.db.get_value("Service Object", {"object_name": self.object_name}, "name")
 				!= self.name
 			):
-				frappe.throw(f"Service Object with name '{self.object_name}' already exists.")
+				frappe.throw(_(f"Service Object with name '{self.object_name}' already exists."))
 
 	def on_trash(self):
 		# Prevent deletion if linked to an active Service Project or Service Request
@@ -26,7 +27,9 @@ class ServiceObject(Document):
 			)
 			if active_projects:
 				frappe.throw(
-					f"Cannot delete Service Object. Linked to active Service Projects: {', '.join(active_projects)}"
+					_("Cannot delete Service Object. Linked to active Service Projects: {projects}").format(
+						projects=", ".join(active_projects)
+					)
 				)
 
 		active_requests = frappe.get_all(
@@ -36,7 +39,9 @@ class ServiceObject(Document):
 		)
 		if active_requests:
 			frappe.throw(
-				f"Cannot delete Service Object. Linked to active Service Requests: {', '.join(active_requests)}"
+				_("Cannot delete Service Object. Linked to active Service Requests: {requests}").format(
+					requests=", ".join(active_requests)
+				)
 			)
 
 

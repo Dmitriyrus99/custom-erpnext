@@ -8,6 +8,17 @@ class ServiceProject(Document):
 		self.check_dates_and_amount()
 		self.validate_unique_objects()
 
+	def on_update(self):
+		# Audit: log status changes
+		try:
+			if self.has_value_changed("status"):
+				self.add_comment(
+					"Info",
+					_("Status changed to {status}").format(status=self.status or "-"),
+				)
+		except Exception:
+			pass
+
 	def check_dates_and_amount(self):
 		if self.end_date and self.start_date and self.end_date < self.start_date:
 			frappe.throw(_("End Date cannot be before Start Date."))

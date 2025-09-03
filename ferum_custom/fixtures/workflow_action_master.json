@@ -59,4 +59,17 @@
     "name": "Activate",
     "workflow_action_name": "Activate"
   }
+  ,
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "name": "Send",
+    "workflow_action_name": "Send"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "name": "Mark Paid",
+    "workflow_action_name": "Mark Paid"
+  }
 ]

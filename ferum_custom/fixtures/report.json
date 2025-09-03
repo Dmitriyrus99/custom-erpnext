@@ -1,0 +1,32 @@
+[
+  {
+    "doctype": "Report",
+    "name": "Service Requests by Project",
+    "report_name": "Service Requests by Project",
+    "ref_doctype": "Service Request",
+    "module": "Ferum Custom",
+    "report_type": "Query Report",
+    "is_standard": "No",
+    "query": "SELECT name, project, status, priority, assigned_to, modified FROM `tabService Request` WHERE (%(project)s IS NULL OR project = %(project)s) ORDER BY modified DESC",
+    "roles": [
+      { "doctype": "Report Perm", "role": "System Manager" },
+      { "doctype": "Report Perm", "role": "Project Manager" },
+      { "doctype": "Report Perm", "role": "Office Manager" }
+    ]
+  },
+  {
+    "doctype": "Report",
+    "name": "Invoices by Project",
+    "report_name": "Invoices by Project",
+    "ref_doctype": "Invoice",
+    "module": "Ferum Custom",
+    "report_type": "Query Report",
+    "is_standard": "No",
+    "query": "SELECT name, project, counterparty_name, counterparty_type, status, amount, invoice_date, modified FROM `tabInvoice` WHERE (%(project)s IS NULL OR project = %(project)s) ORDER BY modified DESC",
+    "roles": [
+      { "doctype": "Report Perm", "role": "System Manager" },
+      { "doctype": "Report Perm", "role": "Project Manager" },
+      { "doctype": "Report Perm", "role": "Chief Accountant" }
+    ]
+  }
+]

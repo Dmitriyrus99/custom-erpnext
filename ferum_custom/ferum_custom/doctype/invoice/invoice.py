@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe import _
 
 try:
 	import gspread  # type: ignore[import-untyped]
@@ -11,6 +12,10 @@ except Exception:
 	gspread = None  # Optional dependency; handled at runtime
 from frappe.model.document import Document
 from frappe.utils.background_jobs import enqueue
+try:
+    from frappe.model.workflow import apply_workflow  # type: ignore[import-not-found]
+except Exception:
+    apply_workflow = None  # type: ignore[assignment]
 
 try:
 	from google.oauth2.service_account import Credentials  # type: ignore[import-untyped]
@@ -105,11 +110,11 @@ def sync_to_google_sheets(docname: str):
 		if cell:
 			# Update existing row
 			sheet.update(f"A{cell.row}", [row_data])
-			frappe.msgprint(f"Invoice {doc.name} updated in Google Sheets.")
+			frappe.msgprint(_(f"Invoice {doc.name} updated in Google Sheets."))
 		else:
 			# Append new row
 			sheet.append_row(row_data)
-			frappe.msgprint(f"Invoice {doc.name} added to Google Sheets.")
+			frappe.msgprint(_(f"Invoice {doc.name} added to Google Sheets."))
 	except Exception as e:
 		frappe.log_error(
 			f"Google Sheets sync failed for invoice {doc.name}: {e!s}", "Google Sheets Sync Error"
@@ -126,11 +131,125 @@ def on_invoice_update(doc, method):
 
 
 @frappe.whitelist()
+def bulk_mark_sent(names: list[str] | str) -> dict:
+    """Bulk mark selected Invoices as 'Sent'.
+
+    - Validates roles (System Manager, Project Manager, Office Manager, Chief Accountant)
+    - Skips invoices already Paid or Cancelled
+    - Returns a summary dict with updated and skipped lists
+    """
+    # Parse names when called from JS (stringified JSON or CSV)
+    if isinstance(names, str):
+        try:
+            names = frappe.parse_json(names)  # type: ignore[assignment]
+        except Exception:
+            names = [n.strip() for n in names.split(",") if n.strip()]
+
+    if not names:
+        return {"updated": [], "skipped": ["<empty>"]}
+
+    roles = set(frappe.get_roles())
+    allowed_roles = {"System Manager", "Project Manager", "Office Manager", "Chief Accountant"}
+    if not roles.intersection(allowed_roles):
+        frappe.throw(_("Not permitted to change invoice status."))
+
+    updated: list[str] = []
+    skipped: list[str] = []
+
+    for name in names:  # type: ignore[assignment]
+        try:
+            doc = frappe.get_doc("Invoice", name)
+            if doc.status in ("Paid", "Cancelled"):
+                skipped.append(name)
+                continue
+            if doc.status == "Sent":
+                skipped.append(name)
+                continue
+            # Prefer workflow transition if configured
+            transitioned = False
+            if apply_workflow:
+                try:
+                    apply_workflow(doc, "Send")
+                    transitioned = True
+                except Exception:
+                    transitioned = False
+            if not transitioned:
+                doc.db_set("status", "Sent")
+            updated.append(name)
+        except Exception:
+            skipped.append(name)
+
+    return {"updated": updated, "skipped": skipped}
+
+
+@frappe.whitelist()
+def bulk_mark_paid(names: list[str] | str) -> dict:
+    """Bulk mark selected Invoices as 'Paid' using Workflow when available.
+
+    - Only Chief Accountant (and System Manager) may perform this action
+    - Requires invoices to not be Cancelled; prefers current status 'Sent'
+    - Uses workflow action 'Mark Paid' if configured; otherwise submits + sets status
+    - Returns a summary dict with updated and skipped lists
+    """
+    # Parse names when called from JS
+    if isinstance(names, str):
+        try:
+            names = frappe.parse_json(names)  # type: ignore[assignment]
+        except Exception:
+            names = [n.strip() for n in names.split(",") if n.strip()]
+
+    if not names:
+        return {"updated": [], "skipped": ["<empty>"]}
+
+    roles = set(frappe.get_roles())
+    allowed_roles = {"Chief Accountant", "System Manager"}
+    if not roles.intersection(allowed_roles):
+        frappe.throw(_("Not permitted to mark invoices as Paid."))
+
+    updated: list[str] = []
+    skipped: list[str] = []
+
+    for name in names:  # type: ignore[assignment]
+        try:
+            doc = frappe.get_doc("Invoice", name)
+            if doc.status in ("Paid", "Cancelled"):
+                skipped.append(name)
+                continue
+
+            # Prefer workflow transition if configured
+            transitioned = False
+            if apply_workflow:
+                try:
+                    apply_workflow(doc, "Mark Paid")
+                    transitioned = True
+                except Exception:
+                    transitioned = False
+
+            if not transitioned:
+                # Fallback: ensure submitted + set status
+                if doc.docstatus == 0:
+                    doc.status = "Paid"
+                    doc.submit()  # triggers on_update hooks
+                elif doc.docstatus == 1:
+                    doc.status = "Paid"
+                    doc.save()
+                else:
+                    skipped.append(name)
+                    continue
+
+            updated.append(name)
+        except Exception:
+            skipped.append(name)
+
+    return {"updated": updated, "skipped": skipped}
+
+
+@frappe.whitelist()
 def create_sales_invoice(invoice_name: str) -> str:
 	"""Create ERPNext Sales Invoice from custom Invoice (Customer only). Returns SI name."""
 	inv = frappe.get_doc("Invoice", invoice_name)
 	if inv.counterparty_type != "Customer":
-		frappe.throw("Sales Invoice is supported only for Customer counterparty.")
+		frappe.throw(_("Sales Invoice is supported only for Customer counterparty."))
 
 	si = frappe.new_doc("Sales Invoice")
 	si.customer = inv.counterparty_name
