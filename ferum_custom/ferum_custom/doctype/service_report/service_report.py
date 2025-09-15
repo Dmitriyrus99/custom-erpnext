@@ -53,12 +53,11 @@ class ServiceReport(Document):
 			("Draft", "Submitted"),
 			("Submitted", "Approved"),
 			("Approved", "Archived"),
-			("Submitted", "Draft"),
 		}
 
 		if self.status == "Cancelled":
-			if old_status not in ["Draft", "Submitted"]:
-				frappe.throw(_("Service Report can only be Cancelled from Draft or Submitted status."))
+			if old_status != "Submitted":
+				frappe.throw(_("Service Report can only be Cancelled from Submitted status."))
 			return
 
 		if not old_status or old_status == self.status:
