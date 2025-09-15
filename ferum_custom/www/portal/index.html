@@ -1,33 +1,33 @@
 <template>
-	<div class="container">
-		<h2>{{ _("My Service Requests") }}</h2>
-		<div id="sr-list"></div>
-		<p><a href="/portal/new-request">{{ _("Create New Request") }}</a></p>
-	</div>
+        <div class="container">
+                <h2>{{ _("My Service Requests") }}</h2>
+                <div id="sr-list"></div>
+                <p><a href="/portal/new-request">{{ _("Create New Request") }}</a></p>
+        </div>
 </template>
 <script>
-	frappe.ready(() => {
-		frappe
-			.call({
-				method: "ferum_custom.ferum_custom.api.service.list_service_requests",
-				args: { start: 0, page_length: 20 },
-			})
-			.then((r) => {
-				const el = document.getElementById("sr-list");
-				const rows = (r.message && r.message.data) || [];
-				if (!rows.length) {
-					el.innerHTML = `<p>${__("No requests yet.")}</p>`;
-					return;
-				}
-				el.innerHTML =
-					"<ul>" +
-					rows
-						.map(
-							(x) =>
-								`<li><a href="/app/service-request/${x.name}">${x.name}</a> - ${x.title} - ${x.status}</li>`,
-						)
-						.join("") +
-					"</ul>";
-			});
-	});
+        frappe.ready(() => {
+                frappe
+                        .call({
+                                method: "ferum_custom.ferum_custom.api.service.list_service_requests",
+                                args: { start: 0, page_length: 20 },
+                        })
+                        .then((r) => {
+                                const el = document.getElementById("sr-list");
+                                const rows = (r.message && r.message.data) || [];
+                                if (!rows.length) {
+                                        el.innerHTML = `<p>${__("No requests yet.")}</p>`;
+                                        return;
+                                }
+                                el.innerHTML =
+                                        "<ul>" +
+                                        rows
+                                                .map(
+                                                        (x) =>
+                                                                `<li><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title} - ${x.status}</li>`,
+                                                )
+                                                .join("") +
+                                        "</ul>";
+                        });
+        });
 </script>
