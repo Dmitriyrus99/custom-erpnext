@@ -7,6 +7,15 @@ from frappe.utils import add_days, add_to_date, getdate, nowdate
 
 
 class ServiceRequest(Document):
+	def after_insert(self) -> None:
+		"""Notify the project manager about the new request.
+
+		Using server-side logic ensures that only the manager of the
+		linked project receives the email instead of broadcasting to all
+		users with the Project Manager role.
+		"""
+		self.notify_project_manager()
+
 	def validate(self):
 		self.set_customer_and_project()
 		self.validate_workflow_transitions()
@@ -86,6 +95,29 @@ class ServiceRequest(Document):
 			updated = True
 		return updated
 
+	def notify_project_manager(self) -> None:
+		"""Send an email to the project manager for the linked project."""
+		if not self.project:
+			return
+
+		try:
+			pm = frappe.db.get_value("Service Project", self.project, "project_manager")
+			if not pm:
+				return
+			email = frappe.db.get_value("User", pm, "email") or pm
+			if not email:
+				return
+			frappe.sendmail(
+				recipients=[email],
+				subject=_("New Service Request {0}").format(self.name),
+				message=_("A new service request {0} was created for your project.").format(self.name),
+			)
+		except Exception:
+			frappe.log_error(
+				frappe.get_traceback(),
+				"Service Request notification failed",
+			)
+
 
 @frappe.whitelist()
 def check_all_slas():
@@ -106,8 +138,8 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 	email.
 
 	Args:
-		service_request_name: Name of the :doctype:`Service Request`.
-		message: Human-readable breach message.
+	    service_request_name: Name of the :doctype:`Service Request`.
+	    message: Human-readable breach message.
 	"""
 
 	try:
