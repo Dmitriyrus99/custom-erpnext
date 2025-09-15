@@ -1,6 +1,5 @@
 import frappe
 
-
 TARGETS = {
     "Service Request": "Service Request Workflow",
     "Service Report": "Service Report Workflow",
