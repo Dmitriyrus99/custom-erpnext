@@ -5,7 +5,6 @@
   "roles": [
     { "role": "System Manager" },
     { "role": "Project Manager" },
-    { "role": "Service Engineer" },
     { "role": "Office Manager" }
   ],
   "doctype": "Workspace",

@@ -1,0 +1,15 @@
+{
+  "label": "My Requests",
+  "public": 0,
+  "module": "Ferum Custom",
+  "roles": [
+    { "role": "Service Engineer" }
+  ],
+  "doctype": "Workspace",
+  "content": [
+    { "type": "shortcut", "label": "Service Requests", "link_to": "List/Service Request" },
+    { "type": "shortcut", "label": "My Open Requests", "link_to": "List/Service Request?status=Open&assigned_to=me" },
+    { "type": "shortcut", "label": "My Reports", "link_to": "List/Service Report" },
+    { "type": "shortcut", "label": "New Service Report", "link_to": "Form/Service Report/New Service Report" }
+  ]
+}
