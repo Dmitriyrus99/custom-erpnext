@@ -72,7 +72,7 @@ except Exception:
 			pass
 
 
-from ferum_custom.utils import get_emails_by_roles
+from ferum_custom.ferum_custom.utils import get_users_by_roles
 
 
 class Invoice(Document):
@@ -104,7 +104,7 @@ class Invoice(Document):
 				roles = [r.get("link_name") or r.get("value") for r in settings.invoice_notification_roles]
 
 			if roles:
-				recipients.update(get_emails_by_roles(roles))
+				recipients.update(get_users_by_roles(roles))
 			if recipients:
 				frappe.sendmail(
 					recipients=list(recipients),

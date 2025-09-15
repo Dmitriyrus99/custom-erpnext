@@ -5,7 +5,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, add_to_date, getdate, nowdate
 
-from ferum_custom.utils import get_emails_by_roles
+from ferum_custom.ferum_custom.utils import get_users_by_roles
 
 
 def _get_pm_email(project: str) -> str | None:
@@ -162,7 +162,7 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 			if pm_email:
 				recipients.add(pm_email)
 
-		recipients.update(get_emails_by_roles(["Office Manager"]))
+			recipients.update(get_users_by_roles(["Office Manager"]))
 
 		if recipients:
 			frappe.sendmail(
