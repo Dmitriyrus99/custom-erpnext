@@ -63,23 +63,41 @@ frappe.listview_settings["Service Project"] = {
 			if (!row) return;
 			try {
 				const project = await frappe.db.get_doc("Service Project", row.name);
-				const objects = (project.objects || []).map((o) => o.service_object).filter(Boolean);
+				const objects = (project.objects || [])
+					.map((o) => o.service_object)
+					.filter(Boolean);
 				if (objects.length) {
 					const d = new frappe.ui.Dialog({
 						title: __("Create Service Request"),
 						fields: [
-							{ fieldname: "service_object", fieldtype: "Select", label: __("Service Object"), options: [""].concat(objects), reqd: 1 },
-							{ fieldname: "title", fieldtype: "Data", label: __("Title"), default: project.project_name || __("Service Request") },
+							{
+								fieldname: "service_object",
+								fieldtype: "Select",
+								label: __("Service Object"),
+								options: [""].concat(objects),
+								reqd: 1,
+							},
+							{
+								fieldname: "title",
+								fieldtype: "Data",
+								label: __("Title"),
+								default: project.project_name || __("Service Request"),
+							},
 						],
 						primary_action_label: __("Create"),
 						primary_action: (values) => {
-							frappe.new_doc("Service Request", { service_object: values.service_object, title: values.title });
+							frappe.new_doc("Service Request", {
+								service_object: values.service_object,
+								title: values.title,
+							});
 							d.hide();
 						},
 					});
 					d.show();
 				} else {
-					frappe.new_doc("Service Request", { title: project.project_name || __("Service Request") });
+					frappe.new_doc("Service Request", {
+						title: project.project_name || __("Service Request"),
+					});
 				}
 			} catch (e) {
 				frappe.msgprint({ message: e.message || e, indicator: "red" });

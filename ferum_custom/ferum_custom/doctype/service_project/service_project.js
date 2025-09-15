@@ -12,7 +12,7 @@ frappe.ui.form.on("Service Project", {
 					counterparty_name: frm.doc.customer || "",
 				});
 			},
-			__("Create"),
+			__("Create")
 		);
 
 		frm.add_custom_button(
@@ -23,7 +23,7 @@ frappe.ui.form.on("Service Project", {
 					counterparty_type: "Subcontractor",
 				});
 			},
-			__("Create"),
+			__("Create")
 		);
 
 		// Quick workflow actions
@@ -46,7 +46,7 @@ frappe.ui.form.on("Service Project", {
 						frappe.msgprint({ message: e.message || e, indicator: "red" });
 					}
 				},
-				__("Change Status"),
+				__("Change Status")
 			);
 		};
 
@@ -61,13 +61,26 @@ frappe.ui.form.on("Service Project", {
 		frm.add_custom_button(
 			__("Service Request"),
 			() => {
-				const objects = (frm.doc.objects || []).map((row) => row.service_object).filter(Boolean);
+				const objects = (frm.doc.objects || [])
+					.map((row) => row.service_object)
+					.filter(Boolean);
 				if (objects && objects.length) {
 					const d = new frappe.ui.Dialog({
 						title: __("Create Service Request"),
 						fields: [
-							{ fieldname: "service_object", fieldtype: "Select", label: __("Service Object"), options: [""].concat(objects), reqd: 1 },
-							{ fieldname: "title", fieldtype: "Data", label: __("Title"), default: frm.doc.project_name || __("Service Request") },
+							{
+								fieldname: "service_object",
+								fieldtype: "Select",
+								label: __("Service Object"),
+								options: [""].concat(objects),
+								reqd: 1,
+							},
+							{
+								fieldname: "title",
+								fieldtype: "Data",
+								label: __("Title"),
+								default: frm.doc.project_name || __("Service Request"),
+							},
 						],
 						primary_action_label: __("Create"),
 						primary_action: (values) => {
@@ -80,10 +93,12 @@ frappe.ui.form.on("Service Project", {
 					});
 					d.show();
 				} else {
-					frappe.new_doc("Service Request", { title: frm.doc.project_name || __("Service Request") });
+					frappe.new_doc("Service Request", {
+						title: frm.doc.project_name || __("Service Request"),
+					});
 				}
 			},
-			__("Create"),
+			__("Create")
 		);
 	},
 });
