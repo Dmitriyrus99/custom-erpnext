@@ -2,7 +2,7 @@
   {
     "doctype": "Dashboard Chart",
     "name": "open-service-requests-by-status",
-    "is_standard": 1,
+    "is_standard": 0,
     "module": "Ferum Custom",
     "chart_name": "Open Service Requests by Status",
     "chart_type": "Group By",
@@ -17,7 +17,7 @@
   {
     "doctype": "Dashboard Chart",
     "name": "Invoices by Project",
-    "is_standard": 1,
+    "is_standard": 0,
     "module": "Ferum Custom",
     "chart_name": "Invoices by Project",
     "chart_type": "Group By",
