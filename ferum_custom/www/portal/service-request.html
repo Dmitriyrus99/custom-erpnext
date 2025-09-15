@@ -1,0 +1,55 @@
+<template>
+        <div class="container">
+                <h2 id="sr-title"></h2>
+                <div id="sr-details"></div>
+                <p id="report-wrapper" style="display:none;">
+                        <a id="report-link" target="_blank">{{ _("Download Service Report") }}</a>
+                </p>
+                <p><a href="/portal">{{ _("Back to list") }}</a></p>
+        </div>
+</template>
+<script>
+        frappe.ready(() => {
+                const params = new URLSearchParams(window.location.search);
+                const name = params.get("name");
+                const detailsEl = document.getElementById("sr-details");
+                if (!name) {
+                        detailsEl.innerHTML = `<p>${__("Missing Service Request ID.")}</p>`;
+                        return;
+                }
+
+                frappe
+                        .call({
+                                method: "ferum_custom.ferum_custom.api.service.get_service_request",
+                                args: { name },
+                        })
+                        .then((r) => {
+                                const doc = r.message || {};
+                                document.getElementById("sr-title").innerText =
+                                        `${doc.name || name} - ${doc.title || ""}`;
+                                const pieces = [
+                                        `<p><strong>${__("Status")}:</strong> ${doc.status || ""}</p>`,
+                                ];
+                                if (doc.description) {
+                                        pieces.push(
+                                                `<p><strong>${__("Description")}:</strong> ${
+                                                        frappe.utils.escape_html(doc.description)
+                                                }</p>`,
+                                        );
+                                }
+                                detailsEl.innerHTML = pieces.join("\n");
+                                if (doc.linked_report) {
+                                        const reportLink = document.getElementById("report-link");
+                                        reportLink.href =
+                                                "/api/method/frappe.utils.print_format.download_pdf?doctype=" +
+                                                encodeURIComponent("Service Report") +
+                                                "&name=" +
+                                                encodeURIComponent(doc.linked_report);
+                                        document.getElementById("report-wrapper").style.display = "";
+                                }
+                        })
+                        .catch((e) => {
+                                detailsEl.innerHTML = `<p>${__("Not found.")}</p>`;
+                        });
+        });
+</script>
