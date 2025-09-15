@@ -14,7 +14,7 @@ bench install-app ferum_custom
 
 > **Note**
 >
-> The project depends on the Frappe framework. While it is pinned in `pyproject.toml`, Frappe is installed and managed through the `bench` CLI.
+> The project depends on the Frappe framework. Its version is pinned but commented out in `pyproject.toml` because Frappe is installed and managed through the `bench` CLI.
 
 ### Contributing
 
