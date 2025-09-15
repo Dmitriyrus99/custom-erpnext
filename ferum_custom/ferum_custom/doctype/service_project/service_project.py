@@ -68,3 +68,35 @@ def has_permission(doc, user: str | None = None) -> bool:
 	if doc.owner == user:
 		return True
 	return False
+
+
+def update_project_financials(project: str) -> None:
+	"""Recalculate and store financial totals for the given Service Project."""
+	if not project:
+		return
+
+	totals = frappe.db.get_all(
+		"Invoice",
+		filters={"project": project, "docstatus": 1, "status": "Paid"},
+		fields=["counterparty_type", "sum(amount) as total"],
+		group_by="counterparty_type",
+	)
+
+	income = 0.0
+	expenses = 0.0
+	for row in totals:
+		total = row.get("total") or 0
+		if row.counterparty_type == "Customer":
+			income = total
+		elif row.counterparty_type == "Subcontractor":
+			expenses = total
+
+	frappe.db.set_value(
+		"Service Project",
+		project,
+		{
+			"income_amount": income,
+			"expense_amount": expenses,
+			"profit_amount": income - expenses,
+		},
+	)

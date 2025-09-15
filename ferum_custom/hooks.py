@@ -44,8 +44,8 @@ app_license = "mit"
 
 # include js in doctype views (not needed for standard doctype controllers)
 doctype_js = {
-    # Keep User.user_type consistent with assigned roles (Desk vs Website)
-    "User": "public/js/user.js",
+	# Keep User.user_type consistent with assigned roles (Desk vs Website)
+	"User": "public/js/user.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -213,6 +213,7 @@ scheduler_events = {
 doc_events = {
 	"Invoice": {
 		"on_update": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
+		"on_cancel": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
 	}
 }
 
@@ -285,22 +286,22 @@ fixtures = [
 		"doctype": "Report",
 		"filters": [["module", "=", "Ferum Custom"]],
 	},
-    {
-        "doctype": "Role Profile",
-        "filters": [
-            [
-                "role_profile",
-                "in",
-                [
-                    "Project Manager",
-                    "Office Manager",
-                    "Service Engineer",
-                    "Chief Accountant",
-                    "Client",
-                ],
-            ]
-        ],
-    },
+	{
+		"doctype": "Role Profile",
+		"filters": [
+			[
+				"role_profile",
+				"in",
+				[
+					"Project Manager",
+					"Office Manager",
+					"Service Engineer",
+					"Chief Accountant",
+					"Client",
+				],
+			]
+		],
+	},
 ]
 
 # Request hooks (JWT optional)
