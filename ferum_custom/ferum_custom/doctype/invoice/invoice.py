@@ -164,12 +164,18 @@ def on_invoice_update(doc, method):
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Project Financial Update Failed")
 
-	if doc.docstatus == 1 and doc.status == "Paid":  # Submitted and Paid
-		enqueue(
-			"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets",
-			queue="short",
-			docname=doc.name,
-		)
+        if doc.docstatus == 1 and doc.status == "Paid":  # Submitted and Paid
+                enqueue(
+                        "ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets",
+                        queue="short",
+                        docname=doc.name,
+                )
+        elif doc.docstatus == 2:  # Cancelled
+                enqueue(
+                        "ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets",
+                        queue="short",
+                        docname=doc.name,
+                )
 
 
 @frappe.whitelist()
