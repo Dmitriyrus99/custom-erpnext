@@ -7,7 +7,7 @@
   "content": [
     { "type": "chart", "chart_name": "Open Service Requests by Status" },
     { "type": "chart", "chart_name": "Invoices by Project" },
-    { "type": "shortcut", "label": "Overdue Service Requests", "link_to": "List/Service Request?status=Overdue" },
+    { "type": "shortcut", "label": "Overdue Service Requests", "link_to": "List/Service Request?status=Open" },
     { "type": "shortcut", "label": "Income Statement", "link_to": "query-report/Income Statement" }
   ]
 }

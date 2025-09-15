@@ -71,6 +71,7 @@
     "document_type": "Invoice",
     "event": "New",
     "channel": "Email",
+    "condition": "doc.counterparty_type != 'Субподрядчик'",
     "subject": "{{ _('Создан новый счёт') }}: {{ doc.name }}",
     "message": "<p>{{ _('Создан новый счёт.') }}</p>\n<p><b>{{ _('Контрагент') }}:</b> {{ doc.counterparty_name }}<br/>\n<b>{{ _('Сумма') }}:</b> {{ doc.amount }}</p>",
     "enabled": 1,
