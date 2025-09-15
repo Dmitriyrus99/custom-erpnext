@@ -7,9 +7,9 @@
   ],
   "doctype": "Workspace",
   "content": [
-    { "type": "shortcut", "label": "Service Requests", "link_to": "List/Service Request" },
+    { "type": "shortcut", "label": "All My Requests", "link_to": "List/Service Request?assigned_to=me" },
     { "type": "shortcut", "label": "My Open Requests", "link_to": "List/Service Request?status=Open&assigned_to=me" },
-    { "type": "shortcut", "label": "My Reports", "link_to": "List/Service Report" },
+    { "type": "shortcut", "label": "My Reports", "link_to": "List/Service Report?owner=me" },
     { "type": "shortcut", "label": "New Service Report", "link_to": "Form/Service Report/New Service Report" }
   ]
 }

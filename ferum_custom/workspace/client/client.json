@@ -8,8 +8,6 @@
   ],
   "doctype": "Workspace",
   "content": [
-    { "type": "shortcut", "label": "New Service Request", "link_to": "/portal/new-request" },
-    { "type": "shortcut", "label": "My Requests", "link_to": "List/Service Request" },
-    { "type": "shortcut", "label": "My Invoices", "link_to": "List/Invoice" }
+    { "type": "shortcut", "label": "New Service Request", "link_to": "/portal/new-request" }
   ]
 }
