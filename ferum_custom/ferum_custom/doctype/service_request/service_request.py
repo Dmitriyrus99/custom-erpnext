@@ -96,10 +96,58 @@ def check_all_slas():
 
 
 def send_sla_breach_notifications(service_request_name: str, message: str) -> None:
+	"""Notify responsible users about an SLA breach.
+
+	This helper is triggered via :pyfunc:`check_sla_breach` either during a
+	document update or from the hourly scheduler job (see ``check_all_slas``).
+	The previous implementation only logged a warning which meant that no one
+	was actually alerted about the overdue service request. Here we collect a
+	set of recipients (project manager and all office managers) and dispatch an
+	email.
+
+	Args:
+		service_request_name: Name of the :doctype:`Service Request`.
+		message: Human-readable breach message.
+	"""
+
 	try:
-		frappe.logger().warning(message)
+		sr = frappe.get_doc("Service Request", service_request_name)
+
+		recipients: set[str] = set()
+
+		# Project manager assigned to the related Service Project
+		if sr.project:
+			project_manager = frappe.db.get_value("Service Project", sr.project, "project_manager")
+			if project_manager:
+				pm_email = frappe.db.get_value("User", project_manager, "email") or project_manager
+				if pm_email:
+					recipients.add(pm_email)
+
+		# All Office Managers in the system
+		office_managers = frappe.get_all(
+			"Has Role",
+			fields=["parent"],
+			filters={"role": "Office Manager", "parenttype": "User"},
+		)
+		for om in office_managers:
+			om_email = frappe.db.get_value("User", om.parent, "email") or om.parent
+			if om_email:
+				recipients.add(om_email)
+
+		if recipients:
+			frappe.sendmail(
+				recipients=list(recipients),
+				subject=_("SLA breached for Service Request {0}").format(service_request_name),
+				message=message,
+			)
+		else:
+			# Fallback to logging if no recipients resolved
+			frappe.logger().warning(
+				f"No recipients found for SLA breach notification on {service_request_name}"
+			)
+
 	except Exception:
-		pass
+		frappe.log_error(frappe.get_traceback(), "Failed to send SLA breach notification")
 
 
 def get_permission_query_conditions(user: str | None = None) -> str | None:
