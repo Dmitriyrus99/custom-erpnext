@@ -12,6 +12,10 @@ bench get-app $URL_OF_THIS_REPO --branch develop
 bench install-app ferum_custom
 ```
 
+> **Note**
+>
+> The project depends on the Frappe framework. While it is pinned in `pyproject.toml`, Frappe is installed and managed through the `bench` CLI.
+
 ### Contributing
 
 This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
