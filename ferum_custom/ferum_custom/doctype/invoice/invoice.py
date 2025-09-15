@@ -72,6 +72,9 @@ except Exception:
 			pass
 
 
+from ferum_custom.utils import get_emails_by_roles
+
+
 class Invoice(Document):
 	def after_insert(self):
 		self.notify_on_subcontractor_invoice()
@@ -97,22 +100,11 @@ class Invoice(Document):
 			recipients: set[str] = set()
 			settings = _get_settings()
 			roles = ["Chief Accountant", "System Manager"]
-			if settings and getattr(settings, "invoice_notification_roles", None):
-				roles = [r.role for r in settings.invoice_notification_roles]
+			if settings and hasattr(settings, "invoice_notification_roles"):
+				roles = [r.get("link_name") or r.get("value") for r in settings.invoice_notification_roles]
 
 			if roles:
-				user_ids = frappe.get_all(
-					"Has Role",
-					filters={"role": ["in", roles], "parenttype": "User"},
-					pluck="parent",
-				)
-				if user_ids:
-					for u in frappe.db.get_all(
-						"User",
-						filters={"name": ["in", user_ids]},
-						fields=["name", "email"],
-					):
-						recipients.add(u.email or u.name)
+				recipients.update(get_emails_by_roles(roles))
 			if recipients:
 				frappe.sendmail(
 					recipients=list(recipients),
