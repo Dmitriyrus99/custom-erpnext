@@ -1,0 +1,31 @@
+[
+  {
+    "doctype": "Dashboard Chart",
+    "is_standard": 1,
+    "module": "Ferum Custom",
+    "chart_name": "Open Service Requests by Status",
+    "chart_type": "Group By",
+    "type": "Pie",
+    "document_type": "Service Request",
+    "group_by_type": "Count",
+    "group_by_based_on": "status",
+    "filters_json": "[]",
+    "is_public": 1,
+    "timeseries": 0
+  },
+  {
+    "doctype": "Dashboard Chart",
+    "is_standard": 1,
+    "module": "Ferum Custom",
+    "chart_name": "Invoices by Project",
+    "chart_type": "Group By",
+    "type": "Bar",
+    "document_type": "Invoice",
+    "group_by_type": "Sum",
+    "group_by_based_on": "project",
+    "value_based_on": "grand_total",
+    "filters_json": "[]",
+    "is_public": 1,
+    "timeseries": 0
+  }
+]
