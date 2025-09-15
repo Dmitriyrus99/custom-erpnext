@@ -101,10 +101,15 @@ class ServiceRequest(Document):
 			return
 
 		try:
-			pm = frappe.db.get_value("Service Project", self.project, "project_manager")
-			if not pm:
+			pm_info = frappe.db.get_value(
+				"Service Project",
+				self.project,
+				["project_manager", "project_manager.email"],
+				as_dict=True,
+			)
+			if not pm_info:
 				return
-			email = frappe.db.get_value("User", pm, "email") or pm
+			email = pm_info.get("project_manager.email") or pm_info.get("project_manager")
 			if not email:
 				return
 			frappe.sendmail(
@@ -149,22 +154,30 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 
 		# Project manager assigned to the related Service Project
 		if sr.project:
-			project_manager = frappe.db.get_value("Service Project", sr.project, "project_manager")
-			if project_manager:
-				pm_email = frappe.db.get_value("User", project_manager, "email") or project_manager
+			pm_info = frappe.db.get_value(
+				"Service Project",
+				sr.project,
+				["project_manager", "project_manager.email"],
+				as_dict=True,
+			)
+			if pm_info:
+				pm_email = pm_info.get("project_manager.email") or pm_info.get("project_manager")
 				if pm_email:
 					recipients.add(pm_email)
 
 		# All Office Managers in the system
-		office_managers = frappe.get_all(
+		office_manager_ids = frappe.get_all(
 			"Has Role",
-			fields=["parent"],
 			filters={"role": "Office Manager", "parenttype": "User"},
+			pluck="parent",
 		)
-		for om in office_managers:
-			om_email = frappe.db.get_value("User", om.parent, "email") or om.parent
-			if om_email:
-				recipients.add(om_email)
+		if office_manager_ids:
+			for om in frappe.db.get_all(
+				"User",
+				filters={"name": ["in", office_manager_ids]},
+				fields=["name", "email"],
+			):
+				recipients.add(om.email or om.name)
 
 		if recipients:
 			frappe.sendmail(
