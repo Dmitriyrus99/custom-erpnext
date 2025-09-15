@@ -12,6 +12,9 @@
     "start_date",
     "end_date",
     "total_amount",
+    "income_amount",
+    "expense_amount",
+    "profit_amount",
     "project_manager",
     "service_objects_section",
     "objects",
@@ -54,6 +57,24 @@
       "fieldname": "total_amount",
       "fieldtype": "Currency",
       "label": "Contract Amount"
+    },
+    {
+      "fieldname": "income_amount",
+      "fieldtype": "Currency",
+      "label": "Total Income",
+      "read_only": 1
+    },
+    {
+      "fieldname": "expense_amount",
+      "fieldtype": "Currency",
+      "label": "Total Expenses",
+      "read_only": 1
+    },
+    {
+      "fieldname": "profit_amount",
+      "fieldtype": "Currency",
+      "label": "Profit",
+      "read_only": 1
     },
     {
       "fieldname": "project_manager",
