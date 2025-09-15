@@ -67,3 +67,33 @@ class TestWorkflows(FrappeTestCase):
 		sr.reload()
 		assert sr.status == "Completed"
 		assert sr.linked_report == rep.name
+
+	def test_service_report_cancel_only_from_submitted(self):
+		sr = frappe.new_doc("Service Request")
+		sr.title = "Cancel from submitted"
+		sr.type = "Routine Maintenance"
+		sr.priority = "Low"
+		sr.service_object = frappe.db.get_value("Service Object", {"object_name": "Obj-1"})
+		sr.insert()
+
+		att = frappe.new_doc("Custom Attachment")
+		att.file_name = "report.pdf"
+		att.file_url = "https://example.com/report.pdf"
+		att.insert()
+
+		rep = frappe.new_doc("Service Report")
+		rep.service_request = sr.name
+		rep.report_date = frappe.utils.nowdate()
+		rep.append("work_items", {"description": "Work", "hours": 1.0, "rate": 100})
+		rep.append("documents", {"custom_attachment": att.name})
+		rep.insert()
+
+		rep.status = "Cancelled"
+		with self.assertRaises(frappe.ValidationError):
+			rep.validate_workflow_transitions()
+
+		rep.status = "Submitted"
+		rep.save()
+
+		rep.status = "Cancelled"
+		rep.validate_workflow_transitions()
