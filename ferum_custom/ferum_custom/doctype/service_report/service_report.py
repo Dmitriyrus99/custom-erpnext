@@ -40,20 +40,31 @@ class ServiceReport(Document):
 				frappe.throw(_("Attachment is required for all Document Items."))
 
 	def validate_workflow_transitions(self):
+		"""Validate allowed status transitions.
+
+		The Service Report workflow currently does not require any side
+		effects when moving between statuses.  This method simply
+		ensures that the transition from ``old_status`` to ``self.status``
+		is permitted by the workflow definition.
+		"""
 		old_status = frappe.db.get_value("Service Report", self.name, "status") if not self.is_new() else None
 
-		if old_status == "Draft" and self.status == "Submitted":
-			pass
-		elif old_status == "Submitted" and self.status == "Approved":
-			pass
-		elif old_status == "Approved" and self.status == "Archived":
-			pass
-		elif old_status == "Submitted" and self.status == "Draft":
-			pass
-		elif self.status == "Cancelled":
+		allowed_transitions = {
+			("Draft", "Submitted"),
+			("Submitted", "Approved"),
+			("Approved", "Archived"),
+			("Submitted", "Draft"),
+		}
+
+		if self.status == "Cancelled":
 			if old_status not in ["Draft", "Submitted"]:
 				frappe.throw(_("Service Report can only be Cancelled from Draft or Submitted status."))
-		elif old_status and old_status != self.status:
+			return
+
+		if not old_status or old_status == self.status:
+			return
+
+		if (old_status, self.status) not in allowed_transitions:
 			frappe.throw(_(f"Invalid status transition from {old_status} to {self.status}."))
 
 	def update_service_request_on_submit(self):
