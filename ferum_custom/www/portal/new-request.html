@@ -30,7 +30,7 @@
                         const service_object = document.getElementById("service_object").value || null;
                         frappe
                                 .call({
-                                        method: "ferum_custom.ferum_custom.api.service.create_service_request",
+                                        method: "ferum_custom.api.service.create_service_request",
                                         args: { title, description, service_object },
                                 })
                                 .then((r) => {

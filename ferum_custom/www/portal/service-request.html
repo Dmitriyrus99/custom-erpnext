@@ -20,7 +20,7 @@
 
                 frappe
                         .call({
-                                method: "ferum_custom.ferum_custom.api.service.get_service_request",
+                                method: "ferum_custom.api.service.get_service_request",
                                 args: { name },
                         })
                         .then((r) => {

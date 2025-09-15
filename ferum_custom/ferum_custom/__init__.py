@@ -1,20 +1,37 @@
 from __future__ import annotations
 
-# Compatibility shim: ensure `ferum_custom.ferum_custom.*` resolves to the
-# standard app package at `apps/ferum_custom/ferum_custom` even if this nested
-# package is on sys.path first in Bench environments.
-import os
+"""Utilities for the nested ``ferum_custom.ferum_custom`` package.
+
+Historically some modules imported APIs via ``ferum_custom.ferum_custom`` even
+though most public modules (``api``, ``hooks`` and friends) live directly next to
+this package inside the app root.  Earlier we tried to support those imports by
+manipulating ``__path__`` which confused :mod:`pkgutil.walk_packages` and caused
+it to recurse indefinitely during the test runner setup.
+
+To keep backward compatibility without mutating ``__path__`` we register a small
+set of alias modules in :mod:`sys.modules`.  This allows dotted imports such as
+``ferum_custom.ferum_custom.api`` to resolve to the real package
+``ferum_custom.api`` while keeping the package tree acyclic.
+"""
+
+from importlib import import_module
 import sys
+from types import ModuleType
+from typing import Dict
 
-_this_dir = os.path.dirname(__file__)
-_parent_pkg_dir = os.path.dirname(_this_dir)
+_LEGACY_ALIASES: Dict[str, str] = {
+        "api": "ferum_custom.api",
+}
 
-# Ensure subpackages are discoverable from the parent app directory
-try:
-	__path__  # type: ignore[name-defined]
-except Exception:
-	__path__ = [_this_dir]  # type: ignore[assignment]
+for alias, target in _LEGACY_ALIASES.items():
+        try:
+                module: ModuleType = import_module(target)
+        except Exception:
+                # Import failures should not prevent the app from loading; simply
+                # skip the alias if the target cannot be imported (for example
+                # during partial installs or optional dependencies).
+                continue
+        sys.modules.setdefault(f"{__name__}.{alias}", module)
+        globals()[alias] = module
 
-if _parent_pkg_dir not in __path__:  # type: ignore[operator]
-	# let python look for subpackages (e.g., `doctype`) in the parent app dir
-	__path__.append(_parent_pkg_dir)  # type: ignore[attr-defined]
+__all__ = ["_LEGACY_ALIASES"]
