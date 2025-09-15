@@ -28,6 +28,7 @@
     "value_based_on": "amount",
     "filters_json": "[]",
     "is_public": 1,
-    "timeseries": 0
+    "timeseries": 0,
+    "aggregate_function_based_on": "amount"
   }
 ]
