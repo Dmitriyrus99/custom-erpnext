@@ -67,6 +67,17 @@
       "fieldname": "jwt_secret",
       "fieldtype": "Password",
       "label": "JWT Secret"
+    },
+    {
+      "fieldname": "notification_section",
+      "fieldtype": "Section Break",
+      "label": "Notifications"
+    },
+    {
+      "fieldname": "invoice_notification_roles",
+      "fieldtype": "Table MultiSelect",
+      "label": "Invoice Notification Roles",
+      "options": "Role"
     }
   ],
   "permissions": [
