@@ -5,6 +5,20 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, add_to_date, getdate, nowdate
 
+from ferum_custom.utils import get_emails_by_roles
+
+
+def _get_pm_email(project: str) -> str | None:
+	pm_info = frappe.db.get_value(
+		"Service Project",
+		project,
+		["project_manager", "project_manager.email"],
+		as_dict=True,
+	)
+	if not pm_info:
+		return None
+	return pm_info.get("project_manager.email") or pm_info.get("project_manager")
+
 
 class ServiceRequest(Document):
 	def after_insert(self) -> None:
@@ -101,15 +115,7 @@ class ServiceRequest(Document):
 			return
 
 		try:
-			pm_info = frappe.db.get_value(
-				"Service Project",
-				self.project,
-				["project_manager", "project_manager.email"],
-				as_dict=True,
-			)
-			if not pm_info:
-				return
-			email = pm_info.get("project_manager.email") or pm_info.get("project_manager")
+			email = _get_pm_email(self.project)
 			if not email:
 				return
 			frappe.sendmail(
@@ -149,35 +155,14 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 
 	try:
 		sr = frappe.get_doc("Service Request", service_request_name)
-
 		recipients: set[str] = set()
 
-		# Project manager assigned to the related Service Project
 		if sr.project:
-			pm_info = frappe.db.get_value(
-				"Service Project",
-				sr.project,
-				["project_manager", "project_manager.email"],
-				as_dict=True,
-			)
-			if pm_info:
-				pm_email = pm_info.get("project_manager.email") or pm_info.get("project_manager")
-				if pm_email:
-					recipients.add(pm_email)
+			pm_email = _get_pm_email(sr.project)
+			if pm_email:
+				recipients.add(pm_email)
 
-		# All Office Managers in the system
-		office_manager_ids = frappe.get_all(
-			"Has Role",
-			filters={"role": "Office Manager", "parenttype": "User"},
-			pluck="parent",
-		)
-		if office_manager_ids:
-			for om in frappe.db.get_all(
-				"User",
-				filters={"name": ["in", office_manager_ids]},
-				fields=["name", "email"],
-			):
-				recipients.add(om.email or om.name)
+		recipients.update(get_emails_by_roles(["Office Manager"]))
 
 		if recipients:
 			frappe.sendmail(
