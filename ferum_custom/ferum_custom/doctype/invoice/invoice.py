@@ -96,13 +96,18 @@ class Invoice(Document):
 
 			recipients: set[str] = set()
 			roles = ["Chief Accountant", "System Manager"]
-			users = frappe.get_all(
-				"Has Role", filters={"role": ["in", roles], "parenttype": "User"}, fields=["parent"]
+			user_ids = frappe.get_all(
+				"Has Role",
+				filters={"role": ["in", roles], "parenttype": "User"},
+				pluck="parent",
 			)
-			for u in users:
-				email = frappe.db.get_value("User", u.parent, "email") or u.parent
-				if email:
-					recipients.add(email)
+			if user_ids:
+				for u in frappe.db.get_all(
+					"User",
+					filters={"name": ["in", user_ids]},
+					fields=["name", "email"],
+				):
+					recipients.add(u.email or u.name)
 			if recipients:
 				frappe.sendmail(
 					recipients=list(recipients),
