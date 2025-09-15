@@ -167,7 +167,10 @@ def on_invoice_update(doc, method):
 
 			update_project_financials(doc.project)
 		except Exception:
-			frappe.log_error(frappe.get_traceback(), "Project Financial Update Failed")
+			frappe.log_error(
+				frappe.get_traceback(),
+				f"Project Financial Update Failed for {doc.project}",
+			)
 
 	if doc.docstatus == 1 and doc.status == "Paid":  # Submitted and Paid
 		enqueue(
