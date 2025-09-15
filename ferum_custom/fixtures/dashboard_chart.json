@@ -1,7 +1,7 @@
 [
   {
     "doctype": "Dashboard Chart",
-    "name": "Open Service Requests by Status",
+    "name": "open-service-requests-by-status",
     "is_standard": 1,
     "module": "Ferum Custom",
     "chart_name": "Open Service Requests by Status",
