@@ -12,10 +12,11 @@ except Exception:
 	gspread = None  # Optional dependency; handled at runtime
 from frappe.model.document import Document
 from frappe.utils.background_jobs import enqueue
+
 try:
-    from frappe.model.workflow import apply_workflow  # type: ignore[import-not-found]
+	from frappe.model.workflow import apply_workflow  # type: ignore[import-not-found]
 except Exception:
-    apply_workflow = None  # type: ignore[assignment]
+	apply_workflow = None  # type: ignore[assignment]
 
 try:
 	from google.oauth2.service_account import Credentials  # type: ignore[import-untyped]
@@ -56,7 +57,10 @@ def get_google_sheet():
 
 try:
 	from backend.bot.telegram_bot import send_telegram_message  # type: ignore[import-not-found]
+
+	TELEGRAM_AVAILABLE = True
 except Exception:
+	TELEGRAM_AVAILABLE = False
 
 	def send_telegram_message(*args, **kwargs):  # fallback no-op
 		try:
@@ -83,7 +87,30 @@ class Invoice(Document):
 	def notify_on_subcontractor_invoice(self):
 		if self.counterparty_type == "Subcontractor":
 			message = f"New subcontractor invoice created: {self.name} for {self.counterparty_name}. Amount: {self.amount}"
-			send_telegram_message(message)
+			if TELEGRAM_AVAILABLE:
+				try:
+					send_telegram_message(message)
+					return
+				except Exception:
+					frappe.log_error(frappe.get_traceback(), "Telegram Notification Failed")
+
+			recipients: set[str] = set()
+			roles = ["Chief Accountant", "System Manager"]
+			users = frappe.get_all(
+				"Has Role", filters={"role": ["in", roles], "parenttype": "User"}, fields=["parent"]
+			)
+			for u in users:
+				email = frappe.db.get_value("User", u.parent, "email") or u.parent
+				if email:
+					recipients.add(email)
+			if recipients:
+				frappe.sendmail(
+					recipients=list(recipients),
+					subject=_("New subcontractor invoice {0}").format(self.name),
+					message=message,
+				)
+			else:
+				frappe.log_error(message, "Subcontractor Invoice Notification")
 
 
 @frappe.whitelist()
@@ -132,116 +159,116 @@ def on_invoice_update(doc, method):
 
 @frappe.whitelist()
 def bulk_mark_sent(names: list[str] | str) -> dict:
-    """Bulk mark selected Invoices as 'Sent'.
+	"""Bulk mark selected Invoices as 'Sent'.
 
-    - Validates roles (System Manager, Project Manager, Office Manager, Chief Accountant)
-    - Skips invoices already Paid or Cancelled
-    - Returns a summary dict with updated and skipped lists
-    """
-    # Parse names when called from JS (stringified JSON or CSV)
-    if isinstance(names, str):
-        try:
-            names = frappe.parse_json(names)  # type: ignore[assignment]
-        except Exception:
-            names = [n.strip() for n in names.split(",") if n.strip()]
+	- Validates roles (System Manager, Project Manager, Office Manager, Chief Accountant)
+	- Skips invoices already Paid or Cancelled
+	- Returns a summary dict with updated and skipped lists
+	"""
+	# Parse names when called from JS (stringified JSON or CSV)
+	if isinstance(names, str):
+		try:
+			names = frappe.parse_json(names)  # type: ignore[assignment]
+		except Exception:
+			names = [n.strip() for n in names.split(",") if n.strip()]
 
-    if not names:
-        return {"updated": [], "skipped": ["<empty>"]}
+	if not names:
+		return {"updated": [], "skipped": ["<empty>"]}
 
-    roles = set(frappe.get_roles())
-    allowed_roles = {"System Manager", "Project Manager", "Office Manager", "Chief Accountant"}
-    if not roles.intersection(allowed_roles):
-        frappe.throw(_("Not permitted to change invoice status."))
+	roles = set(frappe.get_roles())
+	allowed_roles = {"System Manager", "Project Manager", "Office Manager", "Chief Accountant"}
+	if not roles.intersection(allowed_roles):
+		frappe.throw(_("Not permitted to change invoice status."))
 
-    updated: list[str] = []
-    skipped: list[str] = []
+	updated: list[str] = []
+	skipped: list[str] = []
 
-    for name in names:  # type: ignore[assignment]
-        try:
-            doc = frappe.get_doc("Invoice", name)
-            if doc.status in ("Paid", "Cancelled"):
-                skipped.append(name)
-                continue
-            if doc.status == "Sent":
-                skipped.append(name)
-                continue
-            # Prefer workflow transition if configured
-            transitioned = False
-            if apply_workflow:
-                try:
-                    apply_workflow(doc, "Send")
-                    transitioned = True
-                except Exception:
-                    transitioned = False
-            if not transitioned:
-                doc.db_set("status", "Sent")
-            updated.append(name)
-        except Exception:
-            skipped.append(name)
+	for name in names:  # type: ignore[assignment]
+		try:
+			doc = frappe.get_doc("Invoice", name)
+			if doc.status in ("Paid", "Cancelled"):
+				skipped.append(name)
+				continue
+			if doc.status == "Sent":
+				skipped.append(name)
+				continue
+			# Prefer workflow transition if configured
+			transitioned = False
+			if apply_workflow:
+				try:
+					apply_workflow(doc, "Send")
+					transitioned = True
+				except Exception:
+					transitioned = False
+			if not transitioned:
+				doc.db_set("status", "Sent")
+			updated.append(name)
+		except Exception:
+			skipped.append(name)
 
-    return {"updated": updated, "skipped": skipped}
+	return {"updated": updated, "skipped": skipped}
 
 
 @frappe.whitelist()
 def bulk_mark_paid(names: list[str] | str) -> dict:
-    """Bulk mark selected Invoices as 'Paid' using Workflow when available.
+	"""Bulk mark selected Invoices as 'Paid' using Workflow when available.
 
-    - Only Chief Accountant (and System Manager) may perform this action
-    - Requires invoices to not be Cancelled; prefers current status 'Sent'
-    - Uses workflow action 'Mark Paid' if configured; otherwise submits + sets status
-    - Returns a summary dict with updated and skipped lists
-    """
-    # Parse names when called from JS
-    if isinstance(names, str):
-        try:
-            names = frappe.parse_json(names)  # type: ignore[assignment]
-        except Exception:
-            names = [n.strip() for n in names.split(",") if n.strip()]
+	- Only Chief Accountant (and System Manager) may perform this action
+	- Requires invoices to not be Cancelled; prefers current status 'Sent'
+	- Uses workflow action 'Mark Paid' if configured; otherwise submits + sets status
+	- Returns a summary dict with updated and skipped lists
+	"""
+	# Parse names when called from JS
+	if isinstance(names, str):
+		try:
+			names = frappe.parse_json(names)  # type: ignore[assignment]
+		except Exception:
+			names = [n.strip() for n in names.split(",") if n.strip()]
 
-    if not names:
-        return {"updated": [], "skipped": ["<empty>"]}
+	if not names:
+		return {"updated": [], "skipped": ["<empty>"]}
 
-    roles = set(frappe.get_roles())
-    allowed_roles = {"Chief Accountant", "System Manager"}
-    if not roles.intersection(allowed_roles):
-        frappe.throw(_("Not permitted to mark invoices as Paid."))
+	roles = set(frappe.get_roles())
+	allowed_roles = {"Chief Accountant", "System Manager"}
+	if not roles.intersection(allowed_roles):
+		frappe.throw(_("Not permitted to mark invoices as Paid."))
 
-    updated: list[str] = []
-    skipped: list[str] = []
+	updated: list[str] = []
+	skipped: list[str] = []
 
-    for name in names:  # type: ignore[assignment]
-        try:
-            doc = frappe.get_doc("Invoice", name)
-            if doc.status in ("Paid", "Cancelled"):
-                skipped.append(name)
-                continue
+	for name in names:  # type: ignore[assignment]
+		try:
+			doc = frappe.get_doc("Invoice", name)
+			if doc.status in ("Paid", "Cancelled"):
+				skipped.append(name)
+				continue
 
-            # Prefer workflow transition if configured
-            transitioned = False
-            if apply_workflow:
-                try:
-                    apply_workflow(doc, "Mark Paid")
-                    transitioned = True
-                except Exception:
-                    transitioned = False
+			# Prefer workflow transition if configured
+			transitioned = False
+			if apply_workflow:
+				try:
+					apply_workflow(doc, "Mark Paid")
+					transitioned = True
+				except Exception:
+					transitioned = False
 
-            if not transitioned:
-                # Fallback: ensure submitted + set status
-                if doc.docstatus == 0:
-                    doc.status = "Paid"
-                    doc.submit()  # triggers on_update hooks
-                elif doc.docstatus == 1:
-                    doc.status = "Paid"
-                    doc.save()
-                else:
-                    skipped.append(name)
-                    continue
+			if not transitioned:
+				# Fallback: ensure submitted + set status
+				if doc.docstatus == 0:
+					doc.status = "Paid"
+					doc.submit()  # triggers on_update hooks
+				elif doc.docstatus == 1:
+					doc.status = "Paid"
+					doc.save()
+				else:
+					skipped.append(name)
+					continue
 
-            updated.append(name)
-        except Exception:
-            skipped.append(name)
+			updated.append(name)
+		except Exception:
+			skipped.append(name)
 
-    return {"updated": updated, "skipped": skipped}
+	return {"updated": updated, "skipped": skipped}
 
 
 @frappe.whitelist()
