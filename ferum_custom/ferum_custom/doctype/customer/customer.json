@@ -20,7 +20,7 @@
     },
     {
       "fieldname": "phone",
-      "fieldtype": "Data",
+      "fieldtype": "Phone",
       "label": "Phone"
     },
     {
@@ -32,6 +32,18 @@
       "fieldname": "notes",
       "fieldtype": "Text",
       "label": "Notes"
+    },
+    {
+      "fieldname": "customer_group",
+      "fieldtype": "Link",
+      "label": "Customer Group",
+      "options": "Customer Group"
+    },
+    {
+      "fieldname": "territory",
+      "fieldtype": "Link",
+      "label": "Territory",
+      "options": "Territory"
     }
   ],
   "permissions": [
