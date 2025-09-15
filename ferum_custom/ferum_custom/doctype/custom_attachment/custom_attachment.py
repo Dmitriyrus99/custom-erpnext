@@ -40,7 +40,7 @@ def _pgc_for_custom_attachment(user: str) -> str:
 			" and req.owner=%(user)s)"
 		)
 	# Office Manager / Chief Accountant: broad read access
-	if "Office Manager" in roles or "Chief Accountant" in roles or "Department Head" in roles:
+	if "Office Manager" in roles or "Chief Accountant" in roles:
 		# No extra filters for these roles
 		return None
 
@@ -69,13 +69,13 @@ def has_permission(doc, user: str | None = None) -> bool:
 	if "Project Manager" in roles:
 		pm = frappe.db.sql(
 			"""
-            select sp.project_manager
-            from `tabService Report Document Item` srd
-            join `tabService Report` sr on sr.name = srd.parent
-            join `tabService Request` req on req.name = sr.service_request
-            join `tabService Project` sp on sp.name = req.project
-            where srd.custom_attachment=%s limit 1
-            """,
+	    select sp.project_manager
+	    from `tabService Report Document Item` srd
+	    join `tabService Report` sr on sr.name = srd.parent
+	    join `tabService Request` req on req.name = sr.service_request
+	    join `tabService Project` sp on sp.name = req.project
+	    where srd.custom_attachment=%s limit 1
+	    """,
 			(doc.name,),
 		)
 		if pm and pm[0][0] == user:
@@ -84,12 +84,12 @@ def has_permission(doc, user: str | None = None) -> bool:
 	if "Service Engineer" in roles:
 		assignee = frappe.db.sql(
 			"""
-            select req.assigned_to
-            from `tabService Report Document Item` srd
-            join `tabService Report` sr on sr.name = srd.parent
-            join `tabService Request` req on req.name = sr.service_request
-            where srd.custom_attachment=%s limit 1
-            """,
+	    select req.assigned_to
+	    from `tabService Report Document Item` srd
+	    join `tabService Report` sr on sr.name = srd.parent
+	    join `tabService Request` req on req.name = sr.service_request
+	    where srd.custom_attachment=%s limit 1
+	    """,
 			(doc.name,),
 		)
 		if assignee and assignee[0][0] == user:
@@ -98,12 +98,12 @@ def has_permission(doc, user: str | None = None) -> bool:
 	if "Client" in roles:
 		owner = frappe.db.sql(
 			"""
-            select req.owner
-            from `tabService Report Document Item` srd
-            join `tabService Report` sr on sr.name = srd.parent
-            join `tabService Request` req on req.name = sr.service_request
-            where srd.custom_attachment=%s limit 1
-            """,
+	    select req.owner
+	    from `tabService Report Document Item` srd
+	    join `tabService Report` sr on sr.name = srd.parent
+	    join `tabService Request` req on req.name = sr.service_request
+	    where srd.custom_attachment=%s limit 1
+	    """,
 			(doc.name,),
 		)
 		if owner and owner[0][0] == user:
