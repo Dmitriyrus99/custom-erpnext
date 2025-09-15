@@ -1,7 +1,13 @@
 {
   "label": "Service Operations",
-  "public": 1,
+  "public": 0,
   "module": "Ferum Custom",
+  "roles": [
+    { "role": "System Manager" },
+    { "role": "Project Manager" },
+    { "role": "Service Engineer" },
+    { "role": "Office Manager" }
+  ],
   "doctype": "Workspace",
   "content": [
     {
@@ -31,6 +37,8 @@
     },
     { "type": "shortcut", "label": "Invoices", "link_to": "List/Invoice" },
     { "type": "shortcut", "label": "New Invoice (Customer)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Customer" },
-    { "type": "shortcut", "label": "New Invoice (Subcontractor)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Subcontractor" }
+    { "type": "shortcut", "label": "New Invoice (Subcontractor)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Subcontractor" },
+    { "type": "shortcut", "label": "Unassigned Requests", "link_to": "query-report/Unassigned Service Requests" },
+    { "type": "shortcut", "label": "Open Requests by Engineer", "link_to": "query-report/Open Service Requests by Engineer" }
   ]
 }

@@ -13,5 +13,21 @@
       "reqd": 1
     },
     { "fieldname": "description", "fieldtype": "Text", "label": "Description" }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    },
+    {
+      "role": "Office Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
   ]
 }

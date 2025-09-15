@@ -1,7 +1,12 @@
 {
   "label": "Service Maintenance",
-  "public": 1,
+  "public": 0,
   "module": "Ferum Custom",
+  "roles": [
+    { "role": "System Manager" },
+    { "role": "Service Engineer" },
+    { "role": "Office Manager" }
+  ],
   "doctype": "Workspace",
   "content": [
     {
@@ -18,6 +23,7 @@
       "type": "shortcut",
       "label": "Service Requests",
       "link_to": "List/Service Request"
-    }
+    },
+    { "type": "shortcut", "label": "Due Schedules", "link_to": "query-report/Due Service Maintenance Schedules" }
   ]
 }

@@ -70,5 +70,47 @@
         "role": "Chief Accountant"
       }
     ]
+  },
+  {
+    "doctype": "Report",
+    "name": "Unassigned Service Requests",
+    "report_name": "Unassigned Service Requests",
+    "ref_doctype": "Service Request",
+    "module": "Ferum Custom",
+    "report_type": "Query Report",
+    "is_standard": "No",
+    "query": "SELECT name, status, priority, modified FROM `tabService Request` WHERE IFNULL(assigned_to, '') = '' AND status != 'Closed' ORDER BY modified DESC",
+    "roles": [
+      { "doctype": "Report Perm", "role": "System Manager" },
+      { "doctype": "Report Perm", "role": "Office Manager" }
+    ]
+  },
+  {
+    "doctype": "Report",
+    "name": "Open Service Requests by Engineer",
+    "report_name": "Open Service Requests by Engineer",
+    "ref_doctype": "Service Request",
+    "module": "Ferum Custom",
+    "report_type": "Query Report",
+    "is_standard": "No",
+    "query": "SELECT COALESCE(assigned_to, 'Unassigned') AS \"Engineer:Data:200\", COUNT(*) AS \"Open Requests:Int:100\" FROM `tabService Request` WHERE status != 'Closed' GROUP BY assigned_to ORDER BY COUNT(*) DESC",
+    "roles": [
+      { "doctype": "Report Perm", "role": "System Manager" },
+      { "doctype": "Report Perm", "role": "Office Manager" }
+    ]
+  },
+  {
+    "doctype": "Report",
+    "name": "Due Service Maintenance Schedules",
+    "report_name": "Due Service Maintenance Schedules",
+    "ref_doctype": "Service Maintenance Schedule",
+    "module": "Ferum Custom",
+    "report_type": "Query Report",
+    "is_standard": "No",
+    "query": "SELECT name, schedule_name, customer, next_due_date FROM `tabService Maintenance Schedule` WHERE next_due_date <= CURDATE() ORDER BY next_due_date",
+    "roles": [
+      { "doctype": "Report Perm", "role": "System Manager" },
+      { "doctype": "Report Perm", "role": "Office Manager" }
+    ]
   }
 ]
