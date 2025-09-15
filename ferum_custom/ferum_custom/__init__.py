@@ -14,24 +14,23 @@ set of alias modules in :mod:`sys.modules`.  This allows dotted imports such as
 ``ferum_custom.api`` while keeping the package tree acyclic.
 """
 
-from importlib import import_module
 import sys
+from importlib import import_module
 from types import ModuleType
-from typing import Dict
 
-_LEGACY_ALIASES: Dict[str, str] = {
-        "api": "ferum_custom.api",
+_LEGACY_ALIASES: dict[str, str] = {
+	"api": "ferum_custom.api",
 }
 
 for alias, target in _LEGACY_ALIASES.items():
-        try:
-                module: ModuleType = import_module(target)
-        except Exception:
-                # Import failures should not prevent the app from loading; simply
-                # skip the alias if the target cannot be imported (for example
-                # during partial installs or optional dependencies).
-                continue
-        sys.modules.setdefault(f"{__name__}.{alias}", module)
-        globals()[alias] = module
+	try:
+		module: ModuleType = import_module(target)
+	except Exception:
+		# Import failures should not prevent the app from loading; simply
+		# skip the alias if the target cannot be imported (for example
+		# during partial installs or optional dependencies).
+		continue
+	sys.modules.setdefault(f"{__name__}.{alias}", module)
+	globals()[alias] = module
 
 __all__ = ["_LEGACY_ALIASES"]

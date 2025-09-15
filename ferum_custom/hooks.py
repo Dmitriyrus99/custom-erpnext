@@ -125,5 +125,5 @@ fixtures = [
 ]
 
 before_request = [
-        "ferum_custom.api.auth.jwt_before_request",
+	"ferum_custom.api.auth.jwt_before_request",
 ]
