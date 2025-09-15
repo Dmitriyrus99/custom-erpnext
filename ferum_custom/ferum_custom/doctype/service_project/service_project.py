@@ -82,14 +82,9 @@ def update_project_financials(project: str) -> None:
 		group_by="counterparty_type",
 	)
 
-	income = 0.0
-	expenses = 0.0
-	for row in totals:
-		total = row.get("total") or 0
-		if row.counterparty_type == "Customer":
-			income = total
-		elif row.counterparty_type == "Subcontractor":
-			expenses = total
+	totals_map = {row.counterparty_type: row.get("total") or 0 for row in totals}
+	income = totals_map.get("Customer", 0.0)
+	expenses = totals_map.get("Subcontractor", 0.0)
 
 	frappe.db.set_value(
 		"Service Project",
