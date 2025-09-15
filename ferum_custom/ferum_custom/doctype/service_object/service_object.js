@@ -9,7 +9,7 @@ frappe.ui.form.on("Service Object", {
 					title: frm.doc.object_name || __("Service Request"),
 				});
 			},
-			__("Create"),
+			__("Create")
 		);
 	},
 });

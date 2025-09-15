@@ -9,7 +9,7 @@ frappe.ui.form.on("Service Request", {
 						report_date: frappe.datetime.get_today(),
 					});
 				},
-				__("Create"),
+				__("Create")
 			);
 		}
 	},

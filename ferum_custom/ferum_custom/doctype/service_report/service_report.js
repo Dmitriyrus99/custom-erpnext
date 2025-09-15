@@ -7,11 +7,17 @@ frappe.ui.form.on("Service Report", {
 				__("Customer Invoice"),
 				() => {
 					if (!frm.doc.service_request) {
-						frappe.new_doc("Invoice", { counterparty_type: "Customer", amount: frm.doc.total_amount });
+						frappe.new_doc("Invoice", {
+							counterparty_type: "Customer",
+							amount: frm.doc.total_amount,
+						});
 						return;
 					}
 					frappe.db
-						.get_value("Service Request", frm.doc.service_request, ["project", "customer"])
+						.get_value("Service Request", frm.doc.service_request, [
+							"project",
+							"customer",
+						])
 						.then((r) => {
 							const project = r?.message?.project;
 							const customer = r?.message?.customer;
@@ -23,7 +29,7 @@ frappe.ui.form.on("Service Report", {
 							});
 						});
 				},
-				__("Create"),
+				__("Create")
 			);
 			frm.add_custom_button(
 				__("Subcontractor Invoice"),
@@ -42,7 +48,7 @@ frappe.ui.form.on("Service Report", {
 							});
 						});
 				},
-				__("Create"),
+				__("Create")
 			);
 		}
 	},
