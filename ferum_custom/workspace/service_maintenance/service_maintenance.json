@@ -8,7 +8,6 @@
     { "role": "Office Manager" }
   ],
   "doctype": "Workspace",
-  "roles": [{"role": "System Manager"}],
   "content": [
     {
       "type": "shortcut",

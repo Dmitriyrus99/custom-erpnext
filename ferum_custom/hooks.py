@@ -93,42 +93,34 @@ fixtures = [
 		"doctype": "Report",
 		"filters": [["module", "=", "Ferum Custom"]],
 	},
-    {
-        "doctype": "Workspace",
-        "filters": [["module", "=", "Ferum Custom"]],
-    },
-    {
-        "doctype": "Module Def",
-        "filters": [["name", "=", "Ferum Custom"]],
-    },
-    {
-        "doctype": "Module Profile",
-        "filters": [["module_profile_name", "=", "Ferum Admin"]],
-    },
-    {
-        "doctype": "Workspace",
-        "filters": [["module", "=", "Ferum Custom"]],
-    },
-    {
-        "doctype": "Module Def",
-        "filters": [["name", "=", "Ferum Custom"]],
-    },
-    {
-        "doctype": "Role Profile",
-        "filters": [
-            [
-                "role_profile",
-                "in",
-                [
-                    "Project Manager",
-                    "Office Manager",
-                    "Service Engineer",
-                    "Chief Accountant",
-                    "Client",
-                ],
-            ]
-        ],
-    },
+	{
+		"doctype": "Module Profile",
+		"filters": [["module_profile_name", "=", "Ferum Admin"]],
+	},
+	{
+		"doctype": "Workspace",
+		"filters": [["module", "=", "Ferum Custom"]],
+	},
+	{
+		"doctype": "Module Def",
+		"filters": [["name", "=", "Ferum Custom"]],
+	},
+	{
+		"doctype": "Role Profile",
+		"filters": [
+			[
+				"role_profile",
+				"in",
+				[
+					"Project Manager",
+					"Office Manager",
+					"Service Engineer",
+					"Chief Accountant",
+					"Client",
+				],
+			]
+		],
+	},
 ]
 
 # Request hooks (JWT optional)
