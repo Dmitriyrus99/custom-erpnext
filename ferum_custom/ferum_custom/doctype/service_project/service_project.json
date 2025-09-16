@@ -133,7 +133,9 @@
       "role": "Project Manager"
     },
     {
+      "create": 1,
       "read": 1,
+      "write": 1,
       "role": "Office Manager"
     },
     {

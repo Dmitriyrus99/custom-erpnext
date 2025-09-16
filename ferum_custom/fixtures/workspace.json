@@ -1,0 +1,87 @@
+[
+  {
+    "doctype": "Workspace",
+    "name": "Projects (PM)",
+    "label": "Projects (PM)",
+    "title": "Projects (PM)",
+    "module": "Ferum Custom",
+    "public": 1,
+    "roles": [
+      {"doctype": "Has Role", "role": "Project Manager"},
+      {"doctype": "Has Role", "role": "System Manager"}
+    ],
+    "content": "[]",
+    "shortcuts": [
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Projects", "link_to": "Service Project", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "New Project", "link_to": "Service Project", "doc_view": "New"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Service Objects", "link_to": "Service Object", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "New Service Object", "link_to": "Service Object", "doc_view": "New"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Service Requests", "link_to": "Service Request", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Service Reports", "link_to": "Service Report", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Invoices", "link_to": "Invoice", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "URL", "label": "New Invoice (Customer)", "url": "/app/invoice/new?counterparty_type=Customer"},
+      {"doctype": "Workspace Shortcut", "type": "URL", "label": "New Invoice (Subcontractor)", "url": "/app/invoice/new?counterparty_type=Subcontractor"}
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Projects (Office)",
+    "label": "Projects (Office)",
+    "title": "Projects (Office)",
+    "module": "Ferum Custom",
+    "public": 1,
+    "roles": [
+      {"doctype": "Has Role", "role": "Office Manager"},
+      {"doctype": "Has Role", "role": "System Manager"}
+    ],
+    "content": "[]",
+    "shortcuts": [
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Projects", "link_to": "Service Project", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "New Project", "link_to": "Service Project", "doc_view": "New"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Service Requests", "link_to": "Service Request", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Service Reports", "link_to": "Service Report", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Invoices", "link_to": "Invoice", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "URL", "label": "New Invoice (Customer)", "url": "/app/invoice/new?counterparty_type=Customer"},
+      {"doctype": "Workspace Shortcut", "type": "URL", "label": "New Invoice (Subcontractor)", "url": "/app/invoice/new?counterparty_type=Subcontractor"}
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Engineer",
+    "label": "Engineer",
+    "title": "Engineer",
+    "module": "Ferum Custom",
+    "public": 1,
+    "roles": [
+      {"doctype": "Has Role", "role": "Service Engineer"},
+      {"doctype": "Has Role", "role": "System Manager"}
+    ],
+    "content": "[]",
+    "shortcuts": [
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Projects", "link_to": "Service Project", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Service Requests", "link_to": "Service Request", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Create Service Request", "link_to": "Service Request", "doc_view": "New"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Service Reports", "link_to": "Service Report", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Service Objects", "link_to": "Service Object", "doc_view": "List"}
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Accounting",
+    "label": "Accounting",
+    "title": "Accounting",
+    "module": "Ferum Custom",
+    "public": 1,
+    "roles": [
+      {"doctype": "Has Role", "role": "Chief Accountant"},
+      {"doctype": "Has Role", "role": "System Manager"}
+    ],
+    "content": "[]",
+    "shortcuts": [
+      {"doctype": "Workspace Shortcut", "type": "DocType", "label": "Invoices", "link_to": "Invoice", "doc_view": "List"},
+      {"doctype": "Workspace Shortcut", "type": "URL", "label": "New Invoice (Customer)", "url": "/app/invoice/new?counterparty_type=Customer"},
+      {"doctype": "Workspace Shortcut", "type": "URL", "label": "New Invoice (Subcontractor)", "url": "/app/invoice/new?counterparty_type=Subcontractor"},
+      {"doctype": "Workspace Shortcut", "type": "Report", "label": "Reports: Invoices by Project", "link_to": "Invoices by Project"}
+    ]
+  }
+]

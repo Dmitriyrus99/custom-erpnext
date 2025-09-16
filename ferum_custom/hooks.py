@@ -93,37 +93,45 @@ fixtures = [
 		"doctype": "Report",
 		"filters": [["module", "=", "Ferum Custom"]],
 	},
-	{
-		"doctype": "Role Profile",
-		"filters": [
-			[
-				"role_profile",
-				"in",
-				[
-					"Project Manager",
-					"Office Manager",
-					"Service Engineer",
-					"Chief Accountant",
-					"Client",
-				],
-			]
-		],
-	},
-	{
-		"doctype": "Dashboard Chart",
-		"filters": [
-			[
-				"chart_name",
-				"in",
-				[
-					"Open Service Requests by Status",
-					"Invoices by Project",
-				],
-			]
-		],
-	},
+    {
+        "doctype": "Workspace",
+        "filters": [["module", "=", "Ferum Custom"]],
+    },
+    {
+        "doctype": "Module Def",
+        "filters": [["name", "=", "Ferum Custom"]],
+    },
+    {
+        "doctype": "Module Profile",
+        "filters": [["module_profile_name", "=", "Ferum Admin"]],
+    },
+    {
+        "doctype": "Workspace",
+        "filters": [["module", "=", "Ferum Custom"]],
+    },
+    {
+        "doctype": "Module Def",
+        "filters": [["name", "=", "Ferum Custom"]],
+    },
+    {
+        "doctype": "Role Profile",
+        "filters": [
+            [
+                "role_profile",
+                "in",
+                [
+                    "Project Manager",
+                    "Office Manager",
+                    "Service Engineer",
+                    "Chief Accountant",
+                    "Client",
+                ],
+            ]
+        ],
+    },
 ]
 
+# Request hooks (JWT optional)
 before_request = [
 	"ferum_custom.api.auth.jwt_before_request",
 ]

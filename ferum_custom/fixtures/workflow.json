@@ -201,10 +201,26 @@
         "condition": "doc.customer"
       },
       {
+        "state": "Planned",
+        "action": "Activate",
+        "next_state": "Active",
+        "allowed": "Office Manager",
+        "allow_self_approval": 1,
+        "condition": "doc.customer"
+      },
+      {
         "state": "Active",
         "action": "Complete",
         "next_state": "Completed",
         "allowed": "Project Manager",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Active",
+        "action": "Complete",
+        "next_state": "Completed",
+        "allowed": "Office Manager",
         "allow_self_approval": 1,
         "condition": ""
       },

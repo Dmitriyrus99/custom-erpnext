@@ -1,0 +1,67 @@
+{
+ "charts": [],
+ "content": "[]",
+ "creation": "2025-09-04 15:02:18.213689",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "Engineer",
+ "links": [],
+ "modified": "2025-09-04 15:25:13.261688",
+ "modified_by": "Administrator",
+ "module": "Ferum Custom",
+ "name": "Engineer",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Service Engineer"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "doc_view": "List",
+   "label": "Projects",
+   "link_to": "Service Project",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "Service Requests",
+   "link_to": "Service Request",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "New",
+   "label": "Create Service Request",
+   "link_to": "Service Request",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "Service Reports",
+   "link_to": "Service Report",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "Service Objects",
+   "link_to": "Service Object",
+   "type": "DocType"
+  }
+ ],
+ "title": "Engineer"
+}

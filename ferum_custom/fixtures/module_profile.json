@@ -1,0 +1,10 @@
+[
+  {
+    "doctype": "Module Profile",
+    "name": "Ferum Admin",
+    "module_profile_name": "Ferum Admin",
+    "modules": [
+      { "doctype": "Module Profile Module", "module": "Ferum Custom", "parentfield": "modules", "parenttype": "Module Profile" }
+    ]
+  }
+]
