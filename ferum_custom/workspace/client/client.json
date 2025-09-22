@@ -1,5 +1,5 @@
 {
-  "label": "Client",
+  "label": "Клиент",
   "public": 0,
   "module": "Ferum Custom",
   "roles": [
@@ -8,6 +8,6 @@
   ],
   "doctype": "Workspace",
   "content": [
-    { "type": "shortcut", "label": "New Service Request", "link_to": "/portal/new-request" }
+    { "type": "shortcut", "label": "Новая заявка", "link_to": "/portal/new-request" }
   ]
 }

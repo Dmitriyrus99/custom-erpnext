@@ -3,5 +3,7 @@
   { "doctype": "Role", "name": "Chief Accountant", "role_name": "Chief Accountant", "desk_access": 1 },
   { "doctype": "Role", "name": "Service Engineer", "role_name": "Service Engineer", "desk_access": 1 },
   { "doctype": "Role", "name": "Project Manager", "role_name": "Project Manager", "desk_access": 1 },
-  { "doctype": "Role", "name": "Client", "role_name": "Client", "desk_access": 0 }
+  { "doctype": "Role", "name": "Client", "role_name": "Client", "desk_access": 0 },
+  { "doctype": "Role", "name": "General Director", "role_name": "General Director", "desk_access": 1 },
+  { "doctype": "Role", "name": "Department Head", "role_name": "Department Head", "desk_access": 1 }
 ]
