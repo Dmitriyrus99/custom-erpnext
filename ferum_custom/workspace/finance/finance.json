@@ -9,8 +9,8 @@
   "doctype": "Workspace",
   "content": [
     { "type": "shortcut", "label": "Счета", "link_to": "List/Invoice" },
-    { "type": "shortcut", "label": "Новый счет (клиент)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Customer" },
-    { "type": "shortcut", "label": "Новый счет (субподрядчик)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Subcontractor" },
+{ "type": "shortcut", "label": "Новый счет (клиент)", "link_to": "/app/invoice/new?counterparty_type=Customer" },
+{ "type": "shortcut", "label": "Новый счет (субподрядчик)", "link_to": "/app/invoice/new?counterparty_type=Subcontractor" },
     { "type": "shortcut", "label": "Счета по проектам", "link_to": "query-report/Invoices by Project" },
     { "type": "chart", "chart_name": "Счета по проектам" },
     { "type": "shortcut", "label": "Начисления зарплаты", "link_to": "List/Payroll Entry Custom" },
