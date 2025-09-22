@@ -1,0 +1,212 @@
+[
+  {
+    "doctype": "Workspace",
+    "name": "Администрирование",
+    "label": "Администрирование",
+    "title": "Администрирование",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Администрирование\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Открытые заявки по статусам\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Счета по проектам\",\"col\":6}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Открытые заявки\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Отчет о прибылях и убытках\",\"col\":4}}]",
+    "charts": [
+      { "doctype": "Workspace Chart", "chart_name": "Открытые заявки по статусам", "label": "Открытые заявки по статусам" },
+      { "doctype": "Workspace Chart", "chart_name": "Счета по проектам", "label": "Счета по проектам" }
+    ],
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/service-request?status=Open", "label": "Открытые заявки" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Profit and Loss Statement", "label": "Отчет о прибылях и убытках" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "System Manager" }
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Управление проектами",
+    "label": "Управление проектами",
+    "title": "Управление проектами",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Управление проектами\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Проекты\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новый проект\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Заявки\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Сервисные отчеты\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Объекты\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Счета\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новый счет (клиент)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новый счет (субподрядчик)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Прибыльность проектов\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Заявки по проектам\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Счета по проектам\",\"col\":4}}]",
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Project", "doc_view": "List", "label": "Проекты" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/service-project/new", "label": "Новый проект" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Request", "doc_view": "List", "label": "Заявки" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Report", "doc_view": "List", "label": "Сервисные отчеты" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Object", "doc_view": "List", "label": "Объекты" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Invoice", "doc_view": "List", "label": "Счета" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/invoice/new?counterparty_type=Customer", "label": "Новый счет (клиент)" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/invoice/new?counterparty_type=Subcontractor", "label": "Новый счет (субподрядчик)" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Project Profitability", "label": "Прибыльность проектов" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Service Requests by Project", "label": "Заявки по проектам" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Invoices by Project", "label": "Счета по проектам" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "System Manager" },
+      { "doctype": "Has Role", "role": "Project Manager" },
+      { "doctype": "Has Role", "role": "Office Manager" }
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Сервисные операции",
+    "label": "Сервисные операции",
+    "title": "Сервисные операции",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Сервисные операции\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Заявки\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Сервисные отчеты\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Проекты\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новый проект\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Объекты\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Счета\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новый счет (клиент)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новый счет (субподрядчик)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Нераспределенные заявки\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Открытые заявки по инженерам\",\"col\":4}}]",
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Request", "doc_view": "List", "label": "Заявки" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Report", "doc_view": "List", "label": "Сервисные отчеты" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Project", "doc_view": "List", "label": "Проекты" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/service-project/new", "label": "Новый проект" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Object", "doc_view": "List", "label": "Объекты" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Invoice", "doc_view": "List", "label": "Счета" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/invoice/new?counterparty_type=Customer", "label": "Новый счет (клиент)" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/invoice/new?counterparty_type=Subcontractor", "label": "Новый счет (субподрядчик)" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Unassigned Service Requests", "label": "Нераспределенные заявки" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Open Service Requests by Engineer", "label": "Открытые заявки по инженерам" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "System Manager" },
+      { "doctype": "Has Role", "role": "Project Manager" },
+      { "doctype": "Has Role", "role": "Office Manager" }
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Регламентное обслуживание",
+    "label": "Регламентное обслуживание",
+    "title": "Регламентное обслуживание",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Регламентное обслуживание\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Графики\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Элементы графика\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Заявки\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Просроченные графики\",\"col\":4}}]",
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Maintenance Schedule", "doc_view": "List", "label": "Графики" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Maintenance Schedule Item", "doc_view": "List", "label": "Элементы графика" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Request", "doc_view": "List", "label": "Заявки" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Due Service Maintenance Schedules", "label": "Просроченные графики" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "System Manager" },
+      { "doctype": "Has Role", "role": "Service Engineer" },
+      { "doctype": "Has Role", "role": "Office Manager" }
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Руководитель",
+    "label": "Руководитель",
+    "title": "Руководитель",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Руководитель\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Открытые заявки по статусам\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Счета по проектам\",\"col\":6}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Прибыльность проектов\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Счета по проектам\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Заявки по проектам\",\"col\":4}}]",
+    "charts": [
+      { "doctype": "Workspace Chart", "chart_name": "Открытые заявки по статусам", "label": "Открытые заявки по статусам" },
+      { "doctype": "Workspace Chart", "chart_name": "Счета по проектам", "label": "Счета по проектам" }
+    ],
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Project Profitability", "label": "Прибыльность проектов" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Invoices by Project", "label": "Счета по проектам" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Service Requests by Project", "label": "Заявки по проектам" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "System Manager" },
+      { "doctype": "Has Role", "role": "General Director" }
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Финансы",
+    "label": "Финансы",
+    "title": "Финансы",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Финансы\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Счета по проектам\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Счета\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Счета по проектам\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Начисления зарплаты\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новая ведомость (зарплата)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Отчет о прибылях и убытках\",\"col\":3}}]",
+    "charts": [
+      { "doctype": "Workspace Chart", "chart_name": "Счета по проектам", "label": "Счета по проектам" }
+    ],
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Invoice", "doc_view": "List", "label": "Счета" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Invoices by Project", "label": "Счета по проектам" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Payroll Entry Custom", "doc_view": "List", "label": "Начисления зарплаты" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/payroll-entry-custom/new", "label": "Новая ведомость (зарплата)" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Profit and Loss Statement", "label": "Отчет о прибылях и убытках" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "System Manager" },
+      { "doctype": "Has Role", "role": "Chief Accountant" }
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Мои заявки",
+    "label": "Мои заявки",
+    "title": "Мои заявки",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Мои заявки\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Все мои заявки\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Мои открытые заявки\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Мои отчеты\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новый сервисный отчет\",\"col\":4}}]",
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/service-request?assigned_to=me", "label": "Все мои заявки" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/service-request?status=Open&assigned_to=me", "label": "Мои открытые заявки" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/service-report?owner=me", "label": "Мои отчеты" },
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/app/service-report/new", "label": "Новый сервисный отчет" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "Service Engineer" }
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Клиент",
+    "label": "Клиент",
+    "title": "Клиент",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Клиент\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Новая заявка\",\"col\":4}}]",
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "URL", "url": "/portal/new-request", "label": "Новая заявка" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "System Manager" },
+      { "doctype": "Has Role", "role": "Client" }
+    ]
+  },
+  {
+    "doctype": "Workspace",
+    "name": "Руководитель отдела",
+    "label": "Руководитель отдела",
+    "title": "Руководитель отдела",
+    "module": "Ferum Custom",
+    "public": 1,
+    "is_hidden": 0,
+    "for_user": "",
+    "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Руководитель отдела\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Заявки\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Нераспределенные заявки\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Открытые заявки по инженерам\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Сервисные отчеты\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Проекты\",\"col\":3}}]",
+    "shortcuts": [
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Request", "doc_view": "List", "label": "Заявки" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Unassigned Service Requests", "label": "Нераспределенные заявки" },
+      { "doctype": "Workspace Shortcut", "type": "Report", "link_to": "Open Service Requests by Engineer", "label": "Открытые заявки по инженерам" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Report", "doc_view": "List", "label": "Сервисные отчеты" },
+      { "doctype": "Workspace Shortcut", "type": "DocType", "link_to": "Service Project", "doc_view": "List", "label": "Проекты" }
+    ],
+    "roles": [
+      { "doctype": "Has Role", "role": "System Manager" },
+      { "doctype": "Has Role", "role": "Department Head" }
+    ]
+  }
+]

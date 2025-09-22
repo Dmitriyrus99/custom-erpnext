@@ -1,5 +1,5 @@
 {
-  "label": "Service Operations",
+  "label": "Сервисные операции",
   "public": 0,
   "module": "Ferum Custom",
   "roles": [
@@ -11,33 +11,33 @@
   "content": [
     {
       "type": "shortcut",
-      "label": "Service Requests",
+      "label": "Заявки",
       "link_to": "List/Service Request"
     },
     {
       "type": "shortcut",
-      "label": "Service Reports",
+      "label": "Сервисные отчеты",
       "link_to": "List/Service Report"
     },
     {
       "type": "shortcut",
-      "label": "Service Projects",
+      "label": "Проекты",
       "link_to": "List/Service Project"
     },
     {
       "type": "shortcut",
-      "label": "New Project",
+      "label": "Новый проект",
       "link_to": "Form/Service Project/New Service Project"
     },
     {
       "type": "shortcut",
-      "label": "Service Objects",
+      "label": "Объекты",
       "link_to": "List/Service Object"
     },
-    { "type": "shortcut", "label": "Invoices", "link_to": "List/Invoice" },
-    { "type": "shortcut", "label": "New Invoice (Customer)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Customer" },
-    { "type": "shortcut", "label": "New Invoice (Subcontractor)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Subcontractor" },
-    { "type": "shortcut", "label": "Unassigned Requests", "link_to": "query-report/Unassigned Service Requests" },
-    { "type": "shortcut", "label": "Open Requests by Engineer", "link_to": "query-report/Open Service Requests by Engineer" }
+    { "type": "shortcut", "label": "Счета", "link_to": "List/Invoice" },
+    { "type": "shortcut", "label": "Новый счет (клиент)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Customer" },
+    { "type": "shortcut", "label": "Новый счет (субподрядчик)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Subcontractor" },
+    { "type": "shortcut", "label": "Нераспределенные заявки", "link_to": "query-report/Unassigned Service Requests" },
+    { "type": "shortcut", "label": "Открытые заявки по инженерам", "link_to": "query-report/Open Service Requests by Engineer" }
   ]
 }

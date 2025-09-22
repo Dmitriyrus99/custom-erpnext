@@ -1,0 +1,20 @@
+{
+  "label": "Финансы",
+  "public": 0,
+  "module": "Ferum Custom",
+  "roles": [
+    { "role": "System Manager" },
+    { "role": "Chief Accountant" }
+  ],
+  "doctype": "Workspace",
+  "content": [
+    { "type": "shortcut", "label": "Счета", "link_to": "List/Invoice" },
+    { "type": "shortcut", "label": "Новый счет (клиент)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Customer" },
+    { "type": "shortcut", "label": "Новый счет (субподрядчик)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Subcontractor" },
+    { "type": "shortcut", "label": "Счета по проектам", "link_to": "query-report/Invoices by Project" },
+    { "type": "chart", "chart_name": "Счета по проектам" },
+    { "type": "shortcut", "label": "Начисления зарплаты", "link_to": "List/Payroll Entry Custom" },
+    { "type": "shortcut", "label": "Новая ведомость (зарплата)", "link_to": "Form/Payroll Entry Custom/New Payroll Entry Custom" },
+    { "type": "shortcut", "label": "Отчет о прибылях и убытках", "link_to": "query-report/Income Statement" }
+  ]
+}

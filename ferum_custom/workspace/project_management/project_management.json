@@ -1,19 +1,24 @@
 {
-  "label": "Project Management",
-  "public": 1,
+  "label": "Управление проектами",
+  "public": 0,
   "module": "Ferum Custom",
+  "roles": [
+    { "role": "System Manager" },
+    { "role": "Project Manager" },
+    { "role": "Office Manager" }
+  ],
   "doctype": "Workspace",
   "content": [
-    { "type": "shortcut", "label": "Service Projects", "link_to": "List/Service Project" },
-    { "type": "shortcut", "label": "Service Requests", "link_to": "List/Service Request" },
-    { "type": "shortcut", "label": "Service Reports", "link_to": "List/Service Report" },
-    { "type": "shortcut", "label": "Service Objects", "link_to": "List/Service Object" },
-    { "type": "shortcut", "label": "Invoices", "link_to": "List/Invoice" },
-    { "type": "shortcut", "label": "New Project", "link_to": "Form/Service Project/New Service Project" },
-    { "type": "shortcut", "label": "New Invoice (Customer)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Customer" },
-    { "type": "shortcut", "label": "New Invoice (Subcontractor)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Subcontractor" },
-    { "type": "shortcut", "label": "Project Profitability", "link_to": "query-report/Project Profitability" },
-    { "type": "shortcut", "label": "Service Requests by Project", "link_to": "query-report/Service Requests by Project" },
-    { "type": "shortcut", "label": "Invoices by Project", "link_to": "query-report/Invoices by Project" }
+    { "type": "shortcut", "label": "Проекты", "link_to": "List/Service Project" },
+    { "type": "shortcut", "label": "Заявки", "link_to": "List/Service Request" },
+    { "type": "shortcut", "label": "Сервисные отчеты", "link_to": "List/Service Report" },
+    { "type": "shortcut", "label": "Объекты", "link_to": "List/Service Object" },
+    { "type": "shortcut", "label": "Счета", "link_to": "List/Invoice" },
+    { "type": "shortcut", "label": "Новый проект", "link_to": "Form/Service Project/New Service Project" },
+    { "type": "shortcut", "label": "Новый счет (клиент)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Customer" },
+    { "type": "shortcut", "label": "Новый счет (субподрядчик)", "link_to": "Form/Invoice/New Invoice?counterparty_type=Subcontractor" },
+    { "type": "shortcut", "label": "Прибыльность проектов", "link_to": "query-report/Project Profitability" },
+    { "type": "shortcut", "label": "Заявки по проектам", "link_to": "query-report/Service Requests by Project" },
+    { "type": "shortcut", "label": "Счета по проектам", "link_to": "query-report/Invoices by Project" }
   ]
 }
