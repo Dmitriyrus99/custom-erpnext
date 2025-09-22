@@ -27,7 +27,7 @@
     {
       "type": "shortcut",
       "label": "Новый проект",
-      "link_to": "Form/Service Project/New Service Project"
+      "link_to": "/app/service-project/new"
     },
     {
       "type": "shortcut",
