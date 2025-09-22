@@ -10,6 +10,6 @@
     { "type": "shortcut", "label": "Все мои заявки", "link_to": "List/Service Request?assigned_to=me" },
     { "type": "shortcut", "label": "Мои открытые заявки", "link_to": "List/Service Request?status=Open&assigned_to=me" },
     { "type": "shortcut", "label": "Мои отчеты", "link_to": "List/Service Report?owner=me" },
-    { "type": "shortcut", "label": "Новый сервисный отчет", "link_to": "Form/Service Report/New Service Report" }
+{ "type": "shortcut", "label": "Новый сервисный отчет", "link_to": "/app/service-report/new" }
   ]
 }
