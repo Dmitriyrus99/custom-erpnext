@@ -14,7 +14,7 @@
     { "type": "shortcut", "label": "Счета по проектам", "link_to": "query-report/Invoices by Project" },
     { "type": "chart", "chart_name": "Счета по проектам" },
     { "type": "shortcut", "label": "Начисления зарплаты", "link_to": "List/Payroll Entry Custom" },
-    { "type": "shortcut", "label": "Новая ведомость (зарплата)", "link_to": "Form/Payroll Entry Custom/New Payroll Entry Custom" },
+{ "type": "shortcut", "label": "Новая ведомость (зарплата)", "link_to": "/app/payroll-entry-custom/new" },
     { "type": "shortcut", "label": "Отчет о прибылях и убытках", "link_to": "query-report/Income Statement" }
   ]
 }
