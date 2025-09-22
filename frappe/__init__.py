@@ -14,18 +14,21 @@ import copy
 import datetime as _dt
 import importlib
 import traceback
-from typing import Any, MutableMapping
+from typing import Any, Iterable, MutableMapping
 
 __all__ = [
         "Document",
         "ValidationError",
+        "PermissionError",
         "_",
+        "get_cached_value",
         "db",
         "enqueue",
         "get_all",
         "get_doc",
         "get_list",
         "get_roles",
+        "only_for",
         "log_error",
         "logger",
         "msgprint",
@@ -42,6 +45,10 @@ class ValidationError(Exception):
         """Exception raised by :func:`throw`."""
 
 
+class PermissionError(ValidationError):
+        """Raised when the current user lacks the required roles."""
+
+
 def _(text: str) -> str:
         """Translate text.  The test double simply returns the text unchanged."""
 
@@ -50,6 +57,34 @@ def _(text: str) -> str:
 
 def throw(message: str) -> None:
         raise ValidationError(message)
+
+
+def only_for(
+        roles: str | Iterable[str],
+        user: str | None = None,
+        message: str | None = None,
+) -> None:
+        """Ensure the active (or explicit) user has one of the given roles.
+
+        The production API accepts either a single role or an iterable of roles
+        and raises a permission error when none of them match.  The shim keeps
+        the behaviour deliberately small: it checks the in-memory role store
+        and raises :class:`PermissionError` with a helpful message if access
+        should be denied.
+        """
+
+        if isinstance(roles, str):
+                required = {roles}
+        else:
+                required = {role for role in roles if role}
+        if not required:
+                return
+
+        active_user = user or session.user
+        user_roles = set(get_roles(active_user))
+        if required.isdisjoint(user_roles):
+                detail = message or _(f"Not permitted for user {active_user}.")
+                raise PermissionError(detail)
 
 
 def msgprint(message: str) -> None:  # pragma: no cover - side effect only
@@ -123,6 +158,26 @@ def add_user_role(user: str, role: str) -> None:
         roles = _user_roles.setdefault(user, [])
         if role not in roles:
                 roles.append(role)
+
+
+def get_cached_value(
+        doctype: str,
+        name: str | dict[str, Any],
+        fieldname: str | Iterable[str],
+        *,
+        as_dict: bool = False,
+) -> Any:
+        """Return a field value mirroring :func:`frappe.get_cached_value`.
+
+        The production API keeps a cache layer to avoid repeated database
+        lookups.  The shim stays intentionally lean and simply proxies the call
+        to the in-memory database which is already inexpensive.  Having the
+        helper available keeps the public API surface compatible with the real
+        framework which means application code can call it unconditionally
+        without exploding in tests.
+        """
+
+        return db.get_value(doctype, name, fieldname, as_dict=as_dict)
 
 
 def scrub(value: str) -> str:
