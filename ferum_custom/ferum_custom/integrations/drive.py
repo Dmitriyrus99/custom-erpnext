@@ -41,7 +41,7 @@ def _drive_service():
 
 
 def _ensure_folder(drive, name: str, parent_id: str | None) -> str | None:
-	q = f"mimeType='application/vnd.google-apps.folder' and name='{name.replace("'", "\'")}'"
+	q = f"mimeType='application/vnd.google-apps.folder' and name='{name.replace("'", "\\'")}'"
 	if parent_id:
 		q += f" and '{parent_id}' in parents"
 	try:
