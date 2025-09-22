@@ -22,6 +22,10 @@ def _get_pm_email(project: str) -> str | None:
 
 
 class ServiceRequest(Document):
+	def before_insert(self) -> None:
+		if not self.status:
+			self.status = "Open"
+
 	def after_insert(self) -> None:
 		"""Notify the project manager about the new request.
 
