@@ -24,31 +24,31 @@ def create_service_request(
 
 @frappe.whitelist()
 def list_service_requests(
-    status: str | None = None, start: int | None = None, page_length: int | None = None
+	status: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
-    s, pl = _paginate(start, page_length)
-    filters: dict[str, t.Any] = {}
-    if status:
-        filters["status"] = status
-    # Restrict scope for website users or clients to their own
-    try:
-        user = frappe.session.user
-        user_type = frappe.get_cached_value("User", user, "user_type")
-        roles = set(frappe.get_roles(user))
-        if user_type == "Website User" or "Client" in roles:
-            filters["owner"] = user
-    except Exception:
-        pass
+	s, pl = _paginate(start, page_length)
+	filters: dict[str, t.Any] = {}
+	if status:
+		filters["status"] = status
+	# Restrict scope for website users or clients to their own
+	try:
+		user = frappe.session.user
+		user_type = frappe.get_cached_value("User", user, "user_type")
+		roles = set(frappe.get_roles(user))
+		if user_type == "Website User" or "Client" in roles:
+			filters["owner"] = user
+	except Exception:
+		pass
 
-    data = frappe.get_list(
-        "Service Request",
-        filters=filters,
-        fields=["name", "title", "status", "priority", "customer", "project", "service_object", "modified"],
-        start=s,
-        page_length=pl,
-        order_by="modified desc",
-    )
-    return {"data": data, "start": s, "page_length": pl}
+	data = frappe.get_list(
+		"Service Request",
+		filters=filters,
+		fields=["name", "title", "status", "priority", "customer", "project", "service_object", "modified"],
+		start=s,
+		page_length=pl,
+		order_by="modified desc",
+	)
+	return {"data": data, "start": s, "page_length": pl}
 
 
 @frappe.whitelist()

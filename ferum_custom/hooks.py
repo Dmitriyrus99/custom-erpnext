@@ -142,31 +142,31 @@ fixtures = [
 			]
 		],
 	},
-    {
-        "doctype": "Workflow State",
-        "filters": [
-            [
-                "workflow_state_name",
-                "in",
-                [
-                    "Draft",
-                    "Submitted",
-                    "Approved",
-                    "Archived",
-                    "Cancelled",
-                    "Open",
-                    "In Progress",
-                    "Completed",
-                    "Closed",
-                    "Sent",
-                    "Paid",
-                    "Planned",
-                    "Active",
-                    "Pending Approval",
-                ],
-            ]
-        ],
-    },
+	{
+		"doctype": "Workflow State",
+		"filters": [
+			[
+				"workflow_state_name",
+				"in",
+				[
+					"Draft",
+					"Submitted",
+					"Approved",
+					"Archived",
+					"Cancelled",
+					"Open",
+					"In Progress",
+					"Completed",
+					"Closed",
+					"Sent",
+					"Paid",
+					"Planned",
+					"Active",
+					"Pending Approval",
+				],
+			]
+		],
+	},
 ]
 
 before_request = [

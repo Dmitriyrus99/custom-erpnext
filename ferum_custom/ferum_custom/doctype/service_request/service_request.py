@@ -5,8 +5,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, add_to_date, getdate, nowdate
 
-from ferum_custom.ferum_custom.utils import get_users_by_roles
 from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
+from ferum_custom.ferum_custom.utils import get_users_by_roles
 
 
 def _get_pm_email(project: str) -> str | None:
@@ -111,6 +111,7 @@ class ServiceRequest(Document):
 		# update duration if possible
 		try:
 			from frappe.utils import get_datetime
+
 			if self.reported_datetime and self.actual_end_datetime:
 				start = get_datetime(self.reported_datetime)
 				end = get_datetime(self.actual_end_datetime)
