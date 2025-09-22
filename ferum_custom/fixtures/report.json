@@ -2,12 +2,12 @@
   {
     "doctype": "Report",
     "name": "Service Requests by Project",
-    "report_name": "Service Requests by Project",
+    "report_name": "Заявки по проектам",
     "ref_doctype": "Service Request",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-    "query": "SELECT name, project, status, priority, assigned_to, modified FROM `tabService Request` WHERE (%(project)s IS NULL OR project = %(project)s) ORDER BY modified DESC",
+    "query": "SELECT name AS \"Заявка:Link/Service Request:150\", project AS \"Проект:Link/Service Project:180\", status AS \"Статус:Data:120\", priority AS \"Приоритет:Data:120\", assigned_to AS \"Назначено:Link/User:180\", modified AS \"Изменен:Datetime:160\" FROM `tabService Request` WHERE (%(project)s IS NULL OR project = %(project)s) ORDER BY modified DESC",
     "roles": [
       {
         "doctype": "Report Perm",
@@ -26,12 +26,12 @@
   {
     "doctype": "Report",
     "name": "Invoices by Project",
-    "report_name": "Invoices by Project",
+    "report_name": "Счета по проектам",
     "ref_doctype": "Invoice",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-    "query": "SELECT name, project, counterparty_name, counterparty_type, status, amount, invoice_date, modified FROM `tabInvoice` WHERE (%(project)s IS NULL OR project = %(project)s) ORDER BY modified DESC",
+    "query": "SELECT name AS \"Счет:Link/Invoice:150\", project AS \"Проект:Link/Service Project:180\", counterparty_name AS \"Контрагент:Data:180\", counterparty_type AS \"Тип контрагента:Data:140\", status AS \"Статус:Data:120\", amount AS \"Сумма:Currency:120\", invoice_date AS \"Дата счета:Date:120\", modified AS \"Изменен:Datetime:160\" FROM `tabInvoice` WHERE (%(project)s IS NULL OR project = %(project)s) ORDER BY modified DESC",
     "roles": [
       {
         "doctype": "Report Perm",
@@ -50,12 +50,12 @@
   {
     "doctype": "Report",
     "name": "Project Profitability",
-    "report_name": "Project Profitability",
+    "report_name": "Прибыльность проектов",
     "ref_doctype": "Service Project",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-      "query": "WITH invoice_summary AS (SELECT project, SUM(CASE WHEN counterparty_type='Customer' AND status!='Cancelled' THEN amount ELSE 0 END) AS customer_invoices, SUM(CASE WHEN counterparty_type='Subcontractor' AND status!='Cancelled' THEN amount ELSE 0 END) AS subcontractor_invoices FROM `tabInvoice` GROUP BY project) SELECT p.name AS \"Project:Link/Service Project:150\", COALESCE(s.customer_invoices,0) AS \"Customer Invoices:Currency:150\", COALESCE(s.subcontractor_invoices,0) AS \"Subcontractor Invoices:Currency:150\", COALESCE(s.customer_invoices,0) - COALESCE(s.subcontractor_invoices,0) AS \"Profit:Currency:150\" FROM `tabService Project` p LEFT JOIN invoice_summary s ON s.project = p.name GROUP BY p.name, p.modified ORDER BY p.modified DESC",
+      "query": "WITH invoice_summary AS (SELECT project, SUM(CASE WHEN counterparty_type='Customer' AND status!='Cancelled' THEN amount ELSE 0 END) AS customer_invoices, SUM(CASE WHEN counterparty_type='Subcontractor' AND status!='Cancelled' THEN amount ELSE 0 END) AS subcontractor_invoices FROM `tabInvoice` GROUP BY project) SELECT p.name AS \"Проект:Link/Service Project:150\", COALESCE(s.customer_invoices,0) AS \"Счета (клиент):Currency:150\", COALESCE(s.subcontractor_invoices,0) AS \"Счета (субподрядчик):Currency:180\", COALESCE(s.customer_invoices,0) - COALESCE(s.subcontractor_invoices,0) AS \"Прибыль:Currency:150\" FROM `tabService Project` p LEFT JOIN invoice_summary s ON s.project = p.name GROUP BY p.name, p.modified ORDER BY p.modified DESC",
     "roles": [
       {
         "doctype": "Report Perm",
@@ -74,12 +74,12 @@
   {
     "doctype": "Report",
     "name": "Unassigned Service Requests",
-    "report_name": "Unassigned Service Requests",
+    "report_name": "Нераспределенные заявки",
     "ref_doctype": "Service Request",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-      "query": "SELECT name, status, priority, modified FROM `tabService Request` WHERE assigned_to IS NULL AND status != 'Closed' ORDER BY modified DESC",
+      "query": "SELECT name AS \"Заявка:Link/Service Request:150\", status AS \"Статус:Data:120\", priority AS \"Приоритет:Data:120\", modified AS \"Изменен:Datetime:160\" FROM `tabService Request` WHERE assigned_to IS NULL AND status != 'Closed' ORDER BY modified DESC",
     "roles": [
       { "doctype": "Report Perm", "role": "System Manager" },
       { "doctype": "Report Perm", "role": "Office Manager" }
@@ -88,12 +88,12 @@
   {
     "doctype": "Report",
     "name": "Open Service Requests by Engineer",
-    "report_name": "Open Service Requests by Engineer",
+    "report_name": "Открытые заявки по инженерам",
     "ref_doctype": "Service Request",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-    "query": "SELECT COALESCE(assigned_to, 'Unassigned') AS \"Engineer:Data:200\", COUNT(*) AS \"Open Requests:Int:100\" FROM `tabService Request` WHERE status != 'Closed' GROUP BY assigned_to ORDER BY COUNT(*) DESC",
+    "query": "SELECT COALESCE(assigned_to, 'Не назначено') AS \"Инженер:Data:200\", COUNT(*) AS \"Открытых заявок:Int:100\" FROM `tabService Request` WHERE status != 'Closed' GROUP BY assigned_to ORDER BY COUNT(*) DESC",
     "roles": [
       { "doctype": "Report Perm", "role": "System Manager" },
       { "doctype": "Report Perm", "role": "Office Manager" }
@@ -102,12 +102,12 @@
   {
     "doctype": "Report",
     "name": "Due Service Maintenance Schedules",
-    "report_name": "Due Service Maintenance Schedules",
+    "report_name": "Просроченные графики",
     "ref_doctype": "Service Maintenance Schedule",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-    "query": "SELECT name, schedule_name, customer, next_due_date FROM `tabService Maintenance Schedule` WHERE next_due_date <= CURDATE() ORDER BY next_due_date",
+    "query": "SELECT name AS \"График:Link/Service Maintenance Schedule:150\", schedule_name AS \"Название:Data:200\", customer AS \"Клиент:Link/Customer:180\", next_due_date AS \"Следующая дата:Date:140\" FROM `tabService Maintenance Schedule` WHERE next_due_date <= CURDATE() ORDER BY next_due_date",
     "roles": [
       { "doctype": "Report Perm", "role": "System Manager" },
       { "doctype": "Report Perm", "role": "Office Manager" }

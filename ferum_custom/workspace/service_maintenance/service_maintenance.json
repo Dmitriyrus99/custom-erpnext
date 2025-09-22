@@ -1,5 +1,5 @@
 {
-  "label": "Service Maintenance",
+  "label": "Регламентное обслуживание",
   "public": 0,
   "module": "Ferum Custom",
   "roles": [
@@ -11,19 +11,19 @@
   "content": [
     {
       "type": "shortcut",
-      "label": "Schedules",
+      "label": "Графики",
       "link_to": "List/Service Maintenance Schedule"
     },
     {
       "type": "shortcut",
-      "label": "Schedule Items",
+      "label": "Элементы графика",
       "link_to": "List/Service Maintenance Schedule Item"
     },
     {
       "type": "shortcut",
-      "label": "Service Requests",
+      "label": "Заявки",
       "link_to": "List/Service Request"
     },
-    { "type": "shortcut", "label": "Due Schedules", "link_to": "query-report/Due Service Maintenance Schedules" }
+    { "type": "shortcut", "label": "Просроченные графики", "link_to": "query-report/Due Service Maintenance Schedules" }
   ]
 }

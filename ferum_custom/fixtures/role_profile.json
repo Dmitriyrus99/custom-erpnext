@@ -38,5 +38,21 @@
     "roles": [
       { "doctype": "Has Role", "role": "Client", "parentfield": "roles", "parenttype": "Role Profile" }
     ]
+  },
+  {
+    "doctype": "Role Profile",
+    "name": "General Director",
+    "role_profile": "General Director",
+    "roles": [
+      { "doctype": "Has Role", "role": "General Director", "parentfield": "roles", "parenttype": "Role Profile" }
+    ]
+  },
+  {
+    "doctype": "Role Profile",
+    "name": "Department Head",
+    "role_profile": "Department Head",
+    "roles": [
+      { "doctype": "Has Role", "role": "Department Head", "parentfield": "roles", "parenttype": "Role Profile" }
+    ]
   }
 ]

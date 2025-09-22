@@ -77,6 +77,8 @@ fixtures = [
 					"Service Engineer",
 					"Project Manager",
 					"Client",
+					"General Director",
+					"Department Head",
 				],
 			]
 		],
@@ -106,6 +108,10 @@ fixtures = [
 		"filters": [["name", "=", "Ferum Custom"]],
 	},
 	{
+		"doctype": "Workspace",
+		"filters": [["module", "=", "Ferum Custom"]],
+	},
+	{
 		"doctype": "Role Profile",
 		"filters": [
 			[
@@ -117,13 +123,51 @@ fixtures = [
 					"Service Engineer",
 					"Chief Accountant",
 					"Client",
+					"General Director",
+					"Department Head",
 				],
 			]
 		],
 	},
+	{
+		"doctype": "Dashboard Chart",
+		"filters": [
+			[
+				"chart_name",
+				"in",
+				[
+					"Открытые заявки по статусам",
+					"Счета по проектам",
+				],
+			]
+		],
+	},
+    {
+        "doctype": "Workflow State",
+        "filters": [
+            [
+                "workflow_state_name",
+                "in",
+                [
+                    "Draft",
+                    "Submitted",
+                    "Approved",
+                    "Archived",
+                    "Cancelled",
+                    "Open",
+                    "In Progress",
+                    "Completed",
+                    "Closed",
+                    "Sent",
+                    "Paid",
+                    "Planned",
+                    "Active"
+                ],
+            ]
+        ],
+    },
 ]
 
-# Request hooks (JWT optional)
 before_request = [
 	"ferum_custom.api.auth.jwt_before_request",
 ]

@@ -1,0 +1,15 @@
+[
+  { "doctype": "Workflow State", "name": "Draft", "workflow_state_name": "Draft", "style": "Info" },
+  { "doctype": "Workflow State", "name": "Submitted", "workflow_state_name": "Submitted", "style": "Primary" },
+  { "doctype": "Workflow State", "name": "Approved", "workflow_state_name": "Approved", "style": "Success" },
+  { "doctype": "Workflow State", "name": "Archived", "workflow_state_name": "Archived", "style": "Inverse" },
+  { "doctype": "Workflow State", "name": "Cancelled", "workflow_state_name": "Cancelled", "style": "Danger" },
+  { "doctype": "Workflow State", "name": "Open", "workflow_state_name": "Open", "style": "Primary" },
+  { "doctype": "Workflow State", "name": "In Progress", "workflow_state_name": "In Progress", "style": "Info" },
+  { "doctype": "Workflow State", "name": "Completed", "workflow_state_name": "Completed", "style": "Success" },
+  { "doctype": "Workflow State", "name": "Closed", "workflow_state_name": "Closed", "style": "Inverse" },
+  { "doctype": "Workflow State", "name": "Sent", "workflow_state_name": "Sent", "style": "Primary" },
+  { "doctype": "Workflow State", "name": "Paid", "workflow_state_name": "Paid", "style": "Success" },
+  { "doctype": "Workflow State", "name": "Planned", "workflow_state_name": "Planned", "style": "Warning" },
+  { "doctype": "Workflow State", "name": "Active", "workflow_state_name": "Active", "style": "Info" }
+]

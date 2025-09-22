@@ -1,13 +1,16 @@
 {
-  "label": "Administration",
-  "public": 1,
+  "label": "Администрирование",
+  "public": 0,
   "module": "Ferum Custom",
   "icon": "octicon octicon-graph",
+  "roles": [
+    { "role": "System Manager" }
+  ],
   "doctype": "Workspace",
   "content": [
-    { "type": "chart", "chart_name": "Open Service Requests by Status" },
-    { "type": "chart", "chart_name": "Invoices by Project" },
-    { "type": "shortcut", "label": "Open Service Requests", "link_to": "List/Service Request?status=Open" },
-    { "type": "shortcut", "label": "Income Statement", "link_to": "query-report/Income Statement" }
+    { "type": "chart", "chart_name": "Открытые заявки по статусам" },
+    { "type": "chart", "chart_name": "Счета по проектам" },
+    { "type": "shortcut", "label": "Открытые заявки", "link_to": "List/Service Request?status=Open" },
+    { "type": "shortcut", "label": "Отчет о прибылях и убытках", "link_to": "query-report/Income Statement" }
   ]
 }

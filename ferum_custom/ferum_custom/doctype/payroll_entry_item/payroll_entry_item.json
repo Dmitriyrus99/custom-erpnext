@@ -42,5 +42,13 @@
       "cancel": 0,
       "amend": 0
     }
+    ,
+    {
+      "role": "Chief Accountant",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
   ]
 }

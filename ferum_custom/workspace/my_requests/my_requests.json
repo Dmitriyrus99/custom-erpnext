@@ -1,5 +1,5 @@
 {
-  "label": "My Requests",
+  "label": "Мои заявки",
   "public": 0,
   "module": "Ferum Custom",
   "roles": [
@@ -7,9 +7,9 @@
   ],
   "doctype": "Workspace",
   "content": [
-    { "type": "shortcut", "label": "All My Requests", "link_to": "List/Service Request?assigned_to=me" },
-    { "type": "shortcut", "label": "My Open Requests", "link_to": "List/Service Request?status=Open&assigned_to=me" },
-    { "type": "shortcut", "label": "My Reports", "link_to": "List/Service Report?owner=me" },
-    { "type": "shortcut", "label": "New Service Report", "link_to": "Form/Service Report/New Service Report" }
+    { "type": "shortcut", "label": "Все мои заявки", "link_to": "List/Service Request?assigned_to=me" },
+    { "type": "shortcut", "label": "Мои открытые заявки", "link_to": "List/Service Request?status=Open&assigned_to=me" },
+    { "type": "shortcut", "label": "Мои отчеты", "link_to": "List/Service Report?owner=me" },
+    { "type": "shortcut", "label": "Новый сервисный отчет", "link_to": "Form/Service Report/New Service Report" }
   ]
 }
