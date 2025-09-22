@@ -56,8 +56,6 @@ def get_google_sheet():
 
 
 from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
-
-
 from ferum_custom.ferum_custom.utils import get_users_by_roles
 
 
