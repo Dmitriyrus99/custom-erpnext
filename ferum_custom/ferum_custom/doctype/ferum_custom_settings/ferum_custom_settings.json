@@ -74,10 +74,38 @@
       "label": "Notifications"
     },
     {
+      "fieldname": "telegram_section",
+      "fieldtype": "Section Break",
+      "label": "Telegram"
+    },
+    {
+      "fieldname": "telegram_bot_token",
+      "fieldtype": "Password",
+      "label": "Telegram Bot Token",
+      "description": "BotFather token of your Telegram bot"
+    },
+    {
+      "fieldname": "telegram_default_chat_id",
+      "fieldtype": "Data",
+      "label": "Default Chat ID",
+      "description": "Group or user chat_id to send broadcast alerts"
+    },
+    {
       "fieldname": "invoice_notification_roles",
       "fieldtype": "Table MultiSelect",
       "label": "Invoice Notification Roles",
       "options": "Role"
+    },
+    {
+      "fieldname": "drive_section",
+      "fieldtype": "Section Break",
+      "label": "Google Drive"
+    },
+    {
+      "fieldname": "google_drive_root_folder_id",
+      "fieldtype": "Data",
+      "label": "Drive Root Folder ID",
+      "description": "Root folder ID for project archives"
     }
   ],
   "permissions": [

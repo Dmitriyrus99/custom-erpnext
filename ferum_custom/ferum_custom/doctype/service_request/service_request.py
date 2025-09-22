@@ -6,6 +6,7 @@ from frappe.model.document import Document
 from frappe.utils import add_days, add_to_date, getdate, nowdate
 
 from ferum_custom.ferum_custom.utils import get_users_by_roles
+from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
 
 
 def _get_pm_email(project: str) -> str | None:
@@ -180,6 +181,11 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 				subject=_("SLA breached for Service Request {0}").format(service_request_name),
 				message=message,
 			)
+			# Optional Telegram broadcast to default chat
+			try:
+				tg_send(message)
+			except Exception:
+				pass
 		else:
 			# Fallback to logging if no recipients resolved
 			frappe.logger().warning(

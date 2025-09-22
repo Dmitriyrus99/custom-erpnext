@@ -25,6 +25,21 @@
   },
   {
     "doctype": "Report",
+    "name": "Service Projects Pending Approval",
+    "report_name": "Проекты, ожидающие утверждения",
+    "ref_doctype": "Service Project",
+    "module": "Ferum Custom",
+    "report_type": "Query Report",
+    "is_standard": "No",
+    "query": "SELECT name AS \"Проект:Link/Service Project:200\", customer AS \"Клиент:Link/Customer:180\", project_manager AS \"PM:Link/User:160\", start_date AS \"Дата начала:Date:120\", total_amount AS \"Сумма:Currency:120\", modified AS \"Изменен:Datetime:160\" FROM `tabService Project` WHERE status='Pending Approval' ORDER BY modified DESC",
+    "roles": [
+      { "doctype": "Report Perm", "role": "System Manager" },
+      { "doctype": "Report Perm", "role": "General Director" },
+      { "doctype": "Report Perm", "role": "Office Manager" }
+    ]
+  },
+  {
+    "doctype": "Report",
     "name": "Invoices by Project",
     "report_name": "Счета по проектам",
     "ref_doctype": "Invoice",

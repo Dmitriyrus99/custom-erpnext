@@ -1,6 +1,9 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.pdf import get_pdf
+
+from ferum_custom.ferum_custom.integrations.drive import upload_bytes
 
 
 class ServiceReport(Document):
@@ -16,6 +19,7 @@ class ServiceReport(Document):
 
 	def on_submit(self):
 		self.update_service_request_on_submit()
+		self.enqueue_drive_upload()
 
 	def on_update(self):
 		# Audit: log status changes
@@ -78,6 +82,36 @@ class ServiceReport(Document):
 	def validate_work_items(self):
 		if not self.work_items:
 			frappe.throw(_("At least one Work Item is required before submitting a Service Report."))
+
+	def enqueue_drive_upload(self):
+		"""Generate PDF and upload to Google Drive in structured folders.
+
+		Folders: /Customer/Project/Reports, filename: ServiceReport-{name}.pdf
+		"""
+		try:
+			frappe.enqueue(
+				"ferum_custom.ferum_custom.doctype.service_report.service_report._upload_report_pdf",
+				queue="short",
+				docname=self.name,
+			)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "Enqueue Drive Upload failed")
+
+
+def _upload_report_pdf(docname: str) -> None:
+	doc = frappe.get_doc("Service Report", docname)
+	# Build path parts
+	customer = None
+	project = None
+	if doc.service_request:
+		customer = frappe.db.get_value("Service Request", doc.service_request, "customer")
+		project = frappe.db.get_value("Service Request", doc.service_request, "project")
+	parts = [p for p in [customer or "Customer", project or "Project", "Reports"] if p]
+	# Render PDF
+	html = frappe.get_print("Service Report", docname)
+	pdf = get_pdf(html)
+	filename = f"ServiceReport-{docname}.pdf"
+	upload_bytes(parts, filename, pdf, mime_type="application/pdf")
 
 
 def get_permission_query_conditions(user: str | None = None) -> str | None:

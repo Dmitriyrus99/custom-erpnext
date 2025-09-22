@@ -161,7 +161,8 @@ fixtures = [
                     "Sent",
                     "Paid",
                     "Planned",
-                    "Active"
+                    "Active",
+                    "Pending Approval",
                 ],
             ]
         ],

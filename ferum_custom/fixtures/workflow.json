@@ -140,6 +140,14 @@
         "condition": ""
       },
       {
+        "state": "Submitted",
+        "action": "Approve",
+        "next_state": "Approved",
+        "allowed": "Department Head",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
         "state": "Approved",
         "action": "Archive",
         "next_state": "Archived",
@@ -173,6 +181,12 @@
         "color": "Gray"
       },
       {
+        "state": "Pending Approval",
+        "doc_status": 0,
+        "allow_edit": "Project Manager",
+        "color": "Orange"
+      },
+      {
         "state": "Active",
         "doc_status": 0,
         "allow_edit": "Project Manager",
@@ -194,19 +208,35 @@
     "transitions": [
       {
         "state": "Planned",
-        "action": "Activate",
-        "next_state": "Active",
+        "action": "Submit",
+        "next_state": "Pending Approval",
         "allowed": "Project Manager",
         "allow_self_approval": 1,
         "condition": "doc.customer"
       },
       {
         "state": "Planned",
-        "action": "Activate",
-        "next_state": "Active",
+        "action": "Submit",
+        "next_state": "Pending Approval",
         "allowed": "Office Manager",
         "allow_self_approval": 1,
         "condition": "doc.customer"
+      },
+      {
+        "state": "Pending Approval",
+        "action": "Approve",
+        "next_state": "Active",
+        "allowed": "General Director",
+        "allow_self_approval": 1,
+        "condition": ""
+      },
+      {
+        "state": "Pending Approval",
+        "action": "Reject",
+        "next_state": "Planned",
+        "allowed": "General Director",
+        "allow_self_approval": 1,
+        "condition": ""
       },
       {
         "state": "Active",

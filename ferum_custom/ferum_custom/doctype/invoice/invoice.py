@@ -55,21 +55,7 @@ def get_google_sheet():
 		return None
 
 
-try:
-	from backend.bot.telegram_bot import send_telegram_message  # type: ignore[import-not-found]
-
-	TELEGRAM_AVAILABLE = True
-except Exception:
-	TELEGRAM_AVAILABLE = False
-
-	def send_telegram_message(*args, **kwargs):  # fallback no-op
-		try:
-			frappe.log_error(
-				"Telegram bot integration unavailable. Message suppressed.",
-				"Telegram Integration",
-			)
-		except Exception:
-			pass
+from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
 
 
 from ferum_custom.ferum_custom.utils import get_users_by_roles
@@ -90,12 +76,11 @@ class Invoice(Document):
 	def notify_on_subcontractor_invoice(self):
 		if self.counterparty_type == "Subcontractor":
 			message = f"New subcontractor invoice created: {self.name} for {self.counterparty_name}. Amount: {self.amount}"
-			if TELEGRAM_AVAILABLE:
-				try:
-					send_telegram_message(message)
-					return
-				except Exception:
-					frappe.log_error(frappe.get_traceback(), "Telegram Notification Failed")
+			# try Telegram (default chat)
+			try:
+				tg_send(message)
+			except Exception:
+				frappe.log_error(frappe.get_traceback(), "Telegram Notification Failed")
 
 			recipients: set[str] = set()
 			settings = _get_settings()

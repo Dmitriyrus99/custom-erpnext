@@ -11,5 +11,6 @@
   { "doctype": "Workflow State", "name": "Sent", "workflow_state_name": "Sent", "style": "Primary" },
   { "doctype": "Workflow State", "name": "Paid", "workflow_state_name": "Paid", "style": "Success" },
   { "doctype": "Workflow State", "name": "Planned", "workflow_state_name": "Planned", "style": "Warning" },
-  { "doctype": "Workflow State", "name": "Active", "workflow_state_name": "Active", "style": "Info" }
+  { "doctype": "Workflow State", "name": "Active", "workflow_state_name": "Active", "style": "Info" },
+  { "doctype": "Workflow State", "name": "Pending Approval", "workflow_state_name": "Pending Approval", "style": "Warning" }
 ]
