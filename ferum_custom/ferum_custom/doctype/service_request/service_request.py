@@ -107,6 +107,16 @@ class ServiceRequest(Document):
 		elif self.status == "Completed" and not self.actual_end_datetime:
 			self.db_set("actual_end_datetime", frappe.utils.now(), commit=False)
 			updated = True
+		# update duration if possible
+		try:
+			from frappe.utils import get_datetime
+			if self.reported_datetime and self.actual_end_datetime:
+				start = get_datetime(self.reported_datetime)
+				end = get_datetime(self.actual_end_datetime)
+				delta = (end - start).total_seconds() / 3600.0
+				self.db_set("duration_hours", round(delta, 2), commit=False)
+		except Exception:
+			pass
 		return updated
 
 	def notify_project_manager(self) -> None:

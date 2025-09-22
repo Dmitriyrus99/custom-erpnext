@@ -19,6 +19,7 @@
     "reported_datetime",
     "actual_start_datetime",
     "actual_end_datetime",
+    "duration_hours",
     "sla_deadline",
     "attachments_section",
     "attachments",
@@ -108,6 +109,12 @@
       "fieldname": "actual_end_datetime",
       "fieldtype": "Datetime",
       "label": "Actual End Datetime"
+    },
+    {
+      "fieldname": "duration_hours",
+      "fieldtype": "Float",
+      "label": "Duration (hours)",
+      "read_only": 1
     },
     {
       "fieldname": "sla_deadline",

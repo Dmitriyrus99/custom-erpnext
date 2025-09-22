@@ -177,6 +177,22 @@ def on_invoice_update(doc, method):
 			docname=doc.name,
 		)
 
+	# Optional: auto create ERPNext Sales Invoice for Customer invoices when enabled
+	try:
+		settings = _get_settings()
+		if (
+			settings
+			and getattr(settings, "enable_auto_create_sales_invoice", False)
+			and doc.counterparty_type == "Customer"
+			and not doc.sales_invoice
+			and doc.status in ("Sent", "Paid")
+		):
+			# create and link SI; ignore permissions to allow server-side automation
+			name = create_sales_invoice(doc.name)
+			frappe.msgprint(_(f"Sales Invoice {name} created for {doc.name}"))
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Auto-create Sales Invoice failed")
+
 
 @frappe.whitelist()
 def bulk_mark_sent(names: list[str] | str) -> dict:
