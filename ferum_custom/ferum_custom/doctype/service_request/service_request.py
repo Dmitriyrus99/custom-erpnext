@@ -6,19 +6,8 @@ from frappe.model.document import Document
 from frappe.utils import add_days, add_to_date, getdate, nowdate
 
 from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
+from ferum_custom.ferum_custom.services import get_project_manager_email
 from ferum_custom.ferum_custom.utils import get_users_by_roles
-
-
-def _get_pm_email(project: str) -> str | None:
-	pm_info = frappe.db.get_value(
-		"Service Project",
-		project,
-		["project_manager", "project_manager.email"],
-		as_dict=True,
-	)
-	if not pm_info:
-		return None
-	return pm_info.get("project_manager.email") or pm_info.get("project_manager")
 
 
 class ServiceRequest(Document):
@@ -131,7 +120,7 @@ class ServiceRequest(Document):
 			return
 
 		try:
-			email = _get_pm_email(self.project)
+			email = get_project_manager_email(self.project)
 			if not email:
 				return
 			frappe.sendmail(
@@ -174,7 +163,7 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 		recipients: set[str] = set()
 
 		if sr.project:
-			pm_email = _get_pm_email(sr.project)
+			pm_email = get_project_manager_email(sr.project)
 			if pm_email:
 				recipients.add(pm_email)
 

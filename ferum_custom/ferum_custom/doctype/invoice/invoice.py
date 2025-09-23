@@ -1,8 +1,6 @@
 # Copyright (c) 2024, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-import json
-
 import frappe
 from frappe import _
 
@@ -18,36 +16,24 @@ try:
 except Exception:
 	apply_workflow = None  # type: ignore[assignment]
 
-try:
-	from google.oauth2.service_account import Credentials  # type: ignore[import-untyped]
-except Exception:
-	Credentials = None  # type: ignore[assignment]
+from ferum_custom.ferum_custom.integrations.google import (
+	SERVICE_ACCOUNT_SCOPE_SHEETS,
+	build_service_account_credentials,
+)
+from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
 # --- Google Sheets Integration ---
 
 
-def _get_settings():
-	try:
-		return frappe.get_single("Ferum Custom Settings")
-	except Exception:
-		return None
-
-
 def get_google_sheet():
 	"""Connects to Google Sheets and returns the worksheet object using Settings."""
-	settings = _get_settings()
-	if not settings or not settings.enable_google_sheets_sync or gspread is None or Credentials is None:
+	if gspread is None or not is_feature_enabled("enable_google_sheets_sync"):
 		return None
 	try:
-		sheet_name = settings.google_sheet_name or "Ferum Invoices Tracker"
-		file_url = settings.google_service_account_json
-		if not file_url:
+		creds = build_service_account_credentials([SERVICE_ACCOUNT_SCOPE_SHEETS])
+		if not creds:
 			return None
-		file_doc = frappe.get_doc("File", {"file_url": file_url})
-		content = file_doc.get_content()
-		info = json.loads(content.decode("utf-8"))
-		scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-		creds = Credentials.from_service_account_info(info, scopes=scopes)
+		sheet_name = get_setting("google_sheet_name") or "Ferum Invoices Tracker"
 		client = gspread.authorize(creds)
 		return client.open(sheet_name).sheet1
 	except Exception as e:
@@ -56,7 +42,7 @@ def get_google_sheet():
 
 
 from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
-from ferum_custom.ferum_custom.utils import get_users_by_roles
+from ferum_custom.ferum_custom.utils import get_users_by_roles, parse_names_argument
 
 
 class Invoice(Document):
@@ -81,13 +67,19 @@ class Invoice(Document):
 				frappe.log_error(frappe.get_traceback(), "Telegram Notification Failed")
 
 			recipients: set[str] = set()
-			settings = _get_settings()
-			roles = ["Chief Accountant", "System Manager"]
-			if settings and hasattr(settings, "invoice_notification_roles"):
-				roles = [r.get("link_name") or r.get("value") for r in settings.invoice_notification_roles]
+			configured_roles = get_setting("invoice_notification_roles") or []
+			roles: list[str] = []
+			for row in configured_roles:
+				if isinstance(row, dict):
+					role = row.get("link_name") or row.get("value")
+				else:
+					role = str(row)
+				if role:
+					roles.append(role)
+			if not roles:
+				roles = ["Chief Accountant", "System Manager"]
 
-			if roles:
-				recipients.update(get_users_by_roles(roles))
+			recipients.update(get_users_by_roles(roles))
 			if recipients:
 				frappe.sendmail(
 					recipients=list(recipients),
@@ -162,10 +154,8 @@ def on_invoice_update(doc, method):
 
 	# Optional: auto create ERPNext Sales Invoice for Customer invoices when enabled
 	try:
-		settings = _get_settings()
 		if (
-			settings
-			and getattr(settings, "enable_auto_create_sales_invoice", False)
+			is_feature_enabled("enable_auto_create_sales_invoice")
 			and doc.counterparty_type == "Customer"
 			and not doc.sales_invoice
 			and doc.status in ("Sent", "Paid")
@@ -185,14 +175,8 @@ def bulk_mark_sent(names: list[str] | str) -> dict:
 	- Skips invoices already Paid or Cancelled
 	- Returns a summary dict with updated and skipped lists
 	"""
-	# Parse names when called from JS (stringified JSON or CSV)
-	if isinstance(names, str):
-		try:
-			names = frappe.parse_json(names)  # type: ignore[assignment]
-		except Exception:
-			names = [n.strip() for n in names.split(",") if n.strip()]
-
-	if not names:
+	names_list = parse_names_argument(names)
+	if not names_list:
 		return {"updated": [], "skipped": ["<empty>"]}
 
 	roles = set(frappe.get_roles())
@@ -203,7 +187,7 @@ def bulk_mark_sent(names: list[str] | str) -> dict:
 	updated: list[str] = []
 	skipped: list[str] = []
 
-	for name in names:  # type: ignore[assignment]
+	for name in names_list:
 		try:
 			doc = frappe.get_doc("Invoice", name)
 			if doc.status in ("Paid", "Cancelled"):
@@ -238,14 +222,8 @@ def bulk_mark_paid(names: list[str] | str) -> dict:
 	- Uses workflow action 'Mark Paid' if configured; otherwise submits + sets status
 	- Returns a summary dict with updated and skipped lists
 	"""
-	# Parse names when called from JS
-	if isinstance(names, str):
-		try:
-			names = frappe.parse_json(names)  # type: ignore[assignment]
-		except Exception:
-			names = [n.strip() for n in names.split(",") if n.strip()]
-
-	if not names:
+	names_list = parse_names_argument(names)
+	if not names_list:
 		return {"updated": [], "skipped": ["<empty>"]}
 
 	roles = set(frappe.get_roles())
@@ -256,7 +234,7 @@ def bulk_mark_paid(names: list[str] | str) -> dict:
 	updated: list[str] = []
 	skipped: list[str] = []
 
-	for name in names:  # type: ignore[assignment]
+	for name in names_list:
 		try:
 			doc = frappe.get_doc("Invoice", name)
 			if doc.status in ("Paid", "Cancelled"):
@@ -305,16 +283,18 @@ def create_sales_invoice(invoice_name: str) -> str:
 	if getattr(inv, "invoice_date", None):
 		si.posting_date = inv.invoice_date
 
-	settings = _get_settings()
-	if settings and settings.default_item_code:
+	item_code = get_setting("default_item_code")
+	if item_code:
 		row = si.append("items", {})
-		row.item_code = settings.default_item_code
+		row.item_code = item_code
 		row.qty = 1
 		row.rate = inv.amount or 0
-		if settings.income_account:
-			row.income_account = settings.income_account
-		if settings.cost_center:
-			row.cost_center = settings.cost_center
+		income_account = get_setting("income_account")
+		if income_account:
+			row.income_account = income_account
+		cost_center = get_setting("cost_center")
+		if cost_center:
+			row.cost_center = cost_center
 
 	si.insert(ignore_permissions=True)
 	inv.db_set("sales_invoice", si.name)

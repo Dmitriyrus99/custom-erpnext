@@ -1,7 +1,8 @@
 import time
-from typing import Optional
 
 import frappe
+
+from ferum_custom.ferum_custom.settings import get_setting
 
 try:
 	import requests  # type: ignore[import-untyped]
@@ -9,21 +10,13 @@ except Exception:  # pragma: no cover
 	requests = None  # type: ignore[assignment]
 
 
-def get_settings():
-	try:
-		return frappe.get_single("Ferum Custom Settings")
-	except Exception:
-		return None
-
-
 def send_message(text: str, chat_id: str | None = None, max_retries: int = 3) -> bool:
 	"""Send Telegram message using Bot API with simple retry and fallback logging.
 
 	Reads token/default chat from Ferum Custom Settings. Returns True on success.
 	"""
-	settings = get_settings()
-	token = getattr(settings, "telegram_bot_token", None) if settings else None
-	chat = chat_id or (getattr(settings, "telegram_default_chat_id", None) if settings else None)
+	token = get_setting("telegram_bot_token")
+	chat = chat_id or get_setting("telegram_default_chat_id")
 
 	if not token or not chat or requests is None:
 		# Fallback: log and return False; callers may try email fallback

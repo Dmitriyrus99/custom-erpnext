@@ -1,39 +1,28 @@
 from __future__ import annotations
 
-from typing import Optional
-
 import frappe
 
+from ferum_custom.ferum_custom.integrations.google import (
+	SERVICE_ACCOUNT_SCOPE_DRIVE,
+	build_service_account_credentials,
+)
+from ferum_custom.ferum_custom.settings import get_setting
+
 try:
-	from google.oauth2.service_account import Credentials  # type: ignore[import-untyped]
 	from googleapiclient.discovery import build  # type: ignore[import-untyped]
 	from googleapiclient.http import MediaInMemoryUpload  # type: ignore[import-untyped]
 except Exception:  # pragma: no cover
-	Credentials = None  # type: ignore[assignment]
 	build = None  # type: ignore[assignment]
 	MediaInMemoryUpload = None  # type: ignore[assignment]
 
 
-def _get_settings():
-	try:
-		return frappe.get_single("Ferum Custom Settings")
-	except Exception:
-		return None
-
-
 def _drive_service():
-	settings = _get_settings()
-	if not settings or Credentials is None or build is None:
+	if build is None:
 		return None
 	try:
-		file_url = settings.google_service_account_json
-		if not file_url:
+		creds = build_service_account_credentials([SERVICE_ACCOUNT_SCOPE_DRIVE])
+		if not creds:
 			return None
-		file_doc = frappe.get_doc("File", {"file_url": file_url})
-		content = file_doc.get_content()
-		info = frappe.parse_json(content.decode("utf-8"))
-		scopes = ["https://www.googleapis.com/auth/drive"]
-		creds = Credentials.from_service_account_info(info, scopes=scopes)
 		return build("drive", "v3", credentials=creds)
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Drive service init failed")
@@ -70,8 +59,7 @@ def upload_bytes(
 	if not drive or MediaInMemoryUpload is None:
 		return None
 
-	settings = _get_settings()
-	parent = getattr(settings, "google_drive_root_folder_id", None)
+	parent = get_setting("google_drive_root_folder_id")
 	try:
 		for part in path_parts:
 			parent = _ensure_folder(drive, part, parent)

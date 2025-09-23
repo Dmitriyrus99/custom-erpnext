@@ -1,5 +1,8 @@
 import frappe
 
+from ferum_custom.ferum_custom.integrations.google import refresh_service_account_cache
+from ferum_custom.ferum_custom.settings import refresh_settings_cache
+
 
 @frappe.whitelist()
 def save_integrations(
@@ -30,4 +33,6 @@ def save_integrations(
 
 	settings.save(ignore_permissions=True)
 	frappe.db.commit()
+	refresh_settings_cache()
+	refresh_service_account_cache()
 	return updated
