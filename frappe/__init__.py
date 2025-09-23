@@ -253,7 +253,7 @@ class _Database:
                         return None
                 if fieldname is None:
                         return record.get("name")
-                if isinstance(fieldname, (list, tuple)):
+                if isinstance(fieldname, list | tuple):
                         result = {field: record.get(field) for field in fieldname}
                         return result if as_dict else tuple(result.values())
                 value = record.get(fieldname)
@@ -310,7 +310,7 @@ class _Database:
 def _match_filters(record: MutableMapping[str, Any], filters: dict[str, Any]) -> bool:
         for field, expected in filters.items():
                 value = record.get(field)
-                if isinstance(expected, (list, tuple)) and expected:
+                if isinstance(expected, list | tuple) and expected:
                         operator = expected[0]
                         operand = expected[1] if len(expected) > 1 else None
                         if operator == "in":
