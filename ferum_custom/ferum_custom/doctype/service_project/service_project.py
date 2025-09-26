@@ -5,6 +5,7 @@ from frappe.model.document import Document
 
 class ServiceProject(Document):
 	def validate(self):
+		self.ensure_company_defaults()
 		self.check_dates_and_amount()
 		self.validate_unique_objects()
 
@@ -51,12 +52,55 @@ class ServiceProject(Document):
 					)
 				)
 
+		# Ensure all listed objects reference this project and inherit company
+		for item in self.objects:
+			try:
+				obj = frappe.get_doc("Service Object", item.service_object)
+				updated = False
+				if obj.project != self.name:
+					obj.project = self.name
+					updated = True
+				if not getattr(obj, "company", None) and getattr(self, "company", None):
+					obj.company = self.company
+					updated = True
+				if updated:
+					obj.save(ignore_permissions=True)
+			except Exception:
+				pass
+
+	def ensure_company_defaults(self):
+		# When customer has a preferred company, prefill
+		try:
+			if not getattr(self, "company", None) and getattr(self, "customer", None):
+				cust_company = frappe.db.get_value("Customer", self.customer, "company")
+				if cust_company:
+					self.company = cust_company
+		except Exception:
+			pass
+
 
 def get_permission_query_conditions(user: str | None = None) -> str | None:
 	user = user or frappe.session.user
 	if "System Manager" in frappe.get_roles(user):
 		return None
-	return "`tabService Project`.project_manager=%(user)s or `tabService Project`.owner=%(user)s"
+
+	conds = []
+	# Company restriction for internal users
+	try:
+		user_type = frappe.get_cached_value("User", user, "user_type")
+		companies = frappe.get_all(
+			"User Permission",
+			filters={"user": user, "allow": "Company"},
+			pluck="for_value",
+		)
+		if user_type != "Website User" and companies:
+			vals = ", ".join(frappe.db.escape(x) for x in companies)
+			conds.append(f"`tabService Project`.company in ({vals})")
+	except Exception:
+		pass
+
+	conds.append("`tabService Project`.project_manager=%(user)s or `tabService Project`.owner=%(user)s")
+	return " and ".join(f"({c})" for c in conds)
 
 
 def has_permission(doc, user: str | None = None) -> bool:

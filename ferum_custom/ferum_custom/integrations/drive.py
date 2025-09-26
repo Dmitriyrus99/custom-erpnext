@@ -30,7 +30,7 @@ def _drive_service():
 
 
 def _ensure_folder(drive, name: str, parent_id: str | None) -> str | None:
-	q = f"mimeType='application/vnd.google-apps.folder' and name='{name.replace("'", "\\'")}'"
+	q = "mimeType='application/vnd.google-apps.folder' and name='" + name.replace("'", "\\'") + "'"
 	if parent_id:
 		q += f" and '{parent_id}' in parents"
 	try:
@@ -61,16 +61,38 @@ def upload_bytes(
 
 	parent = get_setting("google_drive_root_folder_id")
 	try:
+		# Ensure folder structure exists
 		for part in path_parts:
 			parent = _ensure_folder(drive, part, parent)
 			if not parent:
 				return None
 
 		media = MediaInMemoryUpload(data, mimetype=mime_type, resumable=False)
-		body = {"name": filename}
-		if parent:
-			body["parents"] = [parent]
-		file = drive.files().create(body=body, media_body=media, fields="id").execute()
+
+		# Try update existing file with the same name in the target parent
+		existing_id = None
+		try:
+			q = (
+				"name='" + filename.replace("'", "\\'") + "' and "
+				"mimeType!='application/vnd.google-apps.folder'"
+			)
+			if parent:
+				q += f" and '{parent}' in parents"
+			res = drive.files().list(q=q, fields="files(id,name,modifiedTime)").execute()
+			files = res.get("files", [])
+			if files:
+				existing_id = files[0]["id"]
+		except Exception:
+			existing_id = None
+
+		if existing_id:
+			file = drive.files().update(fileId=existing_id, media_body=media, fields="id").execute()
+		else:
+			body = {"name": filename}
+			if parent:
+				body["parents"] = [parent]
+			file = drive.files().create(body=body, media_body=media, fields="id").execute()
+
 		return file.get("id")
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Drive upload failed")

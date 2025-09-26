@@ -12,6 +12,7 @@ class ServiceReport(Document):
 			self.report_date = frappe.utils.today()
 
 	def validate(self):
+		self.ensure_company_from_request()
 		self.calculate_total_amount()
 		self.validate_attachments()
 		self.validate_workflow_transitions()
@@ -37,8 +38,15 @@ class ServiceReport(Document):
 		for item in self.work_items:
 			item.total = item.hours * item.rate
 			self.total_amount += item.total
+		# For now, payable equals total; can adjust for discounts/taxes later
+		try:
+			self.total_payable = self.total_amount
+		except Exception:
+			pass
 
 	def validate_attachments(self):
+		if not self.documents:
+			frappe.throw(_("At least one attachment is required."))
 		for item in self.documents:
 			if not item.custom_attachment:
 				frappe.throw(_("Attachment is required for all Document Items."))
@@ -83,6 +91,15 @@ class ServiceReport(Document):
 		if not self.work_items:
 			frappe.throw(_("At least one Work Item is required before submitting a Service Report."))
 
+	def ensure_company_from_request(self):
+		try:
+			if getattr(self, "service_request", None):
+				req_company = frappe.db.get_value("Service Request", self.service_request, "company")
+				if req_company:
+					self.company = req_company
+		except Exception:
+			pass
+
 	def enqueue_drive_upload(self):
 		"""Generate PDF and upload to Google Drive in structured folders.
 
@@ -114,12 +131,40 @@ def _upload_report_pdf(docname: str) -> None:
 	upload_bytes(parts, filename, pdf, mime_type="application/pdf")
 
 
+def _user_companies(user: str) -> list[str]:
+	try:
+		return frappe.get_all(
+			"User Permission",
+			filters={"user": user, "allow": "Company"},
+			pluck="for_value",
+		)
+	except Exception:
+		return []
+
+
+def _company_cond_for(user: str, table: str) -> str | None:
+	try:
+		user_type = frappe.get_cached_value("User", user, "user_type")
+		if user_type == "Website User":
+			return None
+		companies = _user_companies(user)
+		if not companies:
+			return None
+		vals = ", ".join(frappe.db.escape(x) for x in companies)
+		return f"`{table}`.company in ({vals})"
+	except Exception:
+		return None
+
+
 def get_permission_query_conditions(user: str | None = None) -> str | None:
 	user = user or frappe.session.user
 	if "System Manager" in frappe.get_roles(user):
 		return None
 	# Join via Service Request or Project
 	conds = []
+	base = _company_cond_for(user, "tabService Report")
+	if base:
+		conds.append(base)
 	if "Project Manager" in frappe.get_roles(user):
 		conds.append(
 			"exists(select 1 from `tabService Request` sr join `tabService Project` sp on sp.name=sr.project where sr.name=`tabService Report`.service_request and sp.project_manager=%(user)s)"
@@ -130,6 +175,12 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 		)
 	if not conds:
 		return None
+	# Combine: company AND (role-based OR)
+	if base:
+		role_conds = conds[1:]  # after base
+		if role_conds:
+			return f"({base}) and ((" + ") or (".join(role_conds) + "))"
+		return base
 	return "(" + ") or (".join(conds) + ")"
 
 

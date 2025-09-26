@@ -5,6 +5,19 @@
   "autoname": "field:object_name",
   "fields": [
     {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
+      "fieldname": "default_engineer",
+      "fieldtype": "Link",
+      "label": "Default Engineer",
+      "options": "User"
+    },
+    {
       "fieldname": "object_name",
       "fieldtype": "Data",
       "label": "Object Name",

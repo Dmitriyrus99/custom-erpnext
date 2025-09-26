@@ -1,0 +1,14 @@
+{
+  "name": "SLA Breaches",
+  "report_name": "SLA Breaches",
+  "doctype": "Report",
+  "is_standard": "Yes",
+  "reference_doctype": "Service Request",
+  "report_type": "Script Report",
+  "module": "Ferum Custom",
+  "roles": [
+    {"role": "System Manager"},
+    {"role": "Project Manager"},
+    {"role": "Office Manager"}
+  ]
+}

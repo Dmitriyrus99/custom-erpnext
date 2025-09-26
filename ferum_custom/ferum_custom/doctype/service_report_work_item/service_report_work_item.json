@@ -12,6 +12,13 @@
       "reqd": 1
     },
     {
+      "fieldname": "employee",
+      "fieldtype": "Link",
+      "label": "Employee",
+      "options": "Employee",
+      "depends_on": "eval:1==1"
+    },
+    {
       "fieldname": "hours",
       "fieldtype": "Float",
       "label": "Hours",

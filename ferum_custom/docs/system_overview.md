@@ -11,10 +11,10 @@ System Overview
 
 ### Architecture
 
-- The solution uses a modular architecture layered on ERPNext’s server and database, coupled with a custom web application for extended functionalities.
-- At its core is an ERPNext site with custom DocTypes for domain-specific records (Service Projects, Service Requests, etc.), running on a Frappe framework with a MariaDB or PostgreSQL database.
-- On top of this, a separate backend service (built with FastAPI in Python, or alternatively NestJS in Node) handles API requests, integrates with external services, and powers a React frontend for specialized user interfaces.
-- The React frontend provides a modern UI for internal users and possibly clients (portal), while ERPNext’s Desk interface is still used for core data entry and internal workflows.
+- Core: a single ERPNext site with the "Ferum Custom" app (Frappe v15), custom DocTypes (Service Project, Service Request, Service Report, Invoice), server logic and integrations.
+- API: Frappe whitelisted methods under `ferum_custom.api.*` with optional JWT (Bearer) auth handled by a `before_request` hook.
+- UI: ERPNext Desk for internal users; lightweight portal pages for clients live under `ferum_custom/ferum_custom/www/portal/`.
+- Integrations: in-app Python modules for Telegram and Google (Drive/Sheets); external microservices are optional and not required for current functionality.
 
 Technologies: Ferum Customizations leverages a range of technologies and integrations:
 
@@ -24,21 +24,19 @@ Technologies: Ferum Customizations leverages a range of technologies and integra
 
 ### Backend
 
-- Python 3.10+ with FastAPI (including Pydantic models for validation).
-- This service exposes RESTful APIs and handles business logic outside ERPNext (e.g.
-- bot interactions, Google API calls).
+- Implemented in-app on Frappe (Python) via whitelisted methods and hooks.
+- Optional: a separate FastAPI service may be added later for extended public APIs, but it is not part of the current repo.
 
-Frontend: React (JavaScript/TypeScript) for any custom web UI components or client portal.
+Frontend: ERPNext Desk; optional portal pages (HTML/JS) are provided for client workflows.
 
 ### Bots
 
-- Telegram (via Aiogram Python library) and WhatsApp bot integrations for notifications and user commands (engineers and clients can interact with the system through messaging apps).
+- Telegram Bot API is used for outbound notifications (simple HTTP calls). Incoming bot command handling, if adopted, would live in a separate service.
 
 ### Cloud Services
 
-- Google Workspace integration – Google Sheets for data synchronization (e.g.
-- tracking invoices) and Google Drive for file storage.
-- Also optional Google Calendar integration for scheduling.
+- Google Drive for report PDF storage and Google Sheets for invoice sync (both via service account credentials stored in `Ferum Custom Settings`).
+- Optional: Calendar and other Google APIs can be added later.
 
 ### DevOps & Monitoring
 
@@ -46,12 +44,8 @@ Frontend: React (JavaScript/TypeScript) for any custom web UI components or clie
 
 ### Security
 
-- JWT-based authentication with 2FA for the custom API, role-based access controls enforced both in ERPNext and the backend, TLS (HTTPS) via Nginx reverse proxy, and request rate limiting (using tools like SlowAPI).
+- Optional JWT authentication (Bearer) for API calls; role-based access control via DocType permissions + PQC; TLS via Nginx; configurable per-IP login rate limiting.
 
-### Overall, the architecture is hybrid
+### Overall, the architecture is pragmatic
 
-- a monolithic ERP for core data and a microservice-like web app for integrations and interfaces.
-- The components communicate primarily through REST API calls (the custom backend calling ERPNext’s API or direct database access via Frappe client) and webhook integrations (for bots and Google services).
-- The diagram below illustrates the high-level architecture, with ERPNext at the center, the custom FastAPI backend and React UI on the side, and external services (Telegram/WhatsApp, Google APIs) interacting through defined interfaces (diagram not shown).
-- This architecture ensures that while ERPNext holds the single source of truth for business records, the system is extensible and can evolve into microservices if needed (e.g.
-- spinning off analytics into a separate service).
+- ERPNext holds the single source of truth. Current integrations run in-process. If future needs arise, external services can be introduced without disrupting the ERP core.

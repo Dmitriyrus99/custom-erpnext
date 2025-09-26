@@ -5,6 +5,7 @@
   "doctype": "DocType",
   "engine": "InnoDB",
   "field_order": [
+    "company",
     "customer",
     "project_name",
     "status",
@@ -15,6 +16,8 @@
     "income_amount",
     "expense_amount",
     "profit_amount",
+    "defaults_section",
+    "default_engineer",
     "project_manager",
     "service_objects_section",
     "objects",
@@ -22,6 +25,13 @@
     "attachments"
   ],
   "fields": [
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
     {
       "fieldname": "customer",
       "fieldtype": "Link",
@@ -75,6 +85,14 @@
       "fieldtype": "Currency",
       "label": "Profit",
       "read_only": 1
+    },
+    { "fieldname": "defaults_section", "fieldtype": "Section Break", "label": "Defaults" },
+    {
+      "fieldname": "default_engineer",
+      "fieldtype": "Link",
+      "label": "Default Engineer",
+      "options": "User",
+      "description": "Engineer to auto-assign new requests when not specified"
     },
     {
       "fieldname": "project_manager",

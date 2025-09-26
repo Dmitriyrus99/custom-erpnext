@@ -32,7 +32,7 @@ def parse_names_argument(names: Iterable[str] | str | None) -> list[str]:
 			parsed = frappe.parse_json(names)
 		except Exception:
 			parsed = None
-		if isinstance(parsed, (list, tuple)):
+		if isinstance(parsed, list | tuple):
 			names_iter = parsed
 		else:
 			names_iter = [part.strip() for part in names.split(",")]

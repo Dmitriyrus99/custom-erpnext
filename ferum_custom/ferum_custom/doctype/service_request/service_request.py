@@ -14,6 +14,20 @@ class ServiceRequest(Document):
 	def before_insert(self) -> None:
 		if not self.status:
 			self.status = "Open"
+		# Auto-assign engineer if not set
+		try:
+			if not getattr(self, "assigned_to", None):
+				# prefer Service Object default, then Project default
+				if getattr(self, "service_object", None):
+					eng = frappe.db.get_value("Service Object", self.service_object, "default_engineer")
+					if eng:
+						self.assigned_to = eng
+				if not getattr(self, "assigned_to", None) and getattr(self, "project", None):
+					eng = frappe.db.get_value("Service Project", self.project, "default_engineer")
+					if eng:
+						self.assigned_to = eng
+		except Exception:
+			pass
 
 	def after_insert(self) -> None:
 		"""Notify the project manager about the new request.
@@ -48,9 +62,14 @@ class ServiceRequest(Document):
 				service_object_doc = frappe.get_doc("Service Object", self.service_object)
 				self.customer = service_object_doc.customer
 				self.project = service_object_doc.project
+				# Align company from Service Object or linked Project
+				self.company = getattr(service_object_doc, "company", None)
+				if not self.company and self.project:
+					self.company = frappe.db.get_value("Service Project", self.project, "company")
 			else:
 				self.customer = None
 				self.project = None
+				# keep company unchanged unless explicitly cleared elsewhere
 
 	def validate_workflow_transitions(self):
 		old_status = (
@@ -196,17 +215,34 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 		return None
 	conds = []
 	roles = set(frappe.get_roles(user))
+
+	# Company restriction for internal users (skip for Website/Client)
+	try:
+		user_type = frappe.get_cached_value("User", user, "user_type")
+		companies = frappe.get_all(
+			"User Permission",
+			filters={"user": user, "allow": "Company"},
+			pluck="for_value",
+		)
+		if user_type != "Website User" and companies:
+			vals = ", ".join(frappe.db.escape(x) for x in companies)
+			conds.append(f"`tabService Request`.company in ({vals})")
+	except Exception:
+		pass
+
+	role_conds = []
 	if "Project Manager" in roles:
-		conds.append(
+		role_conds.append(
 			"exists(select 1 from `tabService Project` sp where sp.name = `tabService Request`.project and sp.project_manager=%(user)s)"
 		)
 	if "Service Engineer" in roles:
-		conds.append("`tabService Request`.assigned_to=%(user)s")
+		role_conds.append("`tabService Request`.assigned_to=%(user)s")
 	if "Client" in roles:
-		conds.append("`tabService Request`.owner=%(user)s")
-	if not conds:
-		return None
-	return "(" + ") or (".join(conds) + ")"
+		role_conds.append("`tabService Request`.owner=%(user)s")
+
+	if role_conds:
+		conds.append("(" + ") or (".join(role_conds) + ")")
+	return " and ".join(f"({c})" for c in conds) if conds else None
 
 
 def has_permission(doc, user: str | None = None) -> bool:

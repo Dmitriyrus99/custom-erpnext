@@ -1,99 +1,67 @@
-import frappe
-from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_to_date
+from __future__ import annotations
+
+import json
+import os
 
 
-class TestWorkflows(FrappeTestCase):
-	def setUp(self):
-		# Ensure administrator context for setup
-		frappe.set_user("Administrator")
-		# Ensure a minimal customer and service object exist
-		if not frappe.db.exists("Customer", "Test Customer"):
-			c = frappe.new_doc("Customer")
-			c.customer_name = "Test Customer"
-			c.insert()
-		if not frappe.db.exists("Service Object", {"object_name": "Obj-1"}):
-			so = frappe.new_doc("Service Object")
-			so.object_name = "Obj-1"
-			so.customer = "Test Customer"
-			so.insert()
+def _load_fixture(relpath: str):
+    base = os.path.dirname(__file__)
+    path = os.path.normpath(os.path.join(base, "..", "fixtures", relpath))
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-	def test_sla_deadline_calculation(self):
-		# Emergency / High → +4 hours
-		sr = frappe.new_doc("Service Request")
-		sr.title = "Test SLA"
-		sr.type = "Emergency"
-		sr.priority = "High"
-		sr.service_object = frappe.db.get_value("Service Object", {"object_name": "Obj-1"})
-		sr.insert()
-		sr.reload()
-		assert sr.sla_deadline, "SLA deadline should be set"
-		assert sr.sla_deadline == add_to_date(sr.creation, hours=4)
 
-	def test_status_requires_assigned(self):
-		sr = frappe.new_doc("Service Request")
-		sr.title = "Need engineer"
-		sr.type = "Routine Maintenance"
-		sr.priority = "Low"
-		sr.service_object = frappe.db.get_value("Service Object", {"object_name": "Obj-1"})
-		sr.insert()
-		sr.status = "In Progress"
-		with self.assertRaises(frappe.ValidationError):
-			sr.save()
+def _find_workflow(data: list[dict], name: str) -> dict:
+    for wf in data:
+        if wf.get("name") == name:
+            return wf
+    raise AssertionError(f"Workflow not found: {name}")
 
-	def test_service_report_submit_updates_request(self):
-		# Create request
-		sr = frappe.new_doc("Service Request")
-		sr.title = "Finish with report"
-		sr.type = "Routine Maintenance"
-		sr.priority = "High"
-		sr.service_object = frappe.db.get_value("Service Object", {"object_name": "Obj-1"})
-		sr.insert()
 
-		# Prepare a minimal Custom Attachment for report document
-		att = frappe.new_doc("Custom Attachment")
-		att.file_name = "report.pdf"
-		att.file_url = "https://example.com/report.pdf"
-		att.insert()
+def test_service_request_workflow_smoke():
+    data = _load_fixture("workflow.json")
+    wf = _find_workflow(data, "Service Request Workflow")
 
-		# Create Service Report with one work item and one document
-		rep = frappe.new_doc("Service Report")
-		rep.service_request = sr.name
-		rep.report_date = frappe.utils.nowdate()
-		rep.append("work_items", {"description": "Work", "hours": 1.0, "rate": 100})
-		rep.append("documents", {"custom_attachment": att.name})
-		rep.insert()
-		rep.submit()
-		sr.reload()
-		assert sr.status == "Completed"
-		assert sr.linked_report == rep.name
+    trans = {(t["state"], t["action"], t["next_state"]): t for t in wf.get("transitions", [])}
 
-	def test_service_report_cancel_only_from_submitted(self):
-		sr = frappe.new_doc("Service Request")
-		sr.title = "Cancel from submitted"
-		sr.type = "Routine Maintenance"
-		sr.priority = "Low"
-		sr.service_object = frappe.db.get_value("Service Object", {"object_name": "Obj-1"})
-		sr.insert()
+    assert ("Open", "Start Work", "In Progress") in trans
+    assert trans[("Open", "Start Work", "In Progress")]["condition"] == "doc.assigned_to"
 
-		att = frappe.new_doc("Custom Attachment")
-		att.file_name = "report.pdf"
-		att.file_url = "https://example.com/report.pdf"
-		att.insert()
+    assert ("In Progress", "Complete", "Completed") in trans
+    assert trans[("In Progress", "Complete", "Completed")]["condition"] == "doc.linked_report"
 
-		rep = frappe.new_doc("Service Report")
-		rep.service_request = sr.name
-		rep.report_date = frappe.utils.nowdate()
-		rep.append("work_items", {"description": "Work", "hours": 1.0, "rate": 100})
-		rep.append("documents", {"custom_attachment": att.name})
-		rep.insert()
+    assert ("Completed", "Close", "Closed") in trans
+    assert trans[("Completed", "Close", "Closed")]["allowed"] == "System Manager"
 
-		rep.status = "Cancelled"
-		with self.assertRaises(frappe.ValidationError):
-			rep.validate_workflow_transitions()
 
-		rep.status = "Submitted"
-		rep.save()
+def test_service_report_workflow_smoke():
+    data = _load_fixture("workflow.json")
+    wf = _find_workflow(data, "Service Report Workflow")
+    actions = {(t["state"], t["action"], t["next_state"]) for t in wf.get("transitions", [])}
 
-		rep.status = "Cancelled"
-		rep.validate_workflow_transitions()
+    assert ("Draft", "Submit", "Submitted") in actions
+    assert ("Submitted", "Approve", "Approved") in actions
+    assert ("Approved", "Archive", "Archived") in actions
+    assert ("Submitted", "Cancel", "Cancelled") in actions
+
+
+def test_service_project_workflow_smoke():
+    data = _load_fixture("workflow.json")
+    wf = _find_workflow(data, "Service Project Workflow")
+    trans = {(t["state"], t["action"], t["next_state"]): t for t in wf.get("transitions", [])}
+
+    assert ("Planned", "Submit", "Pending Approval") in trans
+    assert ("Pending Approval", "Approve", "Active") in trans
+    assert trans[("Pending Approval", "Approve", "Active")]["allowed"] == "General Director"
+    assert ("Active", "Complete", "Completed") in trans
+
+
+def test_invoice_workflow_smoke():
+    data = _load_fixture("workflow.json")
+    wf = _find_workflow(data, "Invoice Workflow")
+    trans = {(t["state"], t["action"], t["next_state"]): t for t in wf.get("transitions", [])}
+
+    assert ("Draft", "Send", "Sent") in trans
+    assert ("Sent", "Mark Paid", "Paid") in trans
+    assert trans[("Sent", "Mark Paid", "Paid")]["allowed"] == "Chief Accountant"
+

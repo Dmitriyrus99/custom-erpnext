@@ -1,33 +1,48 @@
 <template>
         <div class="container">
                 <h2>{{ _("My Service Requests") }}</h2>
+                <div class="mb-2">
+                        <label class="form-label">{{ _("Filter by status") }}</label>
+                        <select id="status" class="form-select" style="max-width:240px;">
+                                <option value="">{{ _("All") }}</option>
+                                <option>Open</option>
+                                <option>In Progress</option>
+                                <option>Completed</option>
+                                <option>Closed</option>
+                        </select>
+                </div>
                 <div id="sr-list"></div>
                 <p><a href="/portal/new-request">{{ _("Create New Request") }}</a></p>
         </div>
 </template>
 <script>
         frappe.ready(() => {
-                frappe
-                        .call({
-                                method: "ferum_custom.api.service.list_service_requests",
-                                args: { start: 0, page_length: 20 },
-                        })
-                        .then((r) => {
-                                const el = document.getElementById("sr-list");
-                                const rows = (r.message && r.message.data) || [];
-                                if (!rows.length) {
-                                        el.innerHTML = `<p>${__("No requests yet.")}</p>`;
-                                        return;
-                                }
-                                el.innerHTML =
-                                        "<ul>" +
-                                        rows
-                                                .map(
-                                                        (x) =>
-                                                                `<li><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title} - ${x.status}</li>`,
-                                                )
-                                                .join("") +
-                                        "</ul>";
-                        });
+                const el = document.getElementById("sr-list");
+                const load = () => {
+                        const status = document.getElementById("status").value || null;
+                        frappe
+                                .call({
+                                        method: "ferum_custom.api.service.list_service_requests",
+                                        args: { start: 0, page_length: 20, status },
+                                })
+                                .then((r) => {
+                                        const rows = (r.message && r.message.data) || [];
+                                        if (!rows.length) {
+                                                el.innerHTML = `<p>${__("No requests yet.")}</p>`;
+                                                return;
+                                        }
+                                        el.innerHTML =
+                                                "<ul>" +
+                                                rows
+                                                        .map(
+                                                                (x) =>
+                                                                        `<li><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title} - ${x.status}</li>`,
+                                                        )
+                                                        .join("") +
+                                                "</ul>";
+                                });
+                };
+                document.getElementById("status").addEventListener("change", load);
+                load();
         });
 </script>

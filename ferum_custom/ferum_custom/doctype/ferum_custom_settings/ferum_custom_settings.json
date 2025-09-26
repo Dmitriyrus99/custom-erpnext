@@ -69,6 +69,17 @@
       "label": "JWT Secret"
     },
     {
+      "fieldname": "enable_rate_limit_auth",
+      "fieldtype": "Check",
+      "label": "Enable Rate Limit for Auth"
+    },
+    {
+      "fieldname": "rate_limit_auth_per_minute",
+      "fieldtype": "Int",
+      "label": "Auth Requests per Minute (per IP)",
+      "default": 5
+    },
+    {
       "fieldname": "notification_section",
       "fieldtype": "Section Break",
       "label": "Notifications"
@@ -106,6 +117,43 @@
       "fieldtype": "Data",
       "label": "Drive Root Folder ID",
       "description": "Root folder ID for project archives"
+    }
+    ,
+    {
+      "fieldname": "rate_limit_section",
+      "fieldtype": "Section Break",
+      "label": "Rate Limiting"
+    },
+    {
+      "fieldname": "enable_rate_limit_create_request",
+      "fieldtype": "Check",
+      "label": "Enable Rate Limit for New Requests"
+    },
+    {
+      "fieldname": "rate_limit_create_request_per_minute",
+      "fieldtype": "Int",
+      "label": "New Requests per Minute (per IP)",
+      "default": 10
+    }
+    ,
+    { "fieldname": "observability_section", "fieldtype": "Section Break", "label": "Observability" },
+    {
+      "fieldname": "sentry_dsn",
+      "fieldtype": "Data",
+      "label": "Sentry DSN"
+    },
+    {
+      "fieldname": "sentry_traces_sample_rate",
+      "fieldtype": "Float",
+      "label": "Sentry Traces Sample Rate",
+      "default": 0
+    },
+    { "fieldname": "telegram_bot_section", "fieldtype": "Section Break", "label": "Telegram Bot" },
+    {
+      "fieldname": "telegram_webhook_secret",
+      "fieldtype": "Password",
+      "label": "Telegram Webhook Secret",
+      "description": "Shared secret to validate incoming Telegram updates"
     }
   ],
   "permissions": [

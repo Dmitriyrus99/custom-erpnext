@@ -1,0 +1,52 @@
+import time
+
+import frappe
+
+
+@frappe.whitelist(allow_guest=True)
+def prometheus() -> None:
+	"""Return a simple Prometheus metrics exposition.
+
+	Exposes a few business and system metrics without external deps.
+	"""
+
+	open_requests = frappe.db.count("Service Request", {"status": ["not in", ["Completed", "Closed"]]})
+	sent_invoices = frappe.db.count("Invoice", {"status": "Sent"})
+	paid_invoices = frappe.db.count("Invoice", {"status": "Paid"})
+
+	lines: list[str] = []
+	ts = int(time.time())
+	lines.append("# HELP ferum_open_service_requests Count of open service requests")
+	lines.append("# TYPE ferum_open_service_requests gauge")
+	lines.append(f"ferum_open_service_requests {open_requests} {ts}")
+
+	lines.append("# HELP ferum_invoices_sent Count of invoices with status=Sent")
+	lines.append("# TYPE ferum_invoices_sent gauge")
+	lines.append(f"ferum_invoices_sent {sent_invoices} {ts}")
+
+	lines.append("# HELP ferum_invoices_paid Count of invoices with status=Paid")
+	lines.append("# TYPE ferum_invoices_paid gauge")
+	lines.append(f"ferum_invoices_paid {paid_invoices} {ts}")
+
+	try:
+		import psutil  # type: ignore[import-untyped]
+
+		lines.append("# HELP process_cpu_percent CPU percent of the Python process")
+		lines.append("# TYPE process_cpu_percent gauge")
+		lines.append(f"process_cpu_percent {psutil.Process().cpu_percent(interval=None)} {ts}")
+
+		mem = psutil.virtual_memory()
+		lines.append("# HELP system_memory_used_bytes System memory used (bytes)")
+		lines.append("# TYPE system_memory_used_bytes gauge")
+		lines.append(f"system_memory_used_bytes {mem.used} {ts}")
+	except Exception:
+		pass
+
+	frappe.local.response.update(
+		{
+			"type": "txt",
+			"filename": None,
+			"content_type": "text/plain; version=0.0.4; charset=utf-8",
+			"message": "\n".join(lines) + "\n",
+		}
+	)

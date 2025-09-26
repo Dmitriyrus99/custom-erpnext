@@ -5,6 +5,7 @@
   "doctype": "DocType",
   "engine": "InnoDB",
   "field_order": [
+    "company",
     "project",
     "counterparty_type",
     "counterparty_name",
@@ -17,6 +18,13 @@
     "attachments"
   ],
   "fields": [
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
     {
       "fieldname": "project",
       "fieldtype": "Link",

@@ -10,6 +10,11 @@ doctype_js = {
 	"User": "public/js/user.js",
 }
 
+# List view customizations
+doctype_list_js = {
+	"Invoice": "ferum_custom/doctype/invoice/invoice_list.js",
+}
+
 scheduler_events = {
 	"daily": [
 		"ferum_custom.ferum_custom.doctype.service_maintenance_schedule.service_maintenance_schedule.generate_service_requests_from_schedule",
@@ -108,10 +113,6 @@ fixtures = [
 		"filters": [["name", "=", "Ferum Custom"]],
 	},
 	{
-		"doctype": "Workspace",
-		"filters": [["module", "=", "Ferum Custom"]],
-	},
-	{
 		"doctype": "Role Profile",
 		"filters": [
 			[
@@ -170,5 +171,10 @@ fixtures = [
 ]
 
 before_request = [
+	"ferum_custom.ferum_custom.observability.before_request",
 	"ferum_custom.api.auth.jwt_before_request",
 ]
+
+override_whitelisted_methods = {
+	"frappe.desk.query_report.run": "ferum_custom.api.reports.run_with_defaults",
+}

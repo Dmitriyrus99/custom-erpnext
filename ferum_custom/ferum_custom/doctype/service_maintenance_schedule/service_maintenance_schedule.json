@@ -6,6 +6,13 @@
   "is_submittable": 0,
   "fields": [
     {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
       "fieldname": "schedule_name",
       "fieldtype": "Data",
       "label": "Schedule Name",

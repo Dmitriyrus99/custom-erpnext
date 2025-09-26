@@ -4,6 +4,27 @@
 - Key integrations include Google Workspace (for spreadsheets and drive storage), messaging platforms (Telegram/WhatsApp bots), and monitoring tools (Prometheus and Sentry).
 - This section describes each integration, how data flows, and any configuration or API usage details.
 
+## Current Implementation (in this repo)
+
+- Google Sheets (Invoices)
+  - Library: `gspread`
+  - Files: `ferum_custom/ferum_custom/ferum_custom/doctype/invoice/invoice.py`
+  - Settings: `enable_google_sheets_sync`, `google_service_account_json` (File), `google_sheet_name`
+
+- Google Drive (Service Report PDFs)
+  - Libraries: `googleapiclient`
+  - Files: `ferum_custom/ferum_custom/ferum_custom/integrations/google.py`, `.../integrations/drive.py`, `.../doctype/service_report/service_report.py`
+  - Settings: `google_service_account_json` (File), `google_drive_root_folder_id`
+
+- Telegram (notifications)
+  - Library: HTTP Bot API via `requests`
+  - Files: `ferum_custom/ferum_custom/ferum_custom/integrations/telegram.py`
+  - Settings: `telegram_bot_token`, `telegram_default_chat_id`
+
+Notes
+- All integrations degrade gracefully if credentials or optional libs are missing; errors are logged via `frappe.log_error`.
+- Service account JSON is stored as a File in ERP and referenced from `Ferum Custom Settings`.
+
 ### Google Sheets Integration (Data Sync for Invoices)
 
 - The system integrates with Google Sheets to track and summarize financial data (primarily subcontractor and client invoices) in real-time.

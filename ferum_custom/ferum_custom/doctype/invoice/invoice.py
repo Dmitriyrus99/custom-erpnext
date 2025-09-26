@@ -46,6 +46,16 @@ from ferum_custom.ferum_custom.utils import get_users_by_roles, parse_names_argu
 
 
 class Invoice(Document):
+	def validate(self):
+		# Ensure company aligns with linked project if present
+		try:
+			if getattr(self, "project", None):
+				proj_company = frappe.db.get_value("Service Project", self.project, "company")
+				if proj_company:
+					self.company = proj_company
+		except Exception:
+			pass
+
 	def after_insert(self):
 		self.notify_on_subcontractor_invoice()
 		enqueue(
@@ -119,10 +129,62 @@ def sync_to_google_sheets(docname: str):
 			# Append new row
 			sheet.append_row(row_data)
 			frappe.msgprint(_(f"Invoice {doc.name} added to Google Sheets."))
+		_ensure_sheet_formatting(sheet)
 	except Exception as e:
 		frappe.log_error(
 			f"Google Sheets sync failed for invoice {doc.name}: {e!s}", "Google Sheets Sync Error"
 		)
+
+
+def _ensure_sheet_formatting(sheet) -> None:
+	"""Ensure basic conditional formatting is present (idempotent)."""
+	try:
+		ss = sheet.spreadsheet
+		# Simple coloring based on Status column (column F = 6)
+		rules = [
+			{
+				"addConditionalFormatRule": {
+					"rule": {
+						"ranges": [
+							{
+								"sheetId": sheet.id,
+								"startRowIndex": 1,
+								"startColumnIndex": 5,
+								"endColumnIndex": 6,
+							}
+						],
+						"booleanRule": {
+							"condition": {"type": "TEXT_EQ", "values": [{"userEnteredValue": "Paid"}]},
+							"format": {"backgroundColor": {"red": 0.8, "green": 0.95, "blue": 0.8}},
+						},
+					},
+					"index": 0,
+				}
+			},
+			{
+				"addConditionalFormatRule": {
+					"rule": {
+						"ranges": [
+							{
+								"sheetId": sheet.id,
+								"startRowIndex": 1,
+								"startColumnIndex": 5,
+								"endColumnIndex": 6,
+							}
+						],
+						"booleanRule": {
+							"condition": {"type": "TEXT_EQ", "values": [{"userEnteredValue": "Sent"}]},
+							"format": {"backgroundColor": {"red": 0.85, "green": 0.9, "blue": 1}},
+						},
+					},
+					"index": 0,
+				}
+			},
+		]
+		ss.batch_update({"requests": rules})
+	except Exception:
+		# Best-effort: formatting is optional
+		pass
 
 
 def on_invoice_update(doc, method):
@@ -313,12 +375,31 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 	roles = set(frappe.get_roles(user))
 	if "System Manager" in roles or "Chief Accountant" in roles:
 		return None
+	conds = []
+	# Company restriction for internal users
+	try:
+		user_type = frappe.get_cached_value("User", user, "user_type")
+		companies = frappe.get_all(
+			"User Permission",
+			filters={"user": user, "allow": "Company"},
+			pluck="for_value",
+		)
+		if user_type != "Website User" and companies:
+			vals = ", ".join(frappe.db.escape(x) for x in companies)
+			conds.append(f"`tabInvoice`.company in ({vals})")
+	except Exception:
+		pass
+
 	if "Office Manager" in roles:
-		return None
+		return " and ".join(f"({c})" for c in conds) if conds else None
 	if "Project Manager" in roles:
-		return "exists(select 1 from `tabService Project` sp where sp.name = `tabInvoice`.project and sp.project_manager=%(user)s)"
-	# Default: no additional rows
-	return "1=0"
+		conds.append(
+			"exists(select 1 from `tabService Project` sp where sp.name = `tabInvoice`.project and sp.project_manager=%(user)s)"
+		)
+		return " and ".join(f"({c})" for c in conds)
+	# Default: no rows
+	base = " and ".join(f"({c})" for c in conds)
+	return base + (" and 1=0" if base else "1=0")
 
 
 def has_permission(doc, user: str | None = None) -> bool:

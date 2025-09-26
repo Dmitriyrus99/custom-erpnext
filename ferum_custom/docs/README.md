@@ -38,3 +38,7 @@
   - [Office Manager User Stories](user_stories/office_manager_user_stories.md)
   - [Client User Stories](user_stories/client_user_stories.md)
 - [Glossary and Appendix](glossary_appendix.md)
+
+Translations
+
+- Русская документация (summary): ru/README.md

@@ -7,4 +7,6 @@ try:
 except PackageNotFoundError:
 	__version__ = "0.0.0"
 
+from ferum_custom.api import reports as _report_overrides
+
 __all__ = ["__version__"]

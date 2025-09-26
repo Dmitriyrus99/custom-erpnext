@@ -6,6 +6,26 @@
 
 ### Authentication & Authorization
 
+Current implementation (this repo)
+
+- JWT is optional and handled in-process by Frappe.
+- Obtain a token via `POST /api/method/ferum_custom.api.auth.login` with JSON `{"username":"...","password":"...","otp":"123456"}` (the `otp` field is required for users with 2FA enabled and may be omitted otherwise).
+- Include `Authorization: Bearer <token>` in subsequent requests; a `before_request` hook validates and sets the user.
+- Token lifetime is 1 hour; refresh flow is not implemented.
+- Login rate limiting can be enabled with settings `enable_rate_limit_auth` and `rate_limit_auth_per_minute`.
+- ERPNext’s desk login 2FA is supported by ERPNext; the JWT login enforces OTP verification for users who have 2FA enabled on their account.
+
+Frappe method endpoints (examples)
+
+- Service Requests
+  - `GET /api/method/ferum_custom.api.service.list_service_requests?status=Open&start=0&page_length=20`
+  - `GET /api/method/ferum_custom.api.service.get_service_request?name=SR-0001`
+  - `POST /api/method/ferum_custom.api.service.create_service_request` (fields: `title`, `description?`, `service_object?`)
+- Service Reports
+  - `GET /api/method/ferum_custom.api.service.list_service_reports?project=SP-0001`
+- Invoices
+  - `GET /api/method/ferum_custom.api.service.list_invoices?project=SP-0001`
+
 - The API uses JWT (JSON Web Tokens) for auth.
 - Users (or bots) must obtain a token (for instance, by providing username/password to an auth endpoint, or in the case of the bot, using a pre-shared API token mapped to an internal user).
 - All subsequent calls require the JWT in the header (e.g., Authorization: Bearer <token>).

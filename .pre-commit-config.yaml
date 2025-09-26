@@ -21,7 +21,11 @@ repos:
     rev: v0.5.5
     hooks:
       - id: ruff
-        args: ["--fix"]
+        args: ["--fix", "--ignore", "UP038"]
+        exclude: |
+          (?x)^( 
+            _frappe_shadow_backup_.*
+          )$
       - id: ruff-format
         name: "Run ruff formatter"
 

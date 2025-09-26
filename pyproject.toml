@@ -13,7 +13,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pre-commit",
+	"pre-commit",
+	"pytest",
 ]
 
 [build-system]

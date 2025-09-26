@@ -8,3 +8,4 @@ ferum_custom.patches.v1_0_0.rename_maintenance_schedule
 ferum_custom.patches.v1_0_0.normalize_workflow_statuses
 ferum_custom.patches.v1_0_0.enforce_active_workflows
 ferum_custom.patches.v1_0_0.add_db_indexes
+ferum_custom.patches.v1_0_1.set_roles_desk_access

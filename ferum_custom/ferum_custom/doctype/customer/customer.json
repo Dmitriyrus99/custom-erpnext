@@ -5,6 +5,12 @@
   "autoname": "field:customer_name",
   "fields": [
     {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company"
+    },
+    {
       "fieldname": "customer_name",
       "fieldtype": "Data",
       "label": "Customer Name",

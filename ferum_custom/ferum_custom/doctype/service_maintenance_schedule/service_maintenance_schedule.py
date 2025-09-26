@@ -17,6 +17,11 @@ def generate_service_requests_from_schedule():
 				continue
 			for item in schedule.items:
 				service_request = frappe.new_doc("Service Request")
+				service_request.company = getattr(schedule, "company", None) or (
+					frappe.db.get_value("Service Project", schedule.service_project, "company")
+					if getattr(schedule, "service_project", None)
+					else None
+				)
 				service_request.customer = schedule.customer
 				service_request.project = schedule.service_project
 				service_request.service_object = item.service_object

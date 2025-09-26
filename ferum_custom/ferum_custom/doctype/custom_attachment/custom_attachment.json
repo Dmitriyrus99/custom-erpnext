@@ -17,6 +17,18 @@
       "reqd": 1
     },
     {
+      "fieldname": "drive_file_id",
+      "fieldtype": "Data",
+      "label": "Drive File ID",
+      "read_only": 1
+    },
+    {
+      "fieldname": "drive_web_link",
+      "fieldtype": "Data",
+      "label": "Drive Web Link",
+      "read_only": 1
+    },
+    {
       "fieldname": "file_type",
       "fieldtype": "Data",
       "label": "File Type"

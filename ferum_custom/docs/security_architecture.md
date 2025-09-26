@@ -3,6 +3,13 @@
 - Security has been woven into every part of Ferum Customizations – from data access controls to network communication and backup practices.
 - This section summarizes the security measures under different aspects: access control, data protection (encryption), backup and recovery, audit trails, and web security (HTTPS, rate limiting).
 
+## Current Implementation Notes
+
+- JWT: Optional Bearer auth implemented via a `before_request` hook; token issuance at `ferum_custom.api.auth.login` (1-hour expiry).
+- Rate limiting: App-level per-IP throttle for login can be enabled with `enable_rate_limit_auth` and `rate_limit_auth_per_minute`.
+- 2FA: ERPNext desk login supports 2FA, and the JWT login flow in this repo enforces OTP verification for users who have two-factor enabled.
+- Secrets storage: `Ferum Custom Settings` stores `jwt_secret` (Password field, encrypted by Frappe) and Google service account JSON (as a File; content loaded at runtime).
+
 ### Role-Based Access Control (RBAC)
 
 - As detailed in the roles and permissions section, all system access is governed by roles and finely-grained permissions.
@@ -36,7 +43,7 @@
 
 - Sensitive accounts (Admin, Accountant, possibly PM and any user with broad access) are required to use 2FA on login.
 - ERPNext supports time-based OTP 2FA; this is enabled in site config or user settings.
-- Additionally, the custom JWT auth process also supports 2FA: the token endpoint expects an OTP for those users.
+- Additionally, the custom JWT auth process requires 2FA: the token endpoint expects an OTP for those users.
 - This greatly reduces risk of credential compromise leading to data breach.
 
 Data Encryption:

@@ -5,6 +5,7 @@
   "doctype": "DocType",
   "engine": "InnoDB",
   "field_order": [
+    "company",
     "title",
     "status",
     "type",
@@ -27,6 +28,13 @@
     "linked_report"
   ],
   "fields": [
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
     {
       "fieldname": "title",
       "fieldtype": "Data",

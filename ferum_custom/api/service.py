@@ -1,6 +1,9 @@
 import typing as t
 
 import frappe
+from frappe import _
+
+from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
 
 def _paginate(start: int | None = None, page_length: int | None = None) -> tuple[int, int]:
@@ -13,11 +16,22 @@ def _paginate(start: int | None = None, page_length: int | None = None) -> tuple
 def create_service_request(
 	title: str, description: str | None = None, service_object: str | None = None
 ) -> str:
+	_check_new_request_rate_limit()
 	doc = frappe.new_doc("Service Request")
 	doc.title = title
 	doc.description = description
 	if service_object:
-		doc.service_object = service_object
+		# Accept either a docname or a human-friendly object_name
+		obj_name = service_object
+		if not frappe.db.exists("Service Object", obj_name):
+			try:
+				val = frappe.db.get_value("Service Object", {"object_name": obj_name}, "name")
+				if val:
+					obj_name = val
+			except Exception:
+				pass
+		if frappe.db.exists("Service Object", obj_name):
+			doc.service_object = obj_name
 	doc.insert()
 	return doc.name
 
@@ -74,6 +88,48 @@ def list_service_reports(
 		order_by="modified desc",
 	)
 	return {"data": data, "start": s, "page_length": pl}
+
+
+def _get_client_ip() -> str:
+	try:
+		xff = frappe.get_request_header("X-Forwarded-For")
+		if xff:
+			return xff.split(",")[0].strip()
+		real_ip = frappe.get_request_header("X-Real-IP")
+		if real_ip:
+			return real_ip
+		ip = getattr(frappe.local, "request_ip", None)
+		if ip:
+			return str(ip)
+	except Exception:
+		pass
+	return "unknown"
+
+
+def _check_new_request_rate_limit() -> None:
+	try:
+		if not is_feature_enabled("enable_rate_limit_create_request"):
+			return
+		limit = get_setting("rate_limit_create_request_per_minute")
+		try:
+			limit_val = int(limit) if limit is not None else 10
+		except Exception:
+			limit_val = 10
+		ip = _get_client_ip()
+		key = f"ferum:rate:new_request:{ip}"
+		cache = frappe.cache()
+		current = cache.get_value(key) or 0
+		try:
+			current_val = int(current) if current is not None else 0
+		except Exception:
+			current_val = 0
+		current_val += 1
+		cache.set_value(key, current_val, expires_in_sec=60)
+		if current_val > max(1, limit_val):
+			frappe.throw(_("Too many new requests. Please try again later."))
+	except Exception:
+		# Never block due to rate-limit implementation errors
+		pass
 
 
 @frappe.whitelist()
