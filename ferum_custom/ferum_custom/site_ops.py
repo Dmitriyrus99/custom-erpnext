@@ -173,3 +173,32 @@ def apply_ru_workspaces() -> dict:
 
     frappe.clear_cache()
     return {"status": "ok"}
+
+
+@frappe.whitelist()
+def backup_to_drive() -> dict:
+    """Создать резервную копию БД и выгрузить архив в Google Drive.
+
+    Размещение: /<site>/Backups/<filename>.
+    Использует существующую интеграцию Google Drive.
+    """
+    from frappe.utils.backups import new_backup
+    from ferum_custom.ferum_custom.integrations.drive import upload_bytes
+
+    # Создаём бэкап (возвращает путь к файлу .sql.gz)
+    bkp = new_backup(ignore_files=True)
+    filepath = getattr(bkp, "backup_path", None) or getattr(bkp, "backup_path_db", None)
+    if not filepath:
+        return {"status": "skipped", "reason": "no-backup-path"}
+
+    try:
+        with open(filepath, "rb") as f:
+            content = f.read()
+        site_name = frappe.local.site or frappe.utils.get_site_name(frappe.local.site_path)
+        parts = [site_name, "Backups"]
+        filename = filepath.split("/")[-1]
+        file_id = upload_bytes(parts, filename, content)
+        return {"status": "ok", "file_id": file_id, "filename": filename}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Backup to Drive failed")
+        return {"status": "error", "error": str(e)}

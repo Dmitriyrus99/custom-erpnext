@@ -18,6 +18,7 @@ doctype_list_js = {
 scheduler_events = {
 	"daily": [
 		"ferum_custom.ferum_custom.doctype.service_maintenance_schedule.service_maintenance_schedule.generate_service_requests_from_schedule",
+		"ferum_custom.ferum_custom.site_ops.backup_to_drive",
 	],
 	"hourly": [
 		"ferum_custom.ferum_custom.doctype.service_request.service_request.check_all_slas",
