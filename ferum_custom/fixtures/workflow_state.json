@@ -1,16 +1,128 @@
 [
-  { "doctype": "Workflow State", "name": "Draft", "workflow_state_name": "Draft", "style": "Info" },
-  { "doctype": "Workflow State", "name": "Submitted", "workflow_state_name": "Submitted", "style": "Primary" },
-  { "doctype": "Workflow State", "name": "Approved", "workflow_state_name": "Approved", "style": "Success" },
-  { "doctype": "Workflow State", "name": "Archived", "workflow_state_name": "Archived", "style": "Inverse" },
-  { "doctype": "Workflow State", "name": "Cancelled", "workflow_state_name": "Cancelled", "style": "Danger" },
-  { "doctype": "Workflow State", "name": "Open", "workflow_state_name": "Open", "style": "Primary" },
-  { "doctype": "Workflow State", "name": "In Progress", "workflow_state_name": "In Progress", "style": "Info" },
-  { "doctype": "Workflow State", "name": "Completed", "workflow_state_name": "Completed", "style": "Success" },
-  { "doctype": "Workflow State", "name": "Closed", "workflow_state_name": "Closed", "style": "Inverse" },
-  { "doctype": "Workflow State", "name": "Sent", "workflow_state_name": "Sent", "style": "Primary" },
-  { "doctype": "Workflow State", "name": "Paid", "workflow_state_name": "Paid", "style": "Success" },
-  { "doctype": "Workflow State", "name": "Planned", "workflow_state_name": "Planned", "style": "Warning" },
-  { "doctype": "Workflow State", "name": "Active", "workflow_state_name": "Active", "style": "Info" },
-  { "doctype": "Workflow State", "name": "Pending Approval", "workflow_state_name": "Pending Approval", "style": "Warning" }
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.752260",
+  "name": "Draft",
+  "style": "Info",
+  "workflow_state_name": "Draft"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.769689",
+  "name": "Submitted",
+  "style": "Primary",
+  "workflow_state_name": "Submitted"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.785715",
+  "name": "Approved",
+  "style": "Success",
+  "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.800811",
+  "name": "Archived",
+  "style": "Inverse",
+  "workflow_state_name": "Archived"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.815945",
+  "name": "Cancelled",
+  "style": "Danger",
+  "workflow_state_name": "Cancelled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.830745",
+  "name": "Open",
+  "style": "Primary",
+  "workflow_state_name": "Open"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.845237",
+  "name": "In Progress",
+  "style": "Info",
+  "workflow_state_name": "In Progress"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.860594",
+  "name": "Completed",
+  "style": "Success",
+  "workflow_state_name": "Completed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.890849",
+  "name": "Closed",
+  "style": "Inverse",
+  "workflow_state_name": "Closed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.906670",
+  "name": "Sent",
+  "style": "Primary",
+  "workflow_state_name": "Sent"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.921698",
+  "name": "Paid",
+  "style": "Success",
+  "workflow_state_name": "Paid"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.937255",
+  "name": "Planned",
+  "style": "Warning",
+  "workflow_state_name": "Planned"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.952051",
+  "name": "Active",
+  "style": "Info",
+  "workflow_state_name": "Active"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": null,
+  "modified": "2025-10-06 16:03:50.966702",
+  "name": "Pending Approval",
+  "style": "Warning",
+  "workflow_state_name": "Pending Approval"
+ }
 ]

@@ -231,8 +231,30 @@ def _attach_photo(ctx: TelegramContext, request_name: str) -> None:
 		)
 		file_doc.insert(ignore_permissions=True)
 
+		# Register as Custom Attachment for unified handling and Drive sync
+		try:
+			att = frappe.get_doc(
+				{
+					"doctype": "Custom Attachment",
+					"file_name": file_name,
+					"file_url": file_doc.file_url,
+					"linked_doctype": "Service Request",
+					"linked_docname": request_name,
+					"file_type": "image",
+				}
+			)
+			att.insert(ignore_permissions=True)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "Create CustomAttachment from Telegram failed")
+
+		# Keep existing photo table for backward compatibility in UI
 		request_doc = frappe.get_doc("Service Request", request_name)
 		request_doc.append("photos", {"photo": file_doc.file_url, "description": "bot"})
+		# Also reflect in generic attachments table
+		try:
+			request_doc.append("attachments", {"attachment": file_doc.file_url, "description": "bot"})
+		except Exception:
+			pass
 		request_doc.save(ignore_permissions=True)
 	except CommandError:
 		raise

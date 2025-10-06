@@ -1,89 +1,117 @@
 [
   {
     "doctype": "Notification",
-    "name": "Service Request Assigned",
-    "module": "Ferum Custom",
-    "document_type": "Service Request",
-    "event": "Value Change",
-    "channel": "Email",
-    "value_changed": "assigned_to",
-    "condition": "doc.assigned_to",
-    "subject": "{{ _('Назначена заявка') }}: {{ doc.name }}",
-    "message": "<p>{{ _('Вам назначена заявка') }} {{ doc.name }}.</p>\n<p><b>{{ _('Заголовок') }}:</b> {{ doc.title }}</p>",
-    "enabled": 1,
-    "recipients": [
-      {
-        "doctype": "Notification Recipient",
-        "receiver_by_document_field": "assigned_to"
-      }
-    ]
-  },
-  {
-    "doctype": "Notification",
-    "name": "Service Report Submitted",
-    "module": "Ferum Custom",
-    "document_type": "Service Report",
-    "event": "Submit",
-    "channel": "Email",
-    "subject": "{{ _('Отчёт отправлен') }}: {{ doc.name }}",
-    "message": "<p>{{ _('Отчёт по работам отправлен.') }}</p>\n<p><b>{{ _('Заявка') }}:</b> {{ doc.service_request or '-' }}<br/>\n<b>{{ _('Дата') }}:</b> {{ doc.report_date }}</p>",
-    "enabled": 1,
-    "attach_print": 1,
-    "print_format": "Service Report Simple",
-    "recipients": [
-      {
-        "doctype": "Notification Recipient",
-        "receiver_by_role": "Project Manager"
-      },
-      {
-        "doctype": "Notification Recipient",
-        "receiver_by_role": "Chief Accountant"
-      }
-    ]
-  },
-  {
-    "doctype": "Notification",
-    "name": "Invoice Paid",
-    "module": "Ferum Custom",
-    "document_type": "Invoice",
-    "event": "Value Change",
-    "channel": "Email",
-    "value_changed": "status",
-    "condition": "doc.status == 'Paid'",
-    "subject": "{{ _('Счёт оплачен') }}: {{ doc.name }}",
-    "message": "<p>{{ _('Статус счёта изменён на Paid') }}.</p>\n<p><b>{{ _('Проект') }}:</b> {{ doc.project or '-' }}<br/>\n<b>{{ _('Сумма') }}:</b> {{ doc.amount }}</p>",
-    "enabled": 1,
-    "recipients": [
-      {
-        "doctype": "Notification Recipient",
-        "receiver_by_role": "Chief Accountant"
-      },
-      {
-        "doctype": "Notification Recipient",
-        "receiver_by_role": "Project Manager"
-      }
-    ]
-  },
-  {
-    "doctype": "Notification",
-    "name": "New Invoice",
-    "module": "Ferum Custom",
-    "document_type": "Invoice",
+    "name": "Project Document Generated",
+    "document_type": "File",
+    "subject": "Новый проектный документ: {{ doc.file_name }}",
+    "message": "Создан файл {{ doc.file_name }} и прикреплён к проекту {{ doc.attached_to_name }}.",
     "event": "New",
-    "channel": "Email",
-    "condition": "doc.counterparty_type == 'Subcontractor'",
-    "subject": "{{ _('Создан новый счёт') }}: {{ doc.name }}",
-    "message": "<p>{{ _('Создан новый счёт.') }}</p>\n<p><b>{{ _('Контрагент') }}:</b> {{ doc.counterparty_name }}<br/>\n<b>{{ _('Сумма') }}:</b> {{ doc.amount }}</p>",
+    "condition": "doc.attached_to_doctype == 'Project'",
     "enabled": 1,
+    "channel": "Email",
     "recipients": [
-      {
-        "doctype": "Notification Recipient",
-        "receiver_by_role": "Chief Accountant"
-      },
-      {
-        "doctype": "Notification Recipient",
-        "receiver_by_role": "System Manager"
-      }
+      {"doctype": "Notification Recipient", "receiver_by_role": "Project Manager"},
+      {"doctype": "Notification Recipient", "receiver_by_role": "Office Manager"}
+    ]
+  },
+  {
+    "doctype": "Notification",
+    "name": "Task Document Generated",
+    "document_type": "File",
+    "subject": "Документ по этапу: {{ doc.file_name }}",
+    "message": "Создан файл {{ doc.file_name }} и прикреплён к задаче {{ doc.attached_to_name }}.",
+    "event": "New",
+    "condition": "doc.attached_to_doctype == 'Task'",
+    "enabled": 1,
+    "channel": "Email",
+    "recipients": [
+      {"doctype": "Notification Recipient", "receiver_by_role": "Project Manager"},
+      {"doctype": "Notification Recipient", "receiver_by_role": "Office Manager"}
+    ]
+  },
+  {
+    "doctype": "Notification",
+    "name": "Issue Created",
+    "document_type": "Issue",
+    "subject": "Новая заявка: {{ doc.subject }}",
+    "message": "Создана заявка {{ doc.name }} ({{ doc.subject }}). Проект: {{ doc.project or '-' }}, Клиент: {{ doc.customer or '-' }}.",
+    "event": "New",
+    "enabled": 1,
+    "channel": "Email",
+    "recipients": [
+      {"doctype": "Notification Recipient", "receiver_by_role": "Project Manager"},
+      {"doctype": "Notification Recipient", "receiver_by_role": "Office Manager"}
+    ]
+  },
+  {
+    "doctype": "Notification",
+    "name": "Issue Closed → Client",
+    "document_type": "Issue",
+    "subject": "Заявка закрыта: {{ doc.subject }}",
+    "message": "Заявка {{ doc.name }} закрыта. Спасибо!",
+    "event": "Value Change",
+    "value_changed": "status",
+    "condition": "doc.status == 'Closed'",
+    "enabled": 1,
+    "channel": "Email",
+    "recipients": [
+      {"doctype": "Notification Recipient", "receiver_by_document_field": "raised_by"}
+    ]
+  },
+  {
+    "doctype": "Notification",
+    "name": "Issue SLA Breach",
+    "document_type": "Issue",
+    "subject": "SLA просрочено: {{ doc.subject }}",
+    "message": "Для заявки {{ doc.name }} истёк срок реакции/выполнения.",
+    "event": "Value Change",
+    "value_changed": "modified",
+    "condition": "doc.response_by and get_datetime(doc.response_by) < now_datetime() and doc.status not in ('Closed','Resolved')",
+    "enabled": 1,
+    "channel": "Email",
+    "recipients": [
+      {"doctype": "Notification Recipient", "receiver_by_role": "Project Manager"},
+      {"doctype": "Notification Recipient", "receiver_by_role": "Service Engineer"}
+    ]
+  },
+  {
+    "doctype": "Notification",
+    "name": "Sales Invoice Submitted",
+    "document_type": "Sales Invoice",
+    "subject": "Счёт (SI) проведён: {{ doc.name }}",
+    "message": "Счёт {{ doc.name }} проведён на сумму {{ doc.grand_total }} {{ doc.currency }}.",
+    "event": "Submit",
+    "enabled": 1,
+    "channel": "Email",
+    "recipients": [
+      {"doctype": "Notification Recipient", "receiver_by_role": "Chief Accountant"}
+    ]
+  },
+  {
+    "doctype": "Notification",
+    "name": "Purchase Invoice Submitted",
+    "document_type": "Purchase Invoice",
+    "subject": "Счёт поставщика (PI) проведён: {{ doc.name }}",
+    "message": "Счёт поставщика {{ doc.name }} проведён на сумму {{ doc.grand_total }} {{ doc.currency }}.",
+    "event": "Submit",
+    "enabled": 1,
+    "channel": "Email",
+    "recipients": [
+      {"doctype": "Notification Recipient", "receiver_by_role": "Chief Accountant"}
+    ]
+  },
+  {
+    "doctype": "Notification",
+    "name": "Payroll Entry Submitted",
+    "document_type": "Payroll Entry",
+    "subject": "Payroll проведён: {{ doc.name }}",
+    "message": "Проведена ведомость по зарплате {{ doc.name }}.",
+    "event": "Submit",
+    "enabled": 1,
+    "channel": "Email",
+    "recipients": [
+      {"doctype": "Notification Recipient", "receiver_by_role": "Chief Accountant"},
+      {"doctype": "Notification Recipient", "receiver_by_role": "General Director"}
     ]
   }
 ]

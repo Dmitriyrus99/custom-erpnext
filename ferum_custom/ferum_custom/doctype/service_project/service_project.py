@@ -79,9 +79,11 @@ class ServiceProject(Document):
 			pass
 
 
+
 def get_permission_query_conditions(user: str | None = None) -> str | None:
 	user = user or frappe.session.user
-	if "System Manager" in frappe.get_roles(user):
+	roles = set(frappe.get_roles(user))
+	if "System Manager" in roles:
 		return None
 
 	conds = []
@@ -99,16 +101,63 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 	except Exception:
 		pass
 
-	conds.append("`tabService Project`.project_manager=%(user)s or `tabService Project`.owner=%(user)s")
+	# Office Manager and Department Head: broad access within companies
+	if "Office Manager" in roles:
+		return " and ".join(f"({c})" for c in conds) if conds else None
+	if "Department Head" in roles:
+		depts = frappe.get_all(
+			"User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
+		)
+		if depts:
+			vals = ", ".join(frappe.db.escape(x) for x in depts)
+			conds.append(f"`tabService Project`.service_department in ({vals})")
+			return " and ".join(f"({c})" for c in conds)
+		return " and ".join(f"({c})" for c in conds) if conds else None
+
+	if "Project Manager" in roles:
+		conds.append("`tabService Project`.project_manager=%(user)s")
+	# Client access by Customer user permission
+	if "Client" in roles:
+		customers = frappe.get_all(
+			"User Permission",
+			filters={"user": user, "allow": "Customer"},
+			pluck="for_value",
+		)
+		if customers:
+			vals = ", ".join(frappe.db.escape(x) for x in customers)
+			conds.append(f"`tabService Project`.customer in ({vals})")
+		else:
+			# fallback to owner if no explicit permission configured
+			conds.append("`tabService Project`.owner=%(user)s")
+	else:
+		conds.append("`tabService Project`.owner=%(user)s")
 	return " and ".join(f"({c})" for c in conds)
 
 
 def has_permission(doc, user: str | None = None) -> bool:
 	user = user or frappe.session.user
-	if "System Manager" in frappe.get_roles(user):
+	roles = set(frappe.get_roles(user))
+	if "System Manager" in roles or "Office Manager" in roles:
 		return True
+	if "Department Head" in roles:
+		allowed = set(
+			frappe.get_all(
+				"User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
+			)
+		)
+		if allowed:
+			if getattr(doc, "service_department", None) in allowed:
+				return True
+		else:
+			return True
 	if doc.project_manager == user:
 		return True
+	if "Client" in roles:
+		customers = frappe.get_all(
+			"User Permission", filters={"user": user, "allow": "Customer"}, pluck="for_value"
+		)
+		if customers and getattr(doc, "customer", None) in set(customers):
+			return True
 	if doc.owner == user:
 		return True
 	return False

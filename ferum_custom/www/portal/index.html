@@ -31,13 +31,18 @@
                                                 el.innerHTML = `<p>${__("No requests yet.")}</p>`;
                                                 return;
                                         }
+                                        const now = new Date();
                                         el.innerHTML =
                                                 "<ul>" +
                                                 rows
-                                                        .map(
-                                                                (x) =>
-                                                                        `<li><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title} - ${x.status}</li>`,
-                                                        )
+                                                        .map((x) => {
+                                                                let style = "";
+                                                                if (x.sla_deadline && ["Completed","Closed"].indexOf(x.status) === -1) {
+                                                                        const due = new Date(x.sla_deadline);
+                                                                        if (due < now) style = ' style="color:#c92a2a;"'; // red for overdue
+                                                                }
+                                                                return `<li${style}><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title} - ${x.status}</li>`;
+                                                        })
                                                         .join("") +
                                                 "</ul>";
                                 });

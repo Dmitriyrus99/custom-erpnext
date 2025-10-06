@@ -25,10 +25,20 @@ scheduler_events = {
 }
 
 doc_events = {
-	"Invoice": {
-		"on_update": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
-		"on_cancel": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
-	}
+    "Invoice": {
+        "on_update": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
+        "on_cancel": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
+    },
+    "File": {
+        "on_trash": "ferum_custom.cleanup.on_file_trash",
+        "on_update": "ferum_custom.ferum_custom.integrations.drive_file.on_file_update",
+    },
+    "Project": {
+        "after_insert": "ferum_custom.ferum_custom.autodoc.on_project_created",
+    },
+    "Task": {
+        "on_update": "ferum_custom.ferum_custom.autodoc.on_task_update",
+    },
 }
 
 fixtures = [
@@ -93,20 +103,8 @@ fixtures = [
 		"filters": [["module", "=", "Ferum Custom"]],
 	},
 	{
-		"doctype": "Notification",
-		"filters": [["module", "=", "Ferum Custom"]],
-	},
-	{
-		"doctype": "Report",
-		"filters": [["module", "=", "Ferum Custom"]],
-	},
-	{
 		"doctype": "Module Profile",
 		"filters": [["module_profile_name", "=", "Ferum Admin"]],
-	},
-	{
-		"doctype": "Workspace",
-		"filters": [["module", "=", "Ferum Custom"]],
 	},
 	{
 		"doctype": "Module Def",

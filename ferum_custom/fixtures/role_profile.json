@@ -1,58 +1,107 @@
 [
-  {
-    "doctype": "Role Profile",
-    "name": "Project Manager",
-    "role_profile": "Project Manager",
-    "roles": [
-      { "doctype": "Has Role", "role": "Project Manager", "parentfield": "roles", "parenttype": "Role Profile" }
-    ]
-  },
-  {
-    "doctype": "Role Profile",
-    "name": "Office Manager",
-    "role_profile": "Office Manager",
-    "roles": [
-      { "doctype": "Has Role", "role": "Office Manager", "parentfield": "roles", "parenttype": "Role Profile" }
-    ]
-  },
-  {
-    "doctype": "Role Profile",
-    "name": "Service Engineer",
-    "role_profile": "Service Engineer",
-    "roles": [
-      { "doctype": "Has Role", "role": "Service Engineer", "parentfield": "roles", "parenttype": "Role Profile" }
-    ]
-  },
-  {
-    "doctype": "Role Profile",
-    "name": "Chief Accountant",
-    "role_profile": "Chief Accountant",
-    "roles": [
-      { "doctype": "Has Role", "role": "Chief Accountant", "parentfield": "roles", "parenttype": "Role Profile" }
-    ]
-  },
-  {
-    "doctype": "Role Profile",
-    "name": "Client",
-    "role_profile": "Client",
-    "roles": [
-      { "doctype": "Has Role", "role": "Client", "parentfield": "roles", "parenttype": "Role Profile" }
-    ]
-  },
-  {
-    "doctype": "Role Profile",
-    "name": "General Director",
-    "role_profile": "General Director",
-    "roles": [
-      { "doctype": "Has Role", "role": "General Director", "parentfield": "roles", "parenttype": "Role Profile" }
-    ]
-  },
-  {
-    "doctype": "Role Profile",
-    "name": "Department Head",
-    "role_profile": "Department Head",
-    "roles": [
-      { "doctype": "Has Role", "role": "Department Head", "parentfield": "roles", "parenttype": "Role Profile" }
-    ]
-  }
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-10-06 16:03:47.369899",
+  "name": "Project Manager",
+  "role_profile": "Project Manager",
+  "roles": [
+   {
+    "parent": "Project Manager",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Project Manager"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-10-06 16:03:47.399081",
+  "name": "Office Manager",
+  "role_profile": "Office Manager",
+  "roles": [
+   {
+    "parent": "Office Manager",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Office Manager"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-10-06 16:03:47.438203",
+  "name": "Service Engineer",
+  "role_profile": "Service Engineer",
+  "roles": [
+   {
+    "parent": "Service Engineer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Service Engineer"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-10-06 16:03:47.462100",
+  "name": "Chief Accountant",
+  "role_profile": "Chief Accountant",
+  "roles": [
+   {
+    "parent": "Chief Accountant",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Chief Accountant"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-10-06 16:03:47.485404",
+  "name": "Client",
+  "role_profile": "Client",
+  "roles": [
+   {
+    "parent": "Client",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Client"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-10-06 16:03:47.508949",
+  "name": "General Director",
+  "role_profile": "General Director",
+  "roles": [
+   {
+    "parent": "General Director",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "General Director"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-10-06 16:03:47.530919",
+  "name": "Department Head",
+  "role_profile": "Department Head",
+  "roles": [
+   {
+    "parent": "Department Head",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Department Head"
+   }
+  ]
+ }
 ]

@@ -1,9 +1,17 @@
 [
-  {
-    "doctype": "Module Def",
-    "name": "Ferum Custom",
-    "module_name": "Ferum Custom",
-    "app_name": "ferum_custom",
-    "custom": 0
-  }
+ {
+  "_assign": null,
+  "_comments": null,
+  "_liked_by": null,
+  "_user_tags": null,
+  "app_name": "ferum_custom",
+  "custom": 0,
+  "docstatus": 0,
+  "doctype": "Module Def",
+  "modified": "2025-10-06 16:03:44.470018",
+  "module_name": "Ferum Custom",
+  "name": "Ferum Custom",
+  "package": null,
+  "restrict_to_domain": null
+ }
 ]

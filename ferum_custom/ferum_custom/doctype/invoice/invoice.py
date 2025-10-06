@@ -38,11 +38,25 @@ def get_google_sheet():
 		return client.open(sheet_name).sheet1
 	except Exception as e:
 		frappe.log_error(f"Google Sheets connection failed: {e!s}", "Google Sheets Connection Error")
+		try:
+			recipients = list(get_users_by_roles(["System Manager", "Chief Accountant"]))
+			if recipients:
+				frappe.sendmail(
+					recipients=recipients,
+					subject="Google Sheets connection failed",
+					message=f"Could not connect to Google Sheets: {e!s}",
+				)
+		except Exception:
+			pass
 		return None
 
 
 from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
-from ferum_custom.ferum_custom.utils import get_users_by_roles, parse_names_argument
+from ferum_custom.ferum_custom.utils import (
+    get_allowed_customers,
+    get_users_by_roles,
+    parse_names_argument,
+)
 
 
 class Invoice(Document):
@@ -390,13 +404,20 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 	except Exception:
 		pass
 
-	if "Office Manager" in roles:
+	if "Office Manager" in roles or "Department Head" in roles:
 		return " and ".join(f"({c})" for c in conds) if conds else None
 	if "Project Manager" in roles:
 		conds.append(
 			"exists(select 1 from `tabService Project` sp where sp.name = `tabInvoice`.project and sp.project_manager=%(user)s)"
 		)
 		return " and ".join(f"({c})" for c in conds)
+	if "Client" in roles:
+		customers = get_allowed_customers(user)
+		if customers:
+			vals = ", ".join(frappe.db.escape(x) for x in customers)
+			conds.append(
+				f"(`tabInvoice`.counterparty_type='Customer' and `tabInvoice`.counterparty_name in ({vals}))"
+			)
 	# Default: no rows
 	base = " and ".join(f"({c})" for c in conds)
 	return base + (" and 1=0" if base else "1=0")
@@ -407,9 +428,13 @@ def has_permission(doc, user: str | None = None) -> bool:
 	roles = set(frappe.get_roles(user))
 	if "System Manager" in roles or "Chief Accountant" in roles:
 		return True
-	if "Office Manager" in roles:
+	if "Office Manager" in roles or "Department Head" in roles:
 		return True
 	if "Project Manager" in roles and doc.project:
 		pm = frappe.db.get_value("Service Project", doc.project, "project_manager")
 		return pm == user
+	if "Client" in roles and doc.counterparty_type == "Customer":
+		customers = set(get_allowed_customers(user))
+		if customers and getattr(doc, "counterparty_name", None) in customers:
+			return True
 	return False

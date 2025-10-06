@@ -1,0 +1,24 @@
+{
+  "name": "Document Template",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "autoname": "field:template_name",
+  "editable_grid": 0,
+  "track_changes": 1,
+  "fields": [
+    {"fieldname": "template_name", "fieldtype": "Data", "label": "Template Name", "reqd": 1, "unique": 1, "in_list_view": 1},
+    {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1"},
+    {"fieldname": "target", "fieldtype": "Select", "label": "Target", "options": "Project\nTask\nTimesheet\nCustom", "reqd": 1},
+    {"fieldname": "when", "fieldtype": "Select", "label": "When", "options": "manual\non_project_create\non_task_completed", "reqd": 1, "default": "manual"},
+    {"fieldname": "output", "fieldtype": "Select", "label": "Output", "options": "PDF\nHTML", "default": "PDF"},
+    {"fieldname": "file_name_pattern", "fieldtype": "Data", "label": "File Name Pattern", "description": "e.g. {{ doc.name }}-contract.pdf"},
+    {"fieldname": "template_body", "fieldtype": "Code", "label": "Template Body (Jinja/HTML)", "options": "HTML", "reqd": 1},
+    {"fieldname": "section_advanced", "fieldtype": "Section Break", "label": "Advanced"},
+    {"fieldname": "default_recipients", "fieldtype": "Table MultiSelect", "label": "Default Recipient Roles", "options": "Has Role"}
+  ],
+  "permissions": [
+    {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "email": 1},
+    {"role": "Project Manager", "read": 1},
+    {"role": "Office Manager", "read": 1}
+  ]
+}

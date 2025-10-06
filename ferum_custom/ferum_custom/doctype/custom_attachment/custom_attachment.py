@@ -1,7 +1,7 @@
 import frappe
 from frappe.model.document import Document
 
-from ferum_custom.ferum_custom.integrations.drive import upload_bytes
+from ferum_custom.ferum_custom.integrations.drive import upload_bytes, delete_file
 
 
 class CustomAttachment(Document):
@@ -12,6 +12,14 @@ class CustomAttachment(Document):
 		# Upload if drive id missing and we have a local File URL
 		if not getattr(self, "drive_file_id", None):
 			self.enqueue_drive_upload()
+
+	def on_trash(self):
+		# Best-effort deletion from Drive if we know the file id
+		try:
+			if getattr(self, "drive_file_id", None):
+				delete_file(self.drive_file_id)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "CustomAttachment: Drive delete on_trash failed")
 
 	def enqueue_drive_upload(self) -> None:
 		try:

@@ -7,6 +7,7 @@ from ferum_custom.ferum_custom.integrations.google import (
 	build_service_account_credentials,
 )
 from ferum_custom.ferum_custom.settings import get_setting
+from ferum_custom.ferum_custom.utils import get_users_by_roles
 
 try:
 	from googleapiclient.discovery import build  # type: ignore[import-untyped]
@@ -26,6 +27,16 @@ def _drive_service():
 		return build("drive", "v3", credentials=creds)
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Drive service init failed")
+		try:
+			recipients = list(get_users_by_roles(["System Manager", "Chief Accountant"]))
+			if recipients:
+				frappe.sendmail(
+					recipients=recipients,
+					subject="Drive service init failed",
+					message="Google Drive service initialization failed. Check Ferum Custom settings and credentials.",
+				)
+		except Exception:
+			pass
 		return None
 
 
@@ -96,4 +107,37 @@ def upload_bytes(
 		return file.get("id")
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Drive upload failed")
+		try:
+			recipients = list(get_users_by_roles(["System Manager", "Chief Accountant"]))
+			if recipients:
+				frappe.sendmail(
+					recipients=recipients,
+					subject="Drive upload failed",
+					message=f"Failed to upload {filename} to Google Drive.",
+				)
+		except Exception:
+			pass
 		return None
+
+
+def delete_file(file_id: str) -> bool:
+	"""Delete a file from Google Drive by id. Returns True on success."""
+	drive = _drive_service()
+	if not drive:
+		return False
+	try:
+		drive.files().delete(fileId=file_id).execute()
+		return True
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Drive delete failed")
+		try:
+			recipients = list(get_users_by_roles(["System Manager", "Chief Accountant"]))
+			if recipients:
+				frappe.sendmail(
+					recipients=recipients,
+					subject="Drive delete failed",
+					message=f"Failed to delete Drive file: {file_id}",
+				)
+		except Exception:
+			pass
+		return False

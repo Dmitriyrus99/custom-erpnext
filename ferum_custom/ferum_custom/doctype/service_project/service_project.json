@@ -8,6 +8,7 @@
     "company",
     "customer",
     "project_name",
+    "service_department",
     "status",
     "amended_from",
     "start_date",
@@ -44,6 +45,12 @@
       "fieldtype": "Data",
       "label": "Project Name",
       "reqd": 1
+    },
+    {
+      "fieldname": "service_department",
+      "fieldtype": "Link",
+      "label": "Service Department",
+      "options": "Service Department"
     },
     {
       "fieldname": "status",
@@ -159,6 +166,10 @@
     {
       "read": 1,
       "role": "Service Engineer"
+    },
+    {
+      "read": 1,
+      "role": "Department Head"
     }
   ],
   "sort_field": "modified",

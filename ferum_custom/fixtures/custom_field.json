@@ -1,0 +1,13 @@
+[
+  {
+    "doctype": "Custom Field",
+    "name": "Timesheet-workflow_state",
+    "dt": "Timesheet",
+    "fieldname": "workflow_state",
+    "label": "Workflow State",
+    "fieldtype": "Data",
+    "insert_after": "status",
+    "read_only": 1,
+    "hidden": 1
+  }
+]

@@ -4,6 +4,7 @@ import frappe
 from frappe import _
 
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
+from ferum_custom.ferum_custom.utils import get_allowed_customers
 
 
 def _paginate(start: int | None = None, page_length: int | None = None) -> tuple[int, int]:
@@ -37,6 +38,7 @@ def create_service_request(
 
 
 @frappe.whitelist()
+
 def list_service_requests(
 	status: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
@@ -44,20 +46,35 @@ def list_service_requests(
 	filters: dict[str, t.Any] = {}
 	if status:
 		filters["status"] = status
-	# Restrict scope for website users or clients to their own
+	# Restrict scope for website users or clients to their Customer
 	try:
 		user = frappe.session.user
 		user_type = frappe.get_cached_value("User", user, "user_type")
 		roles = set(frappe.get_roles(user))
 		if user_type == "Website User" or "Client" in roles:
-			filters["owner"] = user
+			allowed = get_allowed_customers(user)
+			if allowed:
+				filters["customer"] = ["in", allowed]
+			else:
+				# fallback: owner when no explicit customer permission
+				filters["owner"] = user
 	except Exception:
 		pass
 
 	data = frappe.get_list(
 		"Service Request",
 		filters=filters,
-		fields=["name", "title", "status", "priority", "customer", "project", "service_object", "modified"],
+		fields=[
+			"name",
+			"title",
+			"status",
+			"priority",
+			"customer",
+			"project",
+			"service_object",
+			"sla_deadline",
+			"modified",
+		],
 		start=s,
 		page_length=pl,
 		order_by="modified desc",
@@ -72,6 +89,7 @@ def get_service_request(name: str) -> dict:
 
 
 @frappe.whitelist()
+
 def list_service_reports(
 	project: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
@@ -79,6 +97,32 @@ def list_service_reports(
 	filters: dict[str, t.Any] = {}
 	if project:
 		filters["project"] = project
+	try:
+		user = frappe.session.user
+		user_type = frappe.get_cached_value("User", user, "user_type")
+		roles = set(frappe.get_roles(user))
+		if user_type == "Website User" or "Client" in roles:
+			allowed = get_allowed_customers(user)
+			if allowed:
+				# restrict via join to Service Request customer
+				names = frappe.get_all(
+					"Service Report",
+					filters=filters,
+					pluck="name",
+					order_by="modified desc",
+					start=s,
+					page_length=pl,
+				)
+				if names:
+					keep = []
+					for n in names:
+						cust = frappe.db.get_value("Service Request", frappe.db.get_value("Service Report", n, "service_request"), "customer")
+						if cust in set(allowed):
+							keep.append(n)
+					filters = {"name": ["in", keep]} if keep else {"name": "__none__"}
+	except Exception:
+		pass
+
 	data = frappe.get_list(
 		"Service Report",
 		filters=filters,
@@ -140,6 +184,18 @@ def list_invoices(
 	filters: dict[str, t.Any] = {}
 	if project:
 		filters["project"] = project
+	try:
+		user = frappe.session.user
+		user_type = frappe.get_cached_value("User", user, "user_type")
+		roles = set(frappe.get_roles(user))
+		if user_type == "Website User" or "Client" in roles:
+			allowed = get_allowed_customers(user)
+			if allowed:
+				filters["counterparty_type"] = "Customer"
+				filters["counterparty_name"] = ["in", allowed]
+	except Exception:
+		pass
+
 	data = frappe.get_list(
 		"Invoice",
 		filters=filters,
@@ -159,3 +215,24 @@ def list_invoices(
 		order_by="modified desc",
 	)
 	return {"data": data, "start": s, "page_length": pl}
+
+
+@frappe.whitelist()
+def confirm_service_request(name: str) -> None:
+	"""Allow a Client to confirm completion of a Service Request by adding a comment."""
+	doc = frappe.get_doc("Service Request", name)
+	# Permission check performed by Frappe via get_doc; add comment
+	try:
+		doc.add_comment("Comment", _(f"Client confirmed completion via portal."))
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Client confirm SR failed")
+
+
+@frappe.whitelist()
+def confirm_service_report(name: str) -> None:
+	"""Allow a Client to confirm a Service Report via a comment."""
+	doc = frappe.get_doc("Service Report", name)
+	try:
+		doc.add_comment("Comment", _(f"Client confirmed Service Report via portal."))
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Client confirm report failed")

@@ -1,0 +1,55 @@
+[
+  {
+    "doctype": "Assignment Rule",
+    "name": "Issues Round Robin (Engineers)",
+    "document_type": "Issue",
+    "description": "Automatic Assignment",
+    "rule": "Round Robin",
+    "assign_condition": "doc.status not in ('Closed','Resolved')",
+    "priority": 10,
+    "users": [],
+    "assignment_days": [
+      {"doctype": "Assignment Rule Day", "day": "Monday"},
+      {"doctype": "Assignment Rule Day", "day": "Tuesday"},
+      {"doctype": "Assignment Rule Day", "day": "Wednesday"},
+      {"doctype": "Assignment Rule Day", "day": "Thursday"},
+      {"doctype": "Assignment Rule Day", "day": "Friday"},
+      {"doctype": "Assignment Rule Day", "day": "Saturday"},
+      {"doctype": "Assignment Rule Day", "day": "Sunday"}
+    ]
+  },
+  {
+    "doctype": "Assignment Rule",
+    "name": "Issues by Project (PM)",
+    "document_type": "Issue",
+    "description": "Automatic Assignment",
+    "rule": "Round Robin",
+    "assign_condition": "doc.project",
+    "priority": 20,
+    "users": [],
+    "assignment_days": [
+      {"doctype": "Assignment Rule Day", "day": "Monday"},
+      {"doctype": "Assignment Rule Day", "day": "Tuesday"},
+      {"doctype": "Assignment Rule Day", "day": "Wednesday"},
+      {"doctype": "Assignment Rule Day", "day": "Thursday"},
+      {"doctype": "Assignment Rule Day", "day": "Friday"}
+    ]
+  },
+  {
+    "doctype": "Assignment Rule",
+    "name": "Issues by Customer/Type",
+    "document_type": "Issue",
+    "description": "Automatic Assignment",
+    "rule": "Round Robin",
+    "assign_condition": "doc.customer or doc.issue_type",
+    "priority": 30,
+    "users": [],
+    "assignment_days": [
+      {"doctype": "Assignment Rule Day", "day": "Monday"},
+      {"doctype": "Assignment Rule Day", "day": "Tuesday"},
+      {"doctype": "Assignment Rule Day", "day": "Wednesday"},
+      {"doctype": "Assignment Rule Day", "day": "Thursday"},
+      {"doctype": "Assignment Rule Day", "day": "Friday"}
+    ]
+  }
+]
