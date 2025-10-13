@@ -90,6 +90,11 @@
       "label": "Telegram"
     },
     {
+      "fieldname": "enable_telegram_notifications",
+      "fieldtype": "Check",
+      "label": "Enable Telegram Notifications"
+    },
+    {
       "fieldname": "telegram_bot_token",
       "fieldtype": "Password",
       "label": "Telegram Bot Token",
@@ -100,6 +105,23 @@
       "fieldtype": "Data",
       "label": "Default Chat ID",
       "description": "Group or user chat_id to send broadcast alerts"
+    },
+    {
+      "fieldname": "telegram_allowed_chat_ids",
+      "fieldtype": "Small Text",
+      "label": "Allowed Chat IDs",
+      "description": "One chat_id per line; leave blank to allow all chats."
+    },
+    {
+      "fieldname": "telegram_admin_usernames",
+      "fieldtype": "Small Text",
+      "label": "Admin Telegram Usernames",
+      "description": "Comma or newline separated telegram usernames that may execute admin commands."
+    },
+    {
+      "fieldname": "check_telegram",
+      "fieldtype": "Button",
+      "label": "Check Telegram"
     },
     {
       "fieldname": "invoice_notification_roles",
@@ -113,12 +135,21 @@
       "label": "Google Drive"
     },
     {
+      "fieldname": "enable_google_drive_sync",
+      "fieldtype": "Check",
+      "label": "Enable Google Drive Sync"
+    },
+    {
       "fieldname": "google_drive_root_folder_id",
       "fieldtype": "Data",
       "label": "Drive Root Folder ID",
       "description": "Root folder ID for project archives"
-    }
-    ,
+    },
+    {
+      "fieldname": "check_google_drive",
+      "fieldtype": "Button",
+      "label": "Check Google Drive"
+    },
     {
       "fieldname": "rate_limit_section",
       "fieldtype": "Section Break",

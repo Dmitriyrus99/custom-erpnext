@@ -8,6 +8,7 @@
     "company",
     "customer",
     "project_name",
+    "service_department",
     "status",
     "amended_from",
     "start_date",
@@ -22,7 +23,9 @@
     "service_objects_section",
     "objects",
     "attachments_section",
-    "attachments"
+    "attachments",
+    "telegram_users_section",
+    "telegram_users"
   ],
   "fields": [
     {
@@ -44,6 +47,12 @@
       "fieldtype": "Data",
       "label": "Project Name",
       "reqd": 1
+    },
+    {
+      "fieldname": "service_department",
+      "fieldtype": "Link",
+      "label": "Service Department",
+      "options": "Service Department"
     },
     {
       "fieldname": "status",
@@ -121,6 +130,17 @@
       "fieldtype": "Table",
       "label": "Attachments",
       "options": "Document Attachment Item"
+    },
+    {
+      "fieldname": "telegram_users_section",
+      "fieldtype": "Section Break",
+      "label": "Telegram Users"
+    },
+    {
+      "fieldname": "telegram_users",
+      "fieldtype": "Table",
+      "label": "Telegram Users",
+      "options": "Project Telegram User Item"
     }
   ],
   "index_web_pages_for_search": 1,
@@ -159,6 +179,10 @@
     {
       "read": 1,
       "role": "Service Engineer"
+    },
+    {
+      "read": 1,
+      "role": "Department Head"
     }
   ],
   "sort_field": "modified",

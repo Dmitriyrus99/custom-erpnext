@@ -1,0 +1,100 @@
+{
+ "charts": [],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c\u0438\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041f\u0440\u043e\u0435\u043a\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u043e\u0432\u044b\u0439 \u043f\u0440\u043e\u0435\u043a\u0442\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0417\u0430\u044f\u0432\u043a\u0438\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u0442\u0447\u0435\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041e\u0431\u044a\u0435\u043a\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0421\u0447\u0435\u0442\u0430\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u043e\u0432\u044b\u0439 \u0441\u0447\u0435\u0442 (\u043a\u043b\u0438\u0435\u043d\u0442)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u043e\u0432\u044b\u0439 \u0441\u0447\u0435\u0442 (\u0441\u0443\u0431\u043f\u043e\u0434\u0440\u044f\u0434\u0447\u0438\u043a)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041f\u0440\u0438\u0431\u044b\u043b\u044c\u043d\u043e\u0441\u0442\u044c \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0417\u0430\u044f\u0432\u043a\u0438 \u043f\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0421\u0447\u0435\u0442\u0430 \u043f\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c\",\"col\":4}}]",
+ "creation": "2025-09-22 09:43:35.199964",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c\u0438",
+ "links": [],
+ "modified": "2025-10-06 16:01:16.098536",
+ "modified_by": "Administrator",
+ "module": "Ferum Custom",
+ "name": "\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c\u0438",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Project Manager"
+  },
+  {
+   "role": "Office Manager"
+  }
+ ],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "doc_view": "List",
+   "label": "\u041f\u0440\u043e\u0435\u043a\u0442\u044b",
+   "link_to": "Project",
+   "type": "DocType"
+  },
+  {
+   "label": "\u041d\u043e\u0432\u044b\u0439 \u043f\u0440\u043e\u0435\u043a\u0442",
+   "type": "URL",
+   "url": "/app/project/new"
+  },
+  {
+   "doc_view": "List",
+   "label": "\u0417\u0430\u044f\u0432\u043a\u0438",
+   "type": "URL",
+   "url": "/app/issue"
+  },
+  {
+   "doc_view": "List",
+   "label": "\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u0442\u0447\u0435\u0442\u044b",
+   "link_to": "Timesheet",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "\u041e\u0431\u044a\u0435\u043a\u0442\u044b",
+   "link_to": "Asset",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "\u0421\u0447\u0435\u0442\u0430",
+   "type": "URL",
+   "url": "/app/sales-invoice"
+  },
+  {
+   "label": "\u041d\u043e\u0432\u044b\u0439 \u0441\u0447\u0435\u0442 (\u043a\u043b\u0438\u0435\u043d\u0442)",
+   "type": "URL",
+   "url": "/app/sales-invoice/new"
+  },
+  {
+   "label": "\u041d\u043e\u0432\u044b\u0439 \u0441\u0447\u0435\u0442 (\u0441\u0443\u0431\u043f\u043e\u0434\u0440\u044f\u0434\u0447\u0438\u043a)",
+   "type": "URL",
+   "url": "/app/purchase-invoice/new"
+  },
+  {
+   "label": "\u041f\u0440\u0438\u0431\u044b\u043b\u044c\u043d\u043e\u0441\u0442\u044c \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432",
+   "link_to": "Project Profitability",
+   "report_ref_doctype": "Service Project",
+   "type": "Report"
+  },
+  {
+   "label": "\u0417\u0430\u044f\u0432\u043a\u0438 \u043f\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c",
+   "link_to": "Service Requests by Project",
+   "report_ref_doctype": "Service Request",
+   "type": "Report"
+  },
+  {
+   "label": "\u0421\u0447\u0435\u0442\u0430 \u043f\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c",
+   "link_to": "Invoices by Project",
+   "report_ref_doctype": "Invoice",
+   "type": "Report"
+  }
+ ],
+ "title": "\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c\u0438"
+}

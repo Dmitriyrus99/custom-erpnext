@@ -13,6 +13,13 @@
       "reqd": 1
     },
     {
+      "fieldname": "service_department",
+      "fieldtype": "Link",
+      "label": "Service Department",
+      "options": "Service Department",
+      "read_only": 1
+    },
+    {
       "fieldname": "service_request",
       "fieldtype": "Link",
       "label": "Service Request",
@@ -93,6 +100,10 @@
     },
     {
       "role": "Client",
+      "read": 1
+    },
+    {
+      "role": "Department Head",
       "read": 1
     }
   ]

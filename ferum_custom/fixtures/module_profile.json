@@ -1,10 +1,10 @@
 [
-  {
-    "doctype": "Module Profile",
-    "name": "Ferum Admin",
-    "module_profile_name": "Ferum Admin",
-    "modules": [
-      { "doctype": "Module Profile Module", "module": "Ferum Custom", "parentfield": "modules", "parenttype": "Module Profile" }
-    ]
-  }
+ {
+  "block_modules": [],
+  "docstatus": 0,
+  "doctype": "Module Profile",
+  "modified": "2025-10-06 16:03:45.831572",
+  "module_profile_name": "Ferum Admin",
+  "name": "Ferum Admin"
+ }
 ]

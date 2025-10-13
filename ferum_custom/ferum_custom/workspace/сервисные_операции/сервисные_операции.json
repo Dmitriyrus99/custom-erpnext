@@ -1,17 +1,16 @@
 {
  "charts": [],
- "content": "[]",
- "creation": "2025-09-19 15:43:16.434389",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u043f\u0435\u0440\u0430\u0446\u0438\u0438\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0417\u0430\u044f\u0432\u043a\u0438\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u0442\u0447\u0435\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041f\u0440\u043e\u0435\u043a\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u043e\u0432\u044b\u0439 \u043f\u0440\u043e\u0435\u043a\u0442\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041e\u0431\u044a\u0435\u043a\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0421\u0447\u0435\u0442\u0430\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u043e\u0432\u044b\u0439 \u0441\u0447\u0435\u0442 (\u043a\u043b\u0438\u0435\u043d\u0442)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u043e\u0432\u044b\u0439 \u0441\u0447\u0435\u0442 (\u0441\u0443\u0431\u043f\u043e\u0434\u0440\u044f\u0434\u0447\u0438\u043a)\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u0435\u0440\u0430\u0441\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u043d\u044b\u0435 \u0437\u0430\u044f\u0432\u043a\u0438\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041e\u0442\u043a\u0440\u044b\u0442\u044b\u0435 \u0437\u0430\u044f\u0432\u043a\u0438 \u043f\u043e \u0438\u043d\u0436\u0435\u043d\u0435\u0440\u0430\u043c\",\"col\":4}}]",
+ "creation": "2025-10-06 16:03:51.675999",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
- "for_user": "",
  "hide_custom": 0,
  "idx": 0,
  "is_hidden": 0,
  "label": "\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u043f\u0435\u0440\u0430\u0446\u0438\u0438",
  "links": [],
- "modified": "2025-09-19 15:49:37.146259",
+ "modified": "2025-10-06 16:04:52.670199",
  "modified_by": "Administrator",
  "module": "Ferum Custom",
  "name": "\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u043f\u0435\u0440\u0430\u0446\u0438\u0438",
@@ -21,75 +20,67 @@
  "quick_lists": [],
  "roles": [
   {
-   "role": "System Manager"
-  },
-  {
    "role": "Project Manager"
   },
   {
    "role": "Office Manager"
   },
   {
-   "role": "Administrator"
+   "role": "System Manager"
   }
  ],
  "sequence_id": 0.0,
  "shortcuts": [
   {
-   "doc_view": "List",
    "label": "\u0417\u0430\u044f\u0432\u043a\u0438",
-   "link_to": "Service Request",
-   "type": "DocType"
+   "type": "URL",
+   "url": "/app/issue"
   },
   {
-   "doc_view": "List",
-   "label": "\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u0442\u0447\u0435\u0442\u044b",
-   "link_to": "Service Report",
-   "type": "DocType"
+   "label": "\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u0442\u0447\u0435\u0442\u044b (Timesheets)",
+   "type": "URL",
+   "url": "/app/timesheet"
   },
   {
-   "doc_view": "List",
    "label": "\u041f\u0440\u043e\u0435\u043a\u0442\u044b",
-   "link_to": "Service Project",
-   "type": "DocType"
+   "type": "URL",
+   "url": "/app/project"
   },
   {
    "label": "\u041d\u043e\u0432\u044b\u0439 \u043f\u0440\u043e\u0435\u043a\u0442",
    "type": "URL",
-   "url": "/app/service-project/new"
+   "url": "/app/project/new"
   },
   {
-   "doc_view": "List",
-   "label": "\u041e\u0431\u044a\u0435\u043a\u0442\u044b",
-   "link_to": "Service Object",
-   "type": "DocType"
+   "label": "\u041e\u0431\u044a\u0435\u043a\u0442\u044b (Assets)",
+   "type": "URL",
+   "url": "/app/asset"
   },
   {
-   "doc_view": "List",
-   "label": "\u0421\u0447\u0435\u0442\u0430",
-   "link_to": "Invoice",
-   "type": "DocType"
+   "label": "\u0421\u0447\u0435\u0442\u0430 (\u043a\u043b\u0438\u0435\u043d\u0442\u044b)",
+   "type": "URL",
+   "url": "/app/sales-invoice"
   },
   {
    "label": "\u041d\u043e\u0432\u044b\u0439 \u0441\u0447\u0435\u0442 (\u043a\u043b\u0438\u0435\u043d\u0442)",
    "type": "URL",
-   "url": "/app/invoice/new?counterparty_type=Customer"
+   "url": "/app/sales-invoice/new"
   },
   {
    "label": "\u041d\u043e\u0432\u044b\u0439 \u0441\u0447\u0435\u0442 (\u0441\u0443\u0431\u043f\u043e\u0434\u0440\u044f\u0434\u0447\u0438\u043a)",
    "type": "URL",
-   "url": "/app/invoice/new?counterparty_type=Subcontractor"
+   "url": "/app/purchase-invoice/new"
   },
   {
    "label": "\u041d\u0435\u0440\u0430\u0441\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u043d\u044b\u0435 \u0437\u0430\u044f\u0432\u043a\u0438",
-   "link_to": "Unassigned Service Requests",
-   "report_ref_doctype": "Service Request",
+   "link_to": "Unassigned Issues",
+   "report_ref_doctype": "Issue",
    "type": "Report"
   },
   {
    "label": "\u041e\u0442\u043a\u0440\u044b\u0442\u044b\u0435 \u0437\u0430\u044f\u0432\u043a\u0438 \u043f\u043e \u0438\u043d\u0436\u0435\u043d\u0435\u0440\u0430\u043c",
-   "link_to": "Open Service Requests by Engineer",
-   "report_ref_doctype": "Service Request",
+   "link_to": "Open Issues by Engineer",
+   "report_ref_doctype": "Issue",
    "type": "Report"
   }
  ],

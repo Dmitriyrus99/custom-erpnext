@@ -83,6 +83,16 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 		conds.append(
 			"exists(select 1 from `tabProject Object Item` poi join `tabService Project` sp on sp.name=poi.parent where poi.service_object=`tabService Object`.name and sp.project_manager=%(user)s)"
 		)
+	if "Office Manager" in roles or "Department Head" in roles:
+		# broad access within companies
+		return " and ".join(f"({c})" for c in conds) if conds else None
+	if "Client" in roles:
+		customers = frappe.get_all(
+			"User Permission", filters={"user": user, "allow": "Customer"}, pluck="for_value"
+		)
+		if customers:
+			vals = ", ".join(frappe.db.escape(x) for x in customers)
+			conds.append(f"`tabService Object`.customer in ({vals})")
 	# Allow owners to see their created objects
 	conds.append("`tabService Object`.owner=%(user)s")
 	return " and ".join(f"({c})" for c in conds) if conds else None
@@ -91,7 +101,7 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 def has_permission(doc, user: str | None = None) -> bool:
 	user = user or frappe.session.user
 	roles = set(frappe.get_roles(user))
-	if "System Manager" in roles:
+	if "System Manager" in roles or "Office Manager" in roles or "Department Head" in roles:
 		return True
 	if doc.owner == user:
 		return True
@@ -106,4 +116,10 @@ def has_permission(doc, user: str | None = None) -> bool:
 			(doc.name,),
 		)
 		return bool(parents and parents[0][0] == user)
+	if "Client" in roles:
+		customers = frappe.get_all(
+			"User Permission", filters={"user": user, "allow": "Customer"}, pluck="for_value"
+		)
+		if customers and getattr(doc, "customer", None) in set(customers):
+			return True
 	return False

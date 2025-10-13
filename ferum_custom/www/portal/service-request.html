@@ -2,8 +2,12 @@
         <div class="container">
                 <h2 id="sr-title"></h2>
                 <div id="sr-details"></div>
+                <p id="confirm-wrapper" style="display:none;">
+                        <button id="confirm-btn" class="btn btn-sm btn-success">{{ _("Confirm Completion") }}</button>
+                </p>
                 <p id="report-wrapper" style="display:none;">
                         <a id="report-link" target="_blank">{{ _("Download Service Report") }}</a>
+                        <button id="confirm-report-btn" class="btn btn-sm btn-outline-primary" style="display:none;">{{ _("Confirm Report") }}</button>
                 </p>
                 <p><a href="/portal">{{ _("Back to list") }}</a></p>
         </div>
@@ -38,6 +42,14 @@
                                         );
                                 }
                                 detailsEl.innerHTML = pieces.join("\n");
+                                if (doc.status === 'Completed') {
+                                        document.getElementById("confirm-wrapper").style.display = "";
+                                        document.getElementById("confirm-btn").onclick = () => {
+                                                frappe.call({ method: 'ferum_custom.api.service.confirm_service_request', args: { name } }).then(() => {
+                                                        frappe.show_alert({ message: __('Confirmed'), indicator: 'green' });
+                                                });
+                                        };
+                                }
                                 if (doc.linked_report) {
                                         const reportLink = document.getElementById("report-link");
                                         reportLink.href =
@@ -46,6 +58,12 @@
                                                 "&name=" +
                                                 encodeURIComponent(doc.linked_report);
                                         document.getElementById("report-wrapper").style.display = "";
+                                        document.getElementById("confirm-report-btn").style.display = "inline-block";
+                                        document.getElementById("confirm-report-btn").onclick = () => {
+                                                frappe.call({ method: 'ferum_custom.api.service.confirm_service_report', args: { name: doc.linked_report } }).then(() => {
+                                                        frappe.show_alert({ message: __('Report confirmed'), indicator: 'green' });
+                                                });
+                                        };
                                 }
                         })
                         .catch((e) => {

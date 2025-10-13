@@ -12,6 +12,7 @@
     "priority",
     "customer",
     "project",
+    "service_department",
     "service_object",
     "description",
     "assignment_section",
@@ -73,6 +74,13 @@
       "fieldtype": "Link",
       "label": "Project",
       "options": "Service Project",
+      "read_only": 1
+    },
+    {
+      "fieldname": "service_department",
+      "fieldtype": "Link",
+      "label": "Service Department",
+      "options": "Service Department",
       "read_only": 1
     },
     {
@@ -197,6 +205,10 @@
       "create": 1,
       "read": 1,
       "role": "Client"
+    },
+    {
+      "read": 1,
+      "role": "Department Head"
     }
   ],
   "sort_field": "modified",

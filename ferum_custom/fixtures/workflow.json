@@ -1,352 +1,670 @@
 [
-  {
-    "doctype": "Workflow",
-    "name": "Service Request Workflow",
-    "workflow_name": "Service Request Workflow",
-    "document_type": "Service Request",
-    "is_active": 1,
-    "workflow_state_field": "status",
-    "states": [
-      {
-        "state": "Open",
-        "doc_status": 0,
-        "allow_edit": "Project Manager",
-        "color": "Gray"
-      },
-      {
-        "state": "In Progress",
-        "doc_status": 0,
-        "allow_edit": "Service Engineer",
-        "color": "Blue"
-      },
-      {
-        "state": "Completed",
-        "doc_status": 0,
-        "allow_edit": "System Manager",
-        "color": "Green"
-      },
-      {
-        "state": "Closed",
-        "doc_status": 0,
-        "allow_edit": "System Manager",
-        "color": "Gray"
-      }
-    ],
-    "transitions": [
-      {
-        "state": "Open",
-        "action": "Start Work",
-        "next_state": "In Progress",
-        "allowed": "Service Engineer",
-        "allow_self_approval": 1,
-        "condition": "doc.assigned_to"
-      },
-      {
-        "state": "Open",
-        "action": "Start Work",
-        "next_state": "In Progress",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": "doc.assigned_to"
-      },
-      {
-        "state": "In Progress",
-        "action": "Complete",
-        "next_state": "Completed",
-        "allowed": "Service Engineer",
-        "allow_self_approval": 1,
-        "condition": "doc.linked_report"
-      },
-      {
-        "state": "In Progress",
-        "action": "Complete",
-        "next_state": "Completed",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": "doc.linked_report"
-      },
-      {
-        "state": "Completed",
-        "action": "Close",
-        "next_state": "Closed",
-        "allowed": "System Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      }
-    ]
-  },
-  {
-    "doctype": "Workflow",
-    "name": "Service Report Workflow",
-    "workflow_name": "Service Report Workflow",
-    "document_type": "Service Report",
-    "is_active": 1,
-    "workflow_state_field": "status",
-    "states": [
-      {
-        "state": "Draft",
-        "doc_status": 0,
-        "allow_edit": "Service Engineer",
-        "color": "Gray"
-      },
-      {
-        "state": "Submitted",
-        "doc_status": 1,
-        "allow_edit": "Project Manager",
-        "color": "Blue"
-      },
-      {
-        "state": "Approved",
-        "doc_status": 1,
-        "allow_edit": "System Manager",
-        "color": "Green"
-      },
-      {
-        "state": "Archived",
-        "doc_status": 1,
-        "allow_edit": "System Manager",
-        "color": "Gray"
-      },
-      {
-        "state": "Cancelled",
-        "doc_status": 2,
-        "allow_edit": "System Manager",
-        "color": "Red"
-      }
-    ],
-    "transitions": [
-      {
-        "state": "Draft",
-        "action": "Submit",
-        "next_state": "Submitted",
-        "allowed": "Service Engineer",
-        "allow_self_approval": 1,
-        "condition": "doc.work_items"
-      },
-      {
-        "state": "Draft",
-        "action": "Submit",
-        "next_state": "Submitted",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": "doc.work_items"
-      },
-      {
-        "state": "Submitted",
-        "action": "Approve",
-        "next_state": "Approved",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Submitted",
-        "action": "Approve",
-        "next_state": "Approved",
-        "allowed": "Department Head",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Approved",
-        "action": "Archive",
-        "next_state": "Archived",
-        "allowed": "System Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Submitted",
-        "action": "Cancel",
-        "next_state": "Cancelled",
-        "allowed": "System Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      }
-      
-    ]
-  },
-  {
-    "doctype": "Workflow",
-    "name": "Service Project Workflow",
-    "workflow_name": "Service Project Workflow",
-    "document_type": "Service Project",
-    "is_active": 1,
-    "workflow_state_field": "status",
-    "states": [
-      {
-        "state": "Planned",
-        "doc_status": 0,
-        "allow_edit": "Project Manager",
-        "color": "Gray"
-      },
-      {
-        "state": "Pending Approval",
-        "doc_status": 0,
-        "allow_edit": "Project Manager",
-        "color": "Orange"
-      },
-      {
-        "state": "Active",
-        "doc_status": 0,
-        "allow_edit": "Project Manager",
-        "color": "Blue"
-      },
-      {
-        "state": "Completed",
-        "doc_status": 0,
-        "allow_edit": "System Manager",
-        "color": "Green"
-      },
-      {
-        "state": "Cancelled",
-        "doc_status": 0,
-        "allow_edit": "System Manager",
-        "color": "Red"
-      }
-    ],
-    "transitions": [
-      {
-        "state": "Planned",
-        "action": "Submit",
-        "next_state": "Pending Approval",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": "doc.customer"
-      },
-      {
-        "state": "Planned",
-        "action": "Submit",
-        "next_state": "Pending Approval",
-        "allowed": "Office Manager",
-        "allow_self_approval": 1,
-        "condition": "doc.customer"
-      },
-      {
-        "state": "Pending Approval",
-        "action": "Approve",
-        "next_state": "Active",
-        "allowed": "General Director",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Pending Approval",
-        "action": "Reject",
-        "next_state": "Planned",
-        "allowed": "General Director",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Active",
-        "action": "Complete",
-        "next_state": "Completed",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Active",
-        "action": "Complete",
-        "next_state": "Completed",
-        "allowed": "Office Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Active",
-        "action": "Cancel",
-        "next_state": "Cancelled",
-        "allowed": "System Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Completed",
-        "action": "Reopen",
-        "next_state": "Active",
-        "allowed": "System Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      }
-    ]
-  }
-  ,
-  {
-    "doctype": "Workflow",
-    "name": "Invoice Workflow",
-    "workflow_name": "Invoice Workflow",
-    "document_type": "Invoice",
-    "is_active": 1,
-    "workflow_state_field": "status",
-    "states": [
-      {
-        "state": "Draft",
-        "doc_status": 0,
-        "allow_edit": "Project Manager",
-        "color": "Gray"
-      },
-      {
-        "state": "Sent",
-        "doc_status": 0,
-        "allow_edit": "Office Manager",
-        "color": "Blue"
-      },
-      {
-        "state": "Paid",
-        "doc_status": 1,
-        "allow_edit": "Chief Accountant",
-        "color": "Green"
-      },
-      {
-        "state": "Cancelled",
-        "doc_status": 2,
-        "allow_edit": "System Manager",
-        "color": "Red"
-      }
-    ],
-    "transitions": [
-      {
-        "state": "Draft",
-        "action": "Send",
-        "next_state": "Sent",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Draft",
-        "action": "Send",
-        "next_state": "Sent",
-        "allowed": "Office Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Sent",
-        "action": "Mark Paid",
-        "next_state": "Paid",
-        "allowed": "Chief Accountant",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Sent",
-        "action": "Reopen",
-        "next_state": "Draft",
-        "allowed": "Project Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      },
-      {
-        "state": "Paid",
-        "action": "Cancel",
-        "next_state": "Cancelled",
-        "allowed": "System Manager",
-        "allow_self_approval": 1,
-        "condition": ""
-      }
-    ]
-  }
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Service Request",
+  "is_active": 1,
+  "modified": "2025-10-06 16:03:48.823257",
+  "name": "Service Request Workflow",
+  "override_status": 0,
+  "send_email_alert": 0,
+  "states": [
+   {
+    "allow_edit": "Project Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Request Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Open",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Service Engineer",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Request Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "In Progress",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Request Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Completed",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Request Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Closed",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Start Work",
+    "allow_self_approval": 1,
+    "allowed": "Service Engineer",
+    "condition": "doc.assigned_to",
+    "next_state": "In Progress",
+    "parent": "Service Request Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Open",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Start Work",
+    "allow_self_approval": 1,
+    "allowed": "Project Manager",
+    "condition": "doc.assigned_to",
+    "next_state": "In Progress",
+    "parent": "Service Request Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Open",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Complete",
+    "allow_self_approval": 1,
+    "allowed": "Service Engineer",
+    "condition": "doc.linked_report",
+    "next_state": "Completed",
+    "parent": "Service Request Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "In Progress",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Complete",
+    "allow_self_approval": 1,
+    "allowed": "Project Manager",
+    "condition": "doc.linked_report",
+    "next_state": "Completed",
+    "parent": "Service Request Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "In Progress",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Close",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": "",
+    "next_state": "Closed",
+    "parent": "Service Request Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Completed",
+    "workflow_builder_id": null
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Service Request Workflow",
+  "workflow_state_field": "status"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Service Report",
+  "is_active": 1,
+  "modified": "2025-10-06 16:03:48.956372",
+  "name": "Service Report Workflow",
+  "override_status": 0,
+  "send_email_alert": 0,
+  "states": [
+   {
+    "allow_edit": "Service Engineer",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Report Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Draft",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Project Manager",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Report Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Submitted",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Report Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Approved",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Report Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Archived",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Report Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Cancelled",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Submit",
+    "allow_self_approval": 1,
+    "allowed": "Service Engineer",
+    "condition": "doc.work_items",
+    "next_state": "Submitted",
+    "parent": "Service Report Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Draft",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Submit",
+    "allow_self_approval": 1,
+    "allowed": "Project Manager",
+    "condition": "doc.work_items",
+    "next_state": "Submitted",
+    "parent": "Service Report Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Draft",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "Project Manager",
+    "condition": "",
+    "next_state": "Approved",
+    "parent": "Service Report Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Submitted",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "Department Head",
+    "condition": "",
+    "next_state": "Approved",
+    "parent": "Service Report Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Submitted",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Archive",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": "",
+    "next_state": "Archived",
+    "parent": "Service Report Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Approved",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": "",
+    "next_state": "Cancelled",
+    "parent": "Service Report Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Submitted",
+    "workflow_builder_id": null
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Service Report Workflow",
+  "workflow_state_field": "status"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Service Project",
+  "is_active": 1,
+  "modified": "2025-10-06 16:03:49.064215",
+  "name": "Service Project Workflow",
+  "override_status": 0,
+  "send_email_alert": 0,
+  "states": [
+   {
+    "allow_edit": "Project Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Project Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Planned",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Project Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Project Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Pending Approval",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Project Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Project Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Active",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Project Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Completed",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Service Project Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Cancelled",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Submit",
+    "allow_self_approval": 1,
+    "allowed": "Project Manager",
+    "condition": "doc.customer",
+    "next_state": "Pending Approval",
+    "parent": "Service Project Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Planned",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Submit",
+    "allow_self_approval": 1,
+    "allowed": "Office Manager",
+    "condition": "doc.customer",
+    "next_state": "Pending Approval",
+    "parent": "Service Project Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Planned",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "General Director",
+    "condition": "",
+    "next_state": "Active",
+    "parent": "Service Project Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Pending Approval",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Reject",
+    "allow_self_approval": 1,
+    "allowed": "General Director",
+    "condition": "",
+    "next_state": "Planned",
+    "parent": "Service Project Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Pending Approval",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Complete",
+    "allow_self_approval": 1,
+    "allowed": "Project Manager",
+    "condition": "",
+    "next_state": "Completed",
+    "parent": "Service Project Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Active",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Complete",
+    "allow_self_approval": 1,
+    "allowed": "Office Manager",
+    "condition": "",
+    "next_state": "Completed",
+    "parent": "Service Project Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Active",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": "",
+    "next_state": "Cancelled",
+    "parent": "Service Project Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Active",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Reopen",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": "",
+    "next_state": "Active",
+    "parent": "Service Project Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Completed",
+    "workflow_builder_id": null
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Service Project Workflow",
+  "workflow_state_field": "status"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Invoice",
+  "is_active": 1,
+  "modified": "2025-10-06 16:03:49.160624",
+  "name": "Invoice Workflow",
+  "override_status": 0,
+  "send_email_alert": 0,
+  "states": [
+   {
+    "allow_edit": "Project Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Invoice Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Draft",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Office Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Invoice Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Sent",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Chief Accountant",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Invoice Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Paid",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Invoice Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 0,
+    "state": "Cancelled",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Send",
+    "allow_self_approval": 1,
+    "allowed": "Project Manager",
+    "condition": "",
+    "next_state": "Sent",
+    "parent": "Invoice Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Draft",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Send",
+    "allow_self_approval": 1,
+    "allowed": "Office Manager",
+    "condition": "",
+    "next_state": "Sent",
+    "parent": "Invoice Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Draft",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Mark Paid",
+    "allow_self_approval": 1,
+    "allowed": "Chief Accountant",
+    "condition": "",
+    "next_state": "Paid",
+    "parent": "Invoice Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Sent",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Reopen",
+    "allow_self_approval": 1,
+    "allowed": "Project Manager",
+    "condition": "",
+    "next_state": "Draft",
+    "parent": "Invoice Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Sent",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": "",
+    "next_state": "Cancelled",
+    "parent": "Invoice Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Paid",
+    "workflow_builder_id": null
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Invoice Workflow",
+  "workflow_state_field": "status"
+ }
 ]
