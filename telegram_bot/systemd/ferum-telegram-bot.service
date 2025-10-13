@@ -1,0 +1,17 @@
+[Unit]
+Description=Ferum Telegram Bot (Aiogram)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/ferum/telegram-bot
+Environment=MODE=polling
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python -m apps.ferum_custom.telegram_bot.main
+User=ferum
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

@@ -84,8 +84,20 @@ def list_service_requests(
 
 @frappe.whitelist()
 def get_service_request(name: str) -> dict:
-	doc = frappe.get_doc("Service Request", name)
-	return doc.as_dict()
+    doc = frappe.get_doc("Service Request", name)
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def update_service_request_status(name: str, status: str) -> dict:
+    """Update Service Request status with server-side validation.
+
+    Requires authentication; relies on DocType validations and permission checks.
+    """
+    doc = frappe.get_doc("Service Request", name)
+    doc.status = status
+    doc.save()  # will trigger workflow and validations
+    return {"ok": True, "name": doc.name, "status": doc.status}
 
 
 @frappe.whitelist()

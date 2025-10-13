@@ -10,6 +10,7 @@ from typing import Iterable
 
 import frappe
 from frappe.utils import cint
+from ferum_custom.ferum_custom.settings import is_feature_enabled
 
 
 def _ensure_dashboard_chart(
@@ -190,6 +191,9 @@ def backup_to_drive() -> dict:
     filepath = getattr(bkp, "backup_path", None) or getattr(bkp, "backup_path_db", None)
     if not filepath:
         return {"status": "skipped", "reason": "no-backup-path"}
+
+    if not is_feature_enabled("enable_google_drive_sync"):
+        return {"status": "skipped", "reason": "drive-disabled"}
 
     try:
         with open(filepath, "rb") as f:

@@ -4,6 +4,7 @@ from frappe.model.document import Document
 from frappe.utils.pdf import get_pdf
 
 from ferum_custom.ferum_custom.integrations.drive import upload_bytes
+from ferum_custom.ferum_custom.settings import is_feature_enabled
 from ferum_custom.ferum_custom.utils import get_allowed_customers, user_roles
 
 
@@ -16,6 +17,7 @@ class ServiceReport(Document):
 		self.ensure_company_from_request()
 		self.calculate_total_amount()
 		self.validate_attachments()
+		self._sync_document_links_to_attachments()
 		self.validate_workflow_transitions()
 		self.validate_work_items()
 
@@ -55,11 +57,71 @@ class ServiceReport(Document):
 			pass
 
 	def validate_attachments(self):
+		"""Validate presence and types of required attachments.
+
+		Business rule:
+		- At least one attachment must be present.
+		- Must include at least one photo (image/*).
+		- Must include an act/report (PDF), treated as the mandatory "акт".
+		"""
 		if not self.documents:
 			frappe.throw(_("At least one attachment is required."))
+
+		from mimetypes import guess_type
+
+		has_photo = False
+		has_act_pdf = False
+		missing = []
 		for item in self.documents:
 			if not item.custom_attachment:
-				frappe.throw(_("Attachment is required for all Document Items."))
+				missing.append(item.name)
+				continue
+			try:
+				att = frappe.get_doc("Custom Attachment", item.custom_attachment)
+				mime = (att.file_type or "").lower().strip()
+				if not mime:
+					# derive from filename or URL
+					name_or_url = att.file_name or att.file_url or ""
+					m2, _ = guess_type(name_or_url)
+					mime = (m2 or "").lower()
+				if mime.startswith("image/"):
+					has_photo = True
+				# consider any PDF as an acceptable Act/Report
+				if mime == "application/pdf" or (att.file_name or "").lower().endswith(".pdf"):
+					has_act_pdf = True
+			except Exception:
+				# if attachment can't be loaded, treat as missing
+				missing.append(item.custom_attachment)
+
+		if missing:
+			frappe.throw(
+				_("Attachment is required for all Document Items. Missing: {0}").format(
+					", ".join(missing)
+				)
+			)
+		if not has_photo:
+			frappe.throw(_("At least one photo (image) attachment is required."))
+		if not has_act_pdf:
+			frappe.throw(_("An Act (PDF) attachment is required."))
+
+	def _sync_document_links_to_attachments(self) -> None:
+		"""Ensure CustomAttachment records referenced in documents table are linked to this Service Report.
+
+		This guarantees Google Drive synchronization places files under the Service Report context.
+		Idempotent: only updates records where link differs or is missing.
+		"""
+		for item in self.documents or []:
+			if not getattr(item, "custom_attachment", None):
+				continue
+			try:
+				att = frappe.get_doc("Custom Attachment", item.custom_attachment)
+				if att.linked_doctype != "Service Report" or att.linked_docname != self.name:
+					att.db_set({
+						"linked_doctype": "Service Report",
+						"linked_docname": self.name,
+					}, commit=False)
+			except Exception:
+				frappe.log_error(frappe.get_traceback(), f"Failed to sync attachment link for {item.custom_attachment}")
 
 	def validate_workflow_transitions(self):
 		"""Validate allowed status transitions.
@@ -96,6 +158,12 @@ class ServiceReport(Document):
 				{"linked_report": self.name, "status": "Completed"},
 			)
 			frappe.msgprint(_(f"Service Request {self.service_request} updated and marked as Completed."))
+			try:
+				# Add an audit comment on the Service Request
+				req = frappe.get_doc("Service Request", self.service_request)
+				req.add_comment("Info", _("Linked Service Report {0}").format(self.name))
+			except Exception:
+				pass
 
 	def validate_work_items(self):
 		if not self.work_items:
@@ -119,6 +187,8 @@ class ServiceReport(Document):
 
 		Folders: /Customer/Project/Reports, filename: ServiceReport-{name}.pdf
 		"""
+		if not is_feature_enabled("enable_google_drive_sync"):
+			return
 		try:
 			frappe.enqueue(
 				"ferum_custom.ferum_custom.doctype.service_report.service_report._upload_report_pdf",

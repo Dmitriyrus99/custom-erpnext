@@ -5,6 +5,7 @@ import contextlib
 import frappe
 
 from ferum_custom.ferum_custom.integrations.drive import upload_bytes
+from ferum_custom.ferum_custom.settings import is_feature_enabled
 
 
 def _read_file_content(doc) -> tuple[bytes | None, str | None]:
@@ -23,11 +24,13 @@ def _read_file_content(doc) -> tuple[bytes | None, str | None]:
 
 
 def on_file_update(doc, method: str | None = None) -> None:
-    """Upload new/updated ERPNext File to Google Drive, store drive ids.
+	"""Upload new/updated ERPNext File to Google Drive, store drive ids.
 
-    Skips if drive_file_id already set or file is external (no stored content).
-    """
-    try:
+	Skips if drive_file_id already set or file is external (no stored content).
+	"""
+	if not is_feature_enabled("enable_google_drive_sync"):
+		return
+	try:
         # If we already have a drive file id, do not re-upload here
         if getattr(doc, "drive_file_id", None):
             return
@@ -62,4 +65,3 @@ def on_file_update(doc, method: str | None = None) -> None:
                 pass
     except Exception:
         frappe.log_error(frappe.get_traceback(), "File Drive upload failed")
-

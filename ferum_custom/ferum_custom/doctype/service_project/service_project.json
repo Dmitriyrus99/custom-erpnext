@@ -23,7 +23,9 @@
     "service_objects_section",
     "objects",
     "attachments_section",
-    "attachments"
+    "attachments",
+    "telegram_users_section",
+    "telegram_users"
   ],
   "fields": [
     {
@@ -128,6 +130,17 @@
       "fieldtype": "Table",
       "label": "Attachments",
       "options": "Document Attachment Item"
+    },
+    {
+      "fieldname": "telegram_users_section",
+      "fieldtype": "Section Break",
+      "label": "Telegram Users"
+    },
+    {
+      "fieldname": "telegram_users",
+      "fieldtype": "Table",
+      "label": "Telegram Users",
+      "options": "Project Telegram User Item"
     }
   ],
   "index_web_pages_for_search": 1,

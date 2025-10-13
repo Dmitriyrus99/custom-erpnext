@@ -20,6 +20,12 @@ class ServiceProject(Document):
 		except Exception:
 			pass
 
+		# Sync user permissions for Telegram users mapped on this project
+		try:
+			self._sync_telegram_user_permissions()
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "Sync Telegram user permissions failed (Service Project)")
+
 	def check_dates_and_amount(self):
 		if self.end_date and self.start_date and self.end_date < self.start_date:
 			frappe.throw(_("End Date cannot be before Start Date."))
@@ -65,8 +71,70 @@ class ServiceProject(Document):
 					updated = True
 				if updated:
 					obj.save(ignore_permissions=True)
-			except Exception:
+		except Exception:
 				pass
+
+	def _sync_telegram_user_permissions(self) -> None:
+		"""Ensure that mapped Telegram users have explicit permission to this project.
+
+		Creates User Permission entries (allow=Service Project, for_value=self.name)
+		for each row in the `telegram_users` table. Idempotent: skips if exists.
+		"""
+		if not getattr(self, "telegram_users", None):
+			return
+		current_users: set[str] = set()
+		for row in self.telegram_users:
+			user = None
+			try:
+				if row.user:
+					user = row.user
+				elif row.telegram_user:
+					user = frappe.db.get_value("Telegram User Link", row.telegram_user, "user")
+			except Exception:
+				user = None
+			if not user:
+				continue
+			current_users.add(user)
+			exists = frappe.db.exists(
+				"User Permission",
+				{
+					"user": user,
+					"allow": "Service Project",
+					"for_value": self.name,
+				},
+			)
+			if exists:
+				continue
+			doc = frappe.get_doc(
+				{
+					"doctype": "User Permission",
+					"user": user,
+					"allow": "Service Project",
+					"for_value": self.name,
+					"apply_to_all_doctypes": 0,
+					"applicable_for": "Service Project",
+					"is_default": 1,
+				}
+			)
+			doc.insert(ignore_permissions=True)
+
+		# Best-effort cleanup: remove permissions we previously created that are no longer mapped
+		try:
+			existing = frappe.get_all(
+				"User Permission",
+				filters={
+					"allow": "Service Project",
+					"for_value": self.name,
+					"apply_to_all_doctypes": 0,
+					"applicable_for": "Service Project",
+				},
+				fields=["name", "user"],
+			)
+			for up in existing:
+				if up.get("user") and up["user"] not in current_users:
+					frappe.delete_doc("User Permission", up["name"], ignore_permissions=True)
+		except Exception:
+			pass
 
 	def ensure_company_defaults(self):
 		# When customer has a preferred company, prefill

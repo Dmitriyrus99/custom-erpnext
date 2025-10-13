@@ -1,7 +1,8 @@
 import frappe
 from frappe.model.document import Document
 
-from ferum_custom.ferum_custom.integrations.drive import upload_bytes, delete_file
+from ferum_custom.ferum_custom.integrations.drive import delete_file, upload_bytes
+from ferum_custom.ferum_custom.settings import is_feature_enabled
 
 
 class CustomAttachment(Document):
@@ -22,6 +23,8 @@ class CustomAttachment(Document):
 			frappe.log_error(frappe.get_traceback(), "CustomAttachment: Drive delete on_trash failed")
 
 	def enqueue_drive_upload(self) -> None:
+		if not is_feature_enabled("enable_google_drive_sync"):
+			return
 		try:
 			frappe.enqueue(
 				"ferum_custom.ferum_custom.doctype.custom_attachment.custom_attachment._upload_to_drive",
@@ -48,6 +51,8 @@ def _resolve_file_content(file_url: str) -> tuple[bytes | None, str | None]:
 
 
 def _upload_to_drive(docname: str) -> None:
+	if not is_feature_enabled("enable_google_drive_sync"):
+		return
 	doc = frappe.get_doc("Custom Attachment", docname)
 	if doc.drive_file_id:
 		return

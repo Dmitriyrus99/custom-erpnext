@@ -20,3 +20,6 @@ ferum_custom.patches.v15_0.migrate_custom_attachment_to_file
 ferum_custom.patches.v15_0.finalize_freeze_legacy
 ferum_custom.patches.v15_0.add_file_drive_fields
 ferum_custom.patches.v15_0.seed_query_reports
+ferum_custom.patches.v15_1.sync_service_report_attachment_links
+ferum_custom.patches.v15_1.bootstrap_telegram_settings
+ferum_custom.patches.v15_1.add_telegram_fields_to_user
