@@ -4,6 +4,11 @@ import frappe
 from frappe import _
 
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
+
+try:
+	import erpnext  # type: ignore
+except Exception:  # pragma: no cover - erpnext always present in this bench
+	erpnext = None  # fallback safety
 from ferum_custom.ferum_custom.utils import get_allowed_customers
 
 
@@ -13,7 +18,7 @@ def _paginate(start: int | None = None, page_length: int | None = None) -> tuple
 	return s, max(1, min(pl, 200))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])  # API used by bot/portal: POST only
 def create_service_request(
 	title: str, description: str | None = None, service_object: str | None = None
 ) -> str:
@@ -21,6 +26,23 @@ def create_service_request(
 	doc = frappe.new_doc("Service Request")
 	doc.title = title
 	doc.description = description
+	# Ensure required company field is populated
+	try:
+		default_company = None
+		if erpnext is not None and hasattr(erpnext, "get_default_company"):
+			default_company = erpnext.get_default_company()
+		if not default_company:
+			# Fallback to global default or the first Company
+			default_company = frappe.db.get_single_value("Global Defaults", "default_company")
+		if not default_company:
+			companies = frappe.get_all("Company", pluck="name", limit=1)
+			if companies:
+				default_company = companies[0]
+		if default_company:
+			doc.company = default_company
+	except Exception:
+		# Do not block on company resolution; insert() will validate if still missing
+		pass
 	if service_object:
 		# Accept either a docname or a human-friendly object_name
 		obj_name = service_object
@@ -37,8 +59,7 @@ def create_service_request(
 	return doc.name
 
 
-@frappe.whitelist()
-
+@frappe.whitelist(methods=["GET"])  # Listing is idempotent
 def list_service_requests(
 	status: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
@@ -82,26 +103,25 @@ def list_service_requests(
 	return {"data": data, "start": s, "page_length": pl}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])  # Read-only fetch
 def get_service_request(name: str) -> dict:
-    doc = frappe.get_doc("Service Request", name)
-    return doc.as_dict()
+	doc = frappe.get_doc("Service Request", name)
+	return doc.as_dict()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])  # State change
 def update_service_request_status(name: str, status: str) -> dict:
-    """Update Service Request status with server-side validation.
+	"""Update Service Request status with server-side validation.
 
-    Requires authentication; relies on DocType validations and permission checks.
-    """
-    doc = frappe.get_doc("Service Request", name)
-    doc.status = status
-    doc.save()  # will trigger workflow and validations
-    return {"ok": True, "name": doc.name, "status": doc.status}
+	Requires authentication; relies on DocType validations and permission checks.
+	"""
+	doc = frappe.get_doc("Service Request", name)
+	doc.status = status
+	doc.save()  # will trigger workflow and validations
+	return {"ok": True, "name": doc.name, "status": doc.status}
 
 
 @frappe.whitelist()
-
 def list_service_reports(
 	project: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
@@ -128,7 +148,11 @@ def list_service_reports(
 				if names:
 					keep = []
 					for n in names:
-						cust = frappe.db.get_value("Service Request", frappe.db.get_value("Service Report", n, "service_request"), "customer")
+						cust = frappe.db.get_value(
+							"Service Request",
+							frappe.db.get_value("Service Report", n, "service_request"),
+							"customer",
+						)
 						if cust in set(allowed):
 							keep.append(n)
 					filters = {"name": ["in", keep]} if keep else {"name": "__none__"}
@@ -235,7 +259,7 @@ def confirm_service_request(name: str) -> None:
 	doc = frappe.get_doc("Service Request", name)
 	# Permission check performed by Frappe via get_doc; add comment
 	try:
-		doc.add_comment("Comment", _(f"Client confirmed completion via portal."))
+		doc.add_comment("Comment", _("Client confirmed completion via portal."))
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Client confirm SR failed")
 
@@ -245,6 +269,6 @@ def confirm_service_report(name: str) -> None:
 	"""Allow a Client to confirm a Service Report via a comment."""
 	doc = frappe.get_doc("Service Report", name)
 	try:
-		doc.add_comment("Comment", _(f"Client confirmed Service Report via portal."))
+		doc.add_comment("Comment", _("Client confirmed Service Report via portal."))
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Client confirm report failed")

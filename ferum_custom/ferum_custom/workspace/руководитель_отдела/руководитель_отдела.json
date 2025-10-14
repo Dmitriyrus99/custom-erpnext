@@ -1,7 +1,7 @@
 {
  "charts": [],
  "content": "[{\"type\":\"header\",\"data\":{\"text\":\"\u0420\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u043e\u0442\u0434\u0435\u043b\u0430\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0417\u0430\u044f\u0432\u043a\u0438\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u0435\u0440\u0430\u0441\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u043d\u044b\u0435 \u0437\u0430\u044f\u0432\u043a\u0438\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041e\u0442\u043a\u0440\u044b\u0442\u044b\u0435 \u0437\u0430\u044f\u0432\u043a\u0438 \u043f\u043e \u0438\u043d\u0436\u0435\u043d\u0435\u0440\u0430\u043c\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0421\u0435\u0440\u0432\u0438\u0441\u043d\u044b\u0435 \u043e\u0442\u0447\u0435\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041f\u0440\u043e\u0435\u043a\u0442\u044b\",\"col\":3}}]",
- "creation": "2025-10-06 16:03:51.593684",
+ "creation": "2025-10-06 16:37:38.252742",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "label": "\u0420\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u043e\u0442\u0434\u0435\u043b\u0430",
  "links": [],
- "modified": "2025-10-06 16:04:52.516234",
+ "modified": "2025-10-14 15:07:56.672240",
  "modified_by": "Administrator",
  "module": "Ferum Custom",
  "name": "\u0420\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u043e\u0442\u0434\u0435\u043b\u0430",

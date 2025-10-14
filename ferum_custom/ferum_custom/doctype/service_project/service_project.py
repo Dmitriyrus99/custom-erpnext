@@ -24,7 +24,9 @@ class ServiceProject(Document):
 		try:
 			self._sync_telegram_user_permissions()
 		except Exception:
-			frappe.log_error(frappe.get_traceback(), "Sync Telegram user permissions failed (Service Project)")
+			frappe.log_error(
+				frappe.get_traceback(), "Sync Telegram user permissions failed (Service Project)"
+			)
 
 	def check_dates_and_amount(self):
 		if self.end_date and self.start_date and self.end_date < self.start_date:
@@ -71,7 +73,7 @@ class ServiceProject(Document):
 					updated = True
 				if updated:
 					obj.save(ignore_permissions=True)
-		except Exception:
+			except Exception:
 				pass
 
 	def _sync_telegram_user_permissions(self) -> None:
@@ -145,7 +147,6 @@ class ServiceProject(Document):
 					self.company = cust_company
 		except Exception:
 			pass
-
 
 
 def get_permission_query_conditions(user: str | None = None) -> str | None:

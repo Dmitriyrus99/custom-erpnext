@@ -17,7 +17,8 @@ except Exception:  # pragma: no cover - optional dependency
 	Credentials = None  # type: ignore[assignment]
 
 
-SERVICE_ACCOUNT_SCOPE_DRIVE = "https://www.googleapis.com/auth/drive"
+# Principle of least privilege: prefer drive.file scope
+SERVICE_ACCOUNT_SCOPE_DRIVE = "https://www.googleapis.com/auth/drive.file"
 SERVICE_ACCOUNT_SCOPE_SHEETS = "https://www.googleapis.com/auth/spreadsheets"
 
 

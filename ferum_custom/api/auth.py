@@ -55,16 +55,48 @@ def login(username: str, password: str, otp: str | None = None) -> dict:
 	secret = get_setting("jwt_secret")
 	if not secret:
 		frappe.throw(_("JWT secret not configured"))
-	payload = {"sub": username, "iat": int(time.time()), "exp": int(time.time()) + 3600}
+	# Issue short-lived token with audience/scope claims
+	payload = {
+		"sub": username,
+		"iat": int(time.time()),
+		"exp": int(time.time()) + 3600,
+		"aud": "ferum.api",
+		"scope": "ferum:api",
+	}
 	token = jwt.encode(payload, secret, algorithm="HS256")
 	return {"token": token}
 
 
 def jwt_before_request():
-	"""Optional: accept Bearer JWT on API calls under our namespace."""
+	"""Optional: accept Bearer JWT on Ferum API namespace only.
+
+	Guards:
+	- Feature flag enabled and secret present
+	- Request targets only our namespace (`/api/method/ferum_custom.*`)
+	- If token has `aud`, require it to be `ferum.api`
+	"""
 	try:
 		if jwt is None or not is_feature_enabled("enable_jwt"):
 			return
+
+		# Restrict applicability to our API namespace to reduce attack surface
+		try:
+			path = getattr(frappe.request, "path", "")  # type: ignore[attr-defined]
+		except Exception:
+			path = ""
+		form_cmd = None
+		try:
+			form_cmd = (getattr(getattr(frappe.local, "form_dict", object()), "cmd", None) or "").strip()
+		except Exception:
+			form_cmd = None
+		in_namespace = False
+		if path and "/api/method/ferum_custom." in path:
+			in_namespace = True
+		if form_cmd and str(form_cmd).startswith("ferum_custom."):
+			in_namespace = True
+		if not in_namespace:
+			return
+
 		secret = get_setting("jwt_secret")
 		if not secret:
 			return
@@ -72,12 +104,16 @@ def jwt_before_request():
 		if not authz or not authz.startswith("Bearer "):
 			return
 		token = authz.split(" ", 1)[1]
-		data = jwt.decode(token, secret, algorithms=["HS256"])  # type: ignore[arg-type]
+		# Decode without audience verification first to remain backward compatible
+		data = jwt.decode(token, secret, algorithms=["HS256"], options={"verify_aud": False})  # type: ignore[arg-type]
+		aud = data.get("aud")
+		if aud is not None and aud != "ferum.api":
+			return
 		user = data.get("sub")
 		if user and user != frappe.session.user:
 			frappe.set_user(user)
 	except Exception:
-		# Do not block non-protected routes silently
+		# Do not block non-protected routes
 		pass
 
 

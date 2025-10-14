@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup  # moved into package
 
 
 def request_actions(name: str) -> InlineKeyboardMarkup:
@@ -10,4 +10,3 @@ def request_actions(name: str) -> InlineKeyboardMarkup:
             ],
         ]
     )
-

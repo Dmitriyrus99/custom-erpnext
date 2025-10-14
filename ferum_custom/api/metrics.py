@@ -2,6 +2,8 @@ import time
 
 import frappe
 
+from ferum_custom.ferum_custom.metrics import iter_counters
+
 
 @frappe.whitelist(allow_guest=True)
 def prometheus() -> None:
@@ -27,6 +29,15 @@ def prometheus() -> None:
 	lines.append("# HELP ferum_invoices_paid Count of invoices with status=Paid")
 	lines.append("# TYPE ferum_invoices_paid gauge")
 	lines.append(f"ferum_invoices_paid {paid_invoices} {ts}")
+
+	# Export integration counters
+	for name, labels, value in iter_counters():
+		# metric naming: already namespaced at definition site
+		if labels:
+			lbl = ",".join(f'{k}="{v}"' for k, v in labels.items())
+			lines.append(f"{name}{{{lbl}}} {value} {ts}")
+		else:
+			lines.append(f"{name} {value} {ts}")
 
 	try:
 		import psutil  # type: ignore[import-untyped]

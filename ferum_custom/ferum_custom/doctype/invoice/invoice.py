@@ -20,6 +20,7 @@ from ferum_custom.ferum_custom.integrations.google import (
 	SERVICE_ACCOUNT_SCOPE_SHEETS,
 	build_service_account_credentials,
 )
+from ferum_custom.ferum_custom.metrics import inc as metrics_inc
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
 # --- Google Sheets Integration ---
@@ -53,9 +54,9 @@ def get_google_sheet():
 
 from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
 from ferum_custom.ferum_custom.utils import (
-    get_allowed_customers,
-    get_users_by_roles,
-    parse_names_argument,
+	get_allowed_customers,
+	get_users_by_roles,
+	parse_names_argument,
 )
 
 
@@ -125,36 +126,36 @@ def sync_to_google_sheets(docname: str):
 		doc = frappe.get_doc("Invoice", docname)
 		# Check if invoice already exists
 		cell = sheet.find(doc.name)
-        # Resolve PM email for the project (if any) and creator email
-        pm_email = None
-        try:
-            if getattr(doc, "project", None):
-                pm_email = frappe.db.get_value(
-                    "Service Project", doc.project, ["project_manager", "project_manager.email"], as_dict=True
-                )
-                if isinstance(pm_email, dict):
-                    pm_email = pm_email.get("project_manager.email") or pm_email.get("project_manager")
-        except Exception:
-            pm_email = None
+		# Resolve PM email for the project (if any) and creator email
+		pm_email = None
+		try:
+			if getattr(doc, "project", None):
+				pm_email = frappe.db.get_value(
+					"Service Project", doc.project, ["project_manager", "project_manager.email"], as_dict=True
+				)
+				if isinstance(pm_email, dict):
+					pm_email = pm_email.get("project_manager.email") or pm_email.get("project_manager")
+		except Exception:
+			pm_email = None
 
-        created_by_email = None
-        try:
-            created_by_email = frappe.db.get_value("User", doc.owner, "email") or doc.owner
-        except Exception:
-            created_by_email = doc.owner
+		created_by_email = None
+		try:
+			created_by_email = frappe.db.get_value("User", doc.owner, "email") or doc.owner
+		except Exception:
+			created_by_email = doc.owner
 
-        row_data = [
-            doc.name,  # A
-            doc.project,  # B
-            doc.counterparty_name,  # C
-            doc.counterparty_type,  # D
-            doc.amount,  # E
-            doc.status,  # F
-            doc.invoice_date,  # G
-            frappe.utils.now(),  # H (synced_at)
-            created_by_email,  # I
-            pm_email,  # J
-        ]
+		row_data = [
+			doc.name,  # A
+			doc.project,  # B
+			doc.counterparty_name,  # C
+			doc.counterparty_type,  # D
+			doc.amount,  # E
+			doc.status,  # F
+			doc.invoice_date,  # G
+			frappe.utils.now(),  # H (synced_at)
+			created_by_email,  # I
+			pm_email,  # J
+		]
 		if cell:
 			# Update existing row
 			sheet.update(f"A{cell.row}", [row_data])
@@ -164,71 +165,78 @@ def sync_to_google_sheets(docname: str):
 			sheet.append_row(row_data)
 			frappe.msgprint(_(f"Invoice {doc.name} added to Google Sheets."))
 		_ensure_sheet_formatting(sheet)
+		try:
+			metrics_inc("ferum_integration_sheets_sync_total", {"result": "success"})
+		except Exception:
+			pass
 	except Exception as e:
 		frappe.log_error(
 			f"Google Sheets sync failed for invoice {doc.name}: {e!s}", "Google Sheets Sync Error"
 		)
+		try:
+			metrics_inc("ferum_integration_sheets_sync_total", {"result": "error"})
+		except Exception:
+			pass
 
 
 def _ensure_sheet_formatting(sheet) -> None:
 	"""Ensure basic conditional formatting is present (idempotent)."""
 	try:
-        ss = sheet.spreadsheet
-        # Conditional formats:
-        # 1) Status == Paid (col F=6) → green
-        # 2) Status == Sent (col F=6) → blue
-        # 3) Created-by != Project Manager (cols I and J) and project not in exceptions → yellow
-        requests = []
-        # Helper to add a rule
-        def _add_rule(rule):
-            requests.append({"addConditionalFormatRule": {"rule": rule, "index": 0}})
+		ss = sheet.spreadsheet
+		# Conditional formats:
+		# 1) Status == Paid (col F=6) → green
+		# 2) Status == Sent (col F=6) → blue
+		# 3) Created-by != Project Manager (cols I and J) and project not in exceptions → yellow
+		requests = []
 
-        status_range = {
-            "sheetId": sheet.id,
-            "startRowIndex": 1,
-            "startColumnIndex": 5,
-            "endColumnIndex": 6,
-        }
-        _add_rule(
-            {
-                "ranges": [status_range],
-                "booleanRule": {
-                    "condition": {"type": "TEXT_EQ", "values": [{"userEnteredValue": "Paid"}]},
-                    "format": {"backgroundColor": {"red": 0.8, "green": 0.95, "blue": 0.8}},
-                },
-            }
-        )
-        _add_rule(
-            {
-                "ranges": [status_range],
-                "booleanRule": {
-                    "condition": {"type": "TEXT_EQ", "values": [{"userEnteredValue": "Sent"}]},
-                    "format": {"backgroundColor": {"red": 0.85, "green": 0.9, "blue": 1}},
-                },
-            }
-        )
-        # Custom formula on columns I (9) and J (10), with project in column B (2)
-        mismatch_range = {
-            "sheetId": sheet.id,
-            "startRowIndex": 1,
-            "startColumnIndex": 9,
-            "endColumnIndex": 10,
-        }
-        # Exclude projects: "ЗП офис", "Тендеры", "Склад", "Офис"
-        formula = (
-            '=AND($B2<>"ЗП офис",$B2<>"Тендеры",$B2<>"Склад",$B2<>"Офис",$I2<>$J2)'
-        )
-        _add_rule(
-            {
-                "ranges": [mismatch_range],
-                "booleanRule": {
-                    "condition": {"type": "CUSTOM_FORMULA", "values": [{"userEnteredValue": formula}]},
-                    "format": {"backgroundColor": {"red": 1.0, "green": 0.95, "blue": 0.6}},
-                },
-            }
-        )
-        if requests:
-            ss.batch_update({"requests": requests})
+		# Helper to add a rule
+		def _add_rule(rule):
+			requests.append({"addConditionalFormatRule": {"rule": rule, "index": 0}})
+
+		status_range = {
+			"sheetId": sheet.id,
+			"startRowIndex": 1,
+			"startColumnIndex": 5,
+			"endColumnIndex": 6,
+		}
+		_add_rule(
+			{
+				"ranges": [status_range],
+				"booleanRule": {
+					"condition": {"type": "TEXT_EQ", "values": [{"userEnteredValue": "Paid"}]},
+					"format": {"backgroundColor": {"red": 0.8, "green": 0.95, "blue": 0.8}},
+				},
+			}
+		)
+		_add_rule(
+			{
+				"ranges": [status_range],
+				"booleanRule": {
+					"condition": {"type": "TEXT_EQ", "values": [{"userEnteredValue": "Sent"}]},
+					"format": {"backgroundColor": {"red": 0.85, "green": 0.9, "blue": 1}},
+				},
+			}
+		)
+		# Custom formula on columns I (9) and J (10), with project in column B (2)
+		mismatch_range = {
+			"sheetId": sheet.id,
+			"startRowIndex": 1,
+			"startColumnIndex": 9,
+			"endColumnIndex": 10,
+		}
+		# Exclude projects: "ЗП офис", "Тендеры", "Склад", "Офис"
+		formula = '=AND($B2<>"ЗП офис",$B2<>"Тендеры",$B2<>"Склад",$B2<>"Офис",$I2<>$J2)'
+		_add_rule(
+			{
+				"ranges": [mismatch_range],
+				"booleanRule": {
+					"condition": {"type": "CUSTOM_FORMULA", "values": [{"userEnteredValue": formula}]},
+					"format": {"backgroundColor": {"red": 1.0, "green": 0.95, "blue": 0.6}},
+				},
+			}
+		)
+		if requests:
+			ss.batch_update({"requests": requests})
 	except Exception:
 		# Best-effort: formatting is optional
 		pass
@@ -444,11 +452,11 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 			"exists(select 1 from `tabService Project` sp where sp.name = `tabInvoice`.project and sp.project_manager=%(user)s)"
 		)
 		return " and ".join(f"({c})" for c in conds)
-    # Client role: доступ к счетам запрещён
-    if "Client" in roles:
-        # Возвращаем фильтр, который не отдаёт строки
-        base = " and ".join(f"({c})" for c in conds)
-        return base + (" and 1=0" if base else "1=0")
+	# Client role: доступ к счетам запрещён
+	if "Client" in roles:
+		# Возвращаем фильтр, который не отдаёт строки
+		base = " and ".join(f"({c})" for c in conds)
+		return base + (" and 1=0" if base else "1=0")
 	# Default: no rows
 	base = " and ".join(f"({c})" for c in conds)
 	return base + (" and 1=0" if base else "1=0")
@@ -464,7 +472,7 @@ def has_permission(doc, user: str | None = None) -> bool:
 	if "Project Manager" in roles and doc.project:
 		pm = frappe.db.get_value("Service Project", doc.project, "project_manager")
 		return pm == user
-    # Клиенты не имеют доступа к документам счетов
-    if "Client" in roles:
-        return False
-    return False
+	# Клиенты не имеют доступа к документам счетов
+	if "Client" in roles:
+		return False
+	return False

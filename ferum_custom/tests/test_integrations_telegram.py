@@ -20,7 +20,9 @@ def test_is_chat_allowed_with_allowlist(monkeypatch):
 
 
 def test_is_admin_with_config(monkeypatch):
-	monkeypatch.setattr(telegram, "get_list_setting", lambda key: ["Boss"] if key == "telegram_admin_usernames" else [])
+	monkeypatch.setattr(
+		telegram, "get_list_setting", lambda key: ["Boss"] if key == "telegram_admin_usernames" else []
+	)
 	assert telegram.is_admin("Boss") is True
 	assert telegram.is_admin("boss") is True
 	assert telegram.is_admin("other") is False

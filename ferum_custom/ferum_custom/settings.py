@@ -2,10 +2,10 @@ from __future__ import annotations
 
 """Helpers for accessing :doctype:`Ferum Custom Settings`."""
 
-from functools import lru_cache
-from typing import Any
 import os
+from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import frappe
 
@@ -13,56 +13,56 @@ SETTINGS_DOCTYPE = "Ferum Custom Settings"
 ENV_PREFIX = "FERUM_"
 
 _ENV_FILES = (
-    # Local overrides first (highest precedence among files)
-    "config/.env.local.integrations",
-    # Team-shared defaults next
-    "config/.env.integrations",
+	# Local overrides first (highest precedence among files)
+	"config/.env.local.integrations",
+	# Team-shared defaults next
+	"config/.env.integrations",
 )
 
 
 def _load_env_files() -> None:
-    """Best-effort load of integration env files into process env.
+	"""Best-effort load of integration env files into process env.
 
-    - Only sets variables that are not already present in os.environ.
-    - Supports simple KEY=VALUE lines with optional quotes and comments.
-    - Relative paths are resolved from the Bench root (…/frappe-bench).
-    """
-    try:
-        here = Path(__file__).resolve()
-        # Bench root: apps/…/ferum_custom/ferum_custom/ferum_custom/settings.py -> bench root is parent of 'apps'
-        bench_root = here.parents[4]
-    except Exception:
-        bench_root = Path.cwd()
+	- Only sets variables that are not already present in os.environ.
+	- Supports simple KEY=VALUE lines with optional quotes and comments.
+	- Relative paths are resolved from the Bench root (…/frappe-bench).
+	"""
+	try:
+		here = Path(__file__).resolve()
+		# Bench root: apps/…/ferum_custom/ferum_custom/ferum_custom/settings.py -> bench root is parent of 'apps'
+		bench_root = here.parents[4]
+	except Exception:
+		bench_root = Path.cwd()
 
-    def _parse_line(line: str) -> tuple[str, str] | None:
-        line = line.strip()
-        if not line or line.startswith("#"):
-            return None
-        if "=" not in line:
-            return None
-        k, v = line.split("=", 1)
-        key = k.strip()
-        val = v.strip().strip("'\"")
-        if not key:
-            return None
-        return key, val
+	def _parse_line(line: str) -> tuple[str, str] | None:
+		line = line.strip()
+		if not line or line.startswith("#"):
+			return None
+		if "=" not in line:
+			return None
+		k, v = line.split("=", 1)
+		key = k.strip()
+		val = v.strip().strip("'\"")
+		if not key:
+			return None
+		return key, val
 
-    for rel in _ENV_FILES:
-        try:
-            path = bench_root / rel
-            if not path.exists():
-                continue
-            for raw in path.read_text(encoding="utf-8").splitlines():
-                pair = _parse_line(raw)
-                if not pair:
-                    continue
-                key, val = pair
-                # Only export FERUM_* keys; don't override explicit env
-                if key.startswith(ENV_PREFIX) and key not in os.environ:
-                    os.environ[key] = val
-        except Exception:
-            # Non-fatal: env files are optional
-            pass
+	for rel in _ENV_FILES:
+		try:
+			path = bench_root / rel
+			if not path.exists():
+				continue
+			for raw in path.read_text(encoding="utf-8").splitlines():
+				pair = _parse_line(raw)
+				if not pair:
+					continue
+				key, val = pair
+				# Only export FERUM_* keys; don't override explicit env
+				if key.startswith(ENV_PREFIX) and key not in os.environ:
+					os.environ[key] = val
+		except Exception:
+			# Non-fatal: env files are optional
+			pass
 
 
 # Load env files early so get_setting() sees them

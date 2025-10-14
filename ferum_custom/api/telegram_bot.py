@@ -170,9 +170,7 @@ def _cmd_ping(ctx: TelegramContext) -> None:
 	status = result.get("status", "unknown")
 	if status == "ok":
 		details = result.get("details") or {}
-		ctx.reply(
-			_("Telegram OK (bot: {0})").format(details.get("username") or details.get("bot_id") or "-")
-		)
+		ctx.reply(_("Telegram OK (bot: {0})").format(details.get("username") or details.get("bot_id") or "-"))
 	else:
 		message = result.get("message") or _("See error logs for details.")
 		ctx.reply(_("Telegram not ready: {0} — {1}").format(status, message))
@@ -195,8 +193,8 @@ ADMIN_COMMANDS = {"/close", "/analytics", "/ping"}
 
 
 def _cmd_whoami(ctx: TelegramContext) -> None:
-    username = ctx.user or "-"
-    ctx.reply(_(f"You are @{username}, chat_id={ctx.chat_id}"))
+	username = ctx.user or "-"
+	ctx.reply(_(f"You are @{username}, chat_id={ctx.chat_id}"))
 
 
 # Register publicly available helper
@@ -322,31 +320,31 @@ def _dispatch_command(ctx: TelegramContext) -> None:
 
 
 def _verify_secret(query_secret: str | None) -> None:
-    """Verify webhook authenticity via Telegram secret token.
+	"""Verify webhook authenticity via Telegram secret token.
 
-    Prefers the official header "X-Telegram-Bot-Api-Secret-Token" if present
-    (set via setWebhook secret_token). Falls back to the "secret" query param
-    for backward compatibility.
-    """
-    configured = (get_setting("telegram_webhook_secret") or "").strip()
-    # Read header if available (recommended)
-    header_secret = None
-    try:
-        header_secret = (frappe.request.headers.get("X-Telegram-Bot-Api-Secret-Token") or "").strip()
-    except Exception:
-        header_secret = None
+	Prefers the official header "X-Telegram-Bot-Api-Secret-Token" if present
+	(set via setWebhook secret_token). Falls back to the "secret" query param
+	for backward compatibility.
+	"""
+	configured = (get_setting("telegram_webhook_secret") or "").strip()
+	# Read header if available (recommended)
+	header_secret = None
+	try:
+		header_secret = (frappe.request.headers.get("X-Telegram-Bot-Api-Secret-Token") or "").strip()
+	except Exception:
+		header_secret = None
 
-    candidate = (header_secret or (query_secret or "")).strip()
-    if not configured or candidate != configured:
-        frappe.throw(_("Invalid secret"))
+	candidate = (header_secret or (query_secret or "")).strip()
+	if not configured or candidate != configured:
+		frappe.throw(_("Invalid secret"))
 
 
 @frappe.whitelist(allow_guest=True)
 def handle_update(secret: str | None = None, update: str | dict[str, Any] | None = None) -> dict[str, Any]:
 	"""Process Telegram webhook updates with simple chat commands."""
 
-    _verify_secret(secret)
-    payload = frappe.parse_json(update) if isinstance(update, str) else (update or {})
+	_verify_secret(secret)
+	payload = frappe.parse_json(update) if isinstance(update, str) else (update or {})
 	ctx = _build_context(payload)
 
 	if not is_feature_enabled("enable_telegram_notifications"):
@@ -358,41 +356,41 @@ def handle_update(secret: str | None = None, update: str | dict[str, Any] | None
 		return {"ok": False, "error": "chat-not-allowed"}
 
 	# Identify mapped ERPNext user by chat_id or username and switch context
-    try:
-        target_user: str | None = None
-        # 1) Prefer explicit mapping via Telegram User Link
-        rows = frappe.get_all(
-            "Telegram User Link",
-            filters={"chat_id": str(ctx.chat_id) if ctx.chat_id else "__none__"},
-            fields=["user"],
-            limit=1,
-        )
-        if rows and rows[0].get("user"):
-            target_user = rows[0]["user"]
-        # 2) Fallback to mapping by Telegram username
-        if not target_user and ctx.user:
-            rows = frappe.get_all(
-                "Telegram User Link",
-                filters={"telegram_username": ctx.user},
-                fields=["user"],
-                limit=1,
-            )
-            if rows and rows[0].get("user"):
-                target_user = rows[0]["user"]
-        # 3) Fallback to User custom fields (telegram_chat_id / telegram_username)
-        if not target_user and ctx.chat_id:
-            u = frappe.get_all("User", filters={"telegram_chat_id": str(ctx.chat_id)}, pluck="name", limit=1)
-            if u:
-                target_user = u[0]
-        if not target_user and ctx.user:
-            u = frappe.get_all("User", filters={"telegram_username": ctx.user}, pluck="name", limit=1)
-            if u:
-                target_user = u[0]
+	try:
+		target_user: str | None = None
+		# 1) Prefer explicit mapping via Telegram User Link
+		rows = frappe.get_all(
+			"Telegram User Link",
+			filters={"chat_id": str(ctx.chat_id) if ctx.chat_id else "__none__"},
+			fields=["user"],
+			limit=1,
+		)
+		if rows and rows[0].get("user"):
+			target_user = rows[0]["user"]
+		# 2) Fallback to mapping by Telegram username
+		if not target_user and ctx.user:
+			rows = frappe.get_all(
+				"Telegram User Link",
+				filters={"telegram_username": ctx.user},
+				fields=["user"],
+				limit=1,
+			)
+			if rows and rows[0].get("user"):
+				target_user = rows[0]["user"]
+		# 3) Fallback to User custom fields (telegram_chat_id / telegram_username)
+		if not target_user and ctx.chat_id:
+			u = frappe.get_all("User", filters={"telegram_chat_id": str(ctx.chat_id)}, pluck="name", limit=1)
+			if u:
+				target_user = u[0]
+		if not target_user and ctx.user:
+			u = frappe.get_all("User", filters={"telegram_username": ctx.user}, pluck="name", limit=1)
+			if u:
+				target_user = u[0]
 
-        if target_user and target_user != frappe.session.user:
-            frappe.set_user(target_user)
-    except Exception:
-        pass
+		if target_user and target_user != frappe.session.user:
+			frappe.set_user(target_user)
+	except Exception:
+		pass
 
 	if not ctx.text and not ctx.has_photo:
 		return {"ok": True}

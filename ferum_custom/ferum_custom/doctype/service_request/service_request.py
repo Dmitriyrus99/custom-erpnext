@@ -8,9 +8,9 @@ from frappe.utils import add_days, add_to_date, getdate, nowdate
 from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
 from ferum_custom.ferum_custom.services import get_project_manager_email
 from ferum_custom.ferum_custom.utils import (
-    get_allowed_customers,
-    get_users_by_roles,
-    user_roles,
+	get_allowed_customers,
+	get_users_by_roles,
+	user_roles,
 )
 
 
@@ -286,7 +286,6 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 	return " and ".join(f"({c})" for c in conds) if conds else None
 
 
-
 def has_permission(doc, user: str | None = None) -> bool:
 	user = user or frappe.session.user
 	roles = user_roles(user)
@@ -315,18 +314,23 @@ def has_permission(doc, user: str | None = None) -> bool:
 		return True
 	return False
 
+
 def _notify_clients(customer: str, subject: str, message: str) -> None:
-    try:
-        # Find users with Client role and explicit permission to this Customer
-        users = frappe.get_all(
-            "User Permission",
-            filters={"allow": "Customer", "for_value": customer},
-            pluck="user",
-        )
-        if not users:
-            return
-        emails = [u.email for u in frappe.get_all("User", filters={"name": ["in", users]}, fields=["email"]) if u.email]
-        if emails:
-            frappe.sendmail(recipients=emails, subject=subject, message=message)
-    except Exception:
-        frappe.log_error(frappe.get_traceback(), "Notify clients failed")
+	try:
+		# Find users with Client role and explicit permission to this Customer
+		users = frappe.get_all(
+			"User Permission",
+			filters={"allow": "Customer", "for_value": customer},
+			pluck="user",
+		)
+		if not users:
+			return
+		emails = [
+			u.email
+			for u in frappe.get_all("User", filters={"name": ["in", users]}, fields=["email"])
+			if u.email
+		]
+		if emails:
+			frappe.sendmail(recipients=emails, subject=subject, message=message)
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Notify clients failed")

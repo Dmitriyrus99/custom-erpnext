@@ -1,20 +1,18 @@
-<template>
-        <div class="container">
-                <h2>{{ _("My Service Requests") }}</h2>
-                <div class="mb-2">
-                        <label class="form-label">{{ _("Filter by status") }}</label>
-                        <select id="status" class="form-select" style="max-width:240px;">
-                                <option value="">{{ _("All") }}</option>
-                                <option>Open</option>
-                                <option>In Progress</option>
-                                <option>Completed</option>
-                                <option>Closed</option>
-                        </select>
-                </div>
-                <div id="sr-list"></div>
-                <p><a href="/portal/new-request">{{ _("Create New Request") }}</a></p>
+<div class="container">
+        <h2>{{ _("My Service Requests") }}</h2>
+        <div class="mb-2">
+                <label class="form-label">{{ _("Filter by status") }}</label>
+                <select id="status" class="form-select" style="max-width:240px;">
+                        <option value="">{{ _("All") }}</option>
+                        <option>Open</option>
+                        <option>In Progress</option>
+                        <option>Completed</option>
+                        <option>Closed</option>
+                </select>
         </div>
-</template>
+        <div id="sr-list"></div>
+        <p><a href="/portal/new-request">{{ _("Create New Request") }}</a></p>
+</div>
 <script>
         frappe.ready(() => {
                 const el = document.getElementById("sr-list");

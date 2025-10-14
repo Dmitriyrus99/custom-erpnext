@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations  # moved into package 'telegram_bot'
 
 import asyncio
 import logging
@@ -6,7 +6,6 @@ import os
 from contextlib import asynccontextmanager
 
 from aiogram import Bot, Dispatcher
-from aiogram.enums import ParseMode
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 from prometheus_client import Counter, start_http_server
@@ -14,6 +13,7 @@ import sentry_sdk
 
 from .config import load
 from .frappe_client import FrappeClient
+from . import state
 from .handlers import requests as requests_handlers
 
 
@@ -26,33 +26,22 @@ PHOTO_ATTACHED = Counter("ferum_tg_photos_attached", "Photos attached via bot")
 
 @asynccontextmanager
 async def lifespan(dp: Dispatcher):
-    settings = load()
-    client = FrappeClient(
-        settings.frappe_base,
-        settings.frappe_username,
-        settings.frappe_password,
-        totp_secret=settings.bot_totp_secret,
-        verify_ssl=settings.verify_ssl,
-    )
-    dp["frappe_client"] = client
-    try:
-        yield
-    finally:
-        await client.close()
+    # Kept for compatibility, but we initialise client explicitly in run_* paths
+    yield
 
 
 def _wire_dependencies(dp: Dispatcher):
     # Provide FrappeClient to handlers via dependency injection
-    dp.workflow_data["frappe_client"] = dp["frappe_client"]
 
     @dp.message.middleware()
     async def inject_client(handler, event, data):  # type: ignore[no-redef]
-        data["client"] = dp["frappe_client"]
+        # Retrieve client from dispatcher workflow_data where lifespan stored it
+        data["client"] = dp.workflow_data.get("frappe_client")
         return await handler(event, data)
 
     @dp.callback_query.middleware()
     async def inject_client_cb(handler, event, data):  # type: ignore[no-redef]
-        data["client"] = dp["frappe_client"]
+        data["client"] = dp.workflow_data.get("frappe_client")
         return await handler(event, data)
 
 
@@ -63,11 +52,26 @@ async def run_polling() -> None:
     if settings.prometheus_port:
         start_http_server(settings.prometheus_port)
 
-    bot = Bot(token=settings.bot_token, parse_mode=ParseMode.HTML)
+    # Use plain text by default to avoid HTML parsing issues
+    bot = Bot(token=settings.bot_token)
     dp = Dispatcher(lifespan=lifespan)
     dp.include_router(requests_handlers.router)
     _wire_dependencies(dp)
-    await dp.start_polling(bot)
+    # Explicitly initialise ERP client here for reliability
+    settings = load()
+    client = FrappeClient(
+        settings.frappe_base,
+        settings.frappe_username,
+        settings.frappe_password,
+        totp_secret=settings.bot_totp_secret,
+        verify_ssl=settings.verify_ssl,
+    )
+    dp.workflow_data["frappe_client"] = client
+    state.set_client(client)
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await client.close()
 
 
 async def run_webhook() -> None:
@@ -77,11 +81,21 @@ async def run_webhook() -> None:
     if settings.prometheus_port:
         start_http_server(settings.prometheus_port)
 
-    bot = Bot(token=settings.bot_token, parse_mode=ParseMode.HTML)
+    # Use plain text by default to avoid HTML parsing issues
+    bot = Bot(token=settings.bot_token)
     dp = Dispatcher(lifespan=lifespan)
     dp.include_router(requests_handlers.router)
     _wire_dependencies(dp)
-
+    # Explicitly initialise ERP client here for reliability
+    client = FrappeClient(
+        settings.frappe_base,
+        settings.frappe_username,
+        settings.frappe_password,
+        totp_secret=settings.bot_totp_secret,
+        verify_ssl=settings.verify_ssl,
+    )
+    dp.workflow_data["frappe_client"] = client
+    state.set_client(client)
     app = web.Application()
     webhook_path = "/tg-bot/webhook"
     handler = SimpleRequestHandler(dispatcher=dp, bot=bot, secret_token=settings.webhook_secret or None)
@@ -93,11 +107,22 @@ async def run_webhook() -> None:
         return web.Response(text="ok")
 
     app.router.add_get("/healthz", healthz)
+    # If Traefik doesn't strip the prefix, serve prefixed health too
+    app.router.add_get("/tg-bot/healthz", healthz)
+
+    # Ensure client closes on app shutdown (must be set before runner.setup())
+    async def _close_client(_: web.Application) -> None:
+        await client.close()
+    app.on_cleanup.append(_close_client)
 
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, host="0.0.0.0", port=int(os.getenv("PORT", "8080")))
-    await bot.set_webhook(url=settings.webhook_url, secret_token=settings.webhook_secret or None)
+    # Best-effort webhook registration; do not crash on transient errors
+    try:
+        await bot.set_webhook(url=settings.webhook_url, secret_token=settings.webhook_secret or None)
+    except Exception as e:
+        log.warning("set_webhook failed: %s", e)
     await site.start()
     log.info("Webhook server started on :%s", os.getenv("PORT", "8080"))
     # Run forever

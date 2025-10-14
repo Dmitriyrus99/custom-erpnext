@@ -9,6 +9,7 @@ from ferum_custom.ferum_custom.integrations.google import (
 	SERVICE_ACCOUNT_SCOPE_DRIVE,
 	build_service_account_credentials,
 )
+from ferum_custom.ferum_custom.metrics import inc as metrics_inc
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 from ferum_custom.ferum_custom.utils import get_users_by_roles
 
@@ -145,18 +146,19 @@ def upload_bytes(
 				existing_id = None
 
 			if existing_id:
-				file = (
-					service.files()
-					.update(fileId=existing_id, media_body=media, fields="id")
-					.execute()
-				)
+				file = service.files().update(fileId=existing_id, media_body=media, fields="id").execute()
 			else:
 				body = {"name": filename}
 				if current_parent:
 					body["parents"] = [current_parent]
 				file = service.files().create(body=body, media_body=media, fields="id").execute()
 
-			return file.get("id")
+			file_id = file.get("id")
+			try:
+				metrics_inc("ferum_integration_drive_upload_total", {"result": "success"})
+			except Exception:
+				pass
+			return file_id
 		except Exception as exc:
 			last_error = exc
 			category, context = _classify_failure(exc)
@@ -173,6 +175,11 @@ def upload_bytes(
 			"Drive upload failed",
 			f"Failed to upload {filename} to Google Drive. Error: {_classify_failure(last_error)[1]}",
 		)
+		try:
+			category, _ = _classify_failure(last_error)
+			metrics_inc("ferum_integration_drive_upload_total", {"result": "error", "category": category})
+		except Exception:
+			pass
 	return None
 
 
@@ -188,6 +195,10 @@ def delete_file(file_id: str) -> bool:
 
 	try:
 		service.files().delete(fileId=file_id).execute()
+		try:
+			metrics_inc("ferum_integration_drive_delete_total", {"result": "success"})
+		except Exception:
+			pass
 		return True
 	except Exception as exc:
 		frappe.log_error(frappe.get_traceback(), "Drive delete failed")
@@ -197,6 +208,10 @@ def delete_file(file_id: str) -> bool:
 				"Drive delete failed",
 				f"Failed to delete Drive file {file_id}: {context}",
 			)
+		try:
+			metrics_inc("ferum_integration_drive_delete_total", {"result": "error", "category": category})
+		except Exception:
+			pass
 		return False
 
 

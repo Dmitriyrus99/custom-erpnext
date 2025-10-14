@@ -3,7 +3,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.pdf import get_pdf
 
-from ferum_custom.ferum_custom.integrations.drive import upload_bytes
+from ferum_custom.ferum_custom.integrations.file_sync import sync_file_by_name
 from ferum_custom.ferum_custom.settings import is_feature_enabled
 from ferum_custom.ferum_custom.utils import get_allowed_customers, user_roles
 
@@ -82,7 +82,7 @@ class ServiceReport(Document):
 				if not mime:
 					# derive from filename or URL
 					name_or_url = att.file_name or att.file_url or ""
-					m2, _ = guess_type(name_or_url)
+					m2, enc = guess_type(name_or_url)
 					mime = (m2 or "").lower()
 				if mime.startswith("image/"):
 					has_photo = True
@@ -95,9 +95,7 @@ class ServiceReport(Document):
 
 		if missing:
 			frappe.throw(
-				_("Attachment is required for all Document Items. Missing: {0}").format(
-					", ".join(missing)
-				)
+				_("Attachment is required for all Document Items. Missing: {0}").format(", ".join(missing))
 			)
 		if not has_photo:
 			frappe.throw(_("At least one photo (image) attachment is required."))
@@ -116,12 +114,17 @@ class ServiceReport(Document):
 			try:
 				att = frappe.get_doc("Custom Attachment", item.custom_attachment)
 				if att.linked_doctype != "Service Report" or att.linked_docname != self.name:
-					att.db_set({
-						"linked_doctype": "Service Report",
-						"linked_docname": self.name,
-					}, commit=False)
+					att.db_set(
+						{
+							"linked_doctype": "Service Report",
+							"linked_docname": self.name,
+						},
+						commit=False,
+					)
 			except Exception:
-				frappe.log_error(frappe.get_traceback(), f"Failed to sync attachment link for {item.custom_attachment}")
+				frappe.log_error(
+					frappe.get_traceback(), f"Failed to sync attachment link for {item.custom_attachment}"
+				)
 
 	def validate_workflow_transitions(self):
 		"""Validate allowed status transitions.
@@ -200,21 +203,12 @@ class ServiceReport(Document):
 
 
 def _upload_report_pdf(docname: str) -> None:
-	doc = frappe.get_doc("Service Report", docname)
-	# Build path parts
-	customer = None
-	project = None
-	if doc.service_request:
-		customer = frappe.db.get_value("Service Request", doc.service_request, "customer")
-		project = frappe.db.get_value("Service Request", doc.service_request, "project")
-	parts = [p for p in [customer or "Customer", project or "Project", "Reports"] if p]
 	# Render PDF
 	html = frappe.get_print("Service Report", docname)
 	pdf = get_pdf(html)
 	filename = f"ServiceReport-{docname}.pdf"
-	# Upload to Google Drive
-	upload_bytes(parts, filename, pdf, mime_type="application/pdf")
-	# Also attach PDF as ERP File + register as Custom Attachment for consistency
+
+	# Attach PDF as ERP File (on_update hook will handle Drive sync via FileSyncService)
 	try:
 		file_doc = frappe.get_doc(
 			{
@@ -227,16 +221,33 @@ def _upload_report_pdf(docname: str) -> None:
 			}
 		)
 		file_doc.insert(ignore_permissions=True)
-		att = frappe.get_doc(
-			{
-				"doctype": "Custom Attachment",
-				"file_name": filename,
-				"file_url": file_doc.file_url,
-				"file_type": "application/pdf",
-				"linked_doctype": "Service Report",
-				"linked_docname": docname,
-			}
-		)
+
+		# Force immediate sync to avoid race (optional; idempotent)
+		sync_file_by_name(file_doc.name)
+
+		# Reload to fetch drive ids if available
+		try:
+			file_doc = frappe.get_doc("File", file_doc.name)
+			file_drive_id = getattr(file_doc, "drive_file_id", None)
+			file_web = getattr(file_doc, "drive_web_link", None)
+		except Exception:
+			file_drive_id = None
+			file_web = None
+
+		# Register as Custom Attachment for unified handling and references
+		att_data = {
+			"doctype": "Custom Attachment",
+			"file_name": filename,
+			"file_url": file_doc.file_url,
+			"file_type": "application/pdf",
+			"linked_doctype": "Service Report",
+			"linked_docname": docname,
+		}
+		if file_drive_id:
+			att_data["drive_file_id"] = file_drive_id
+		if file_web:
+			att_data["drive_web_link"] = file_web
+		att = frappe.get_doc(att_data)
 		att.insert(ignore_permissions=True)
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Attach Service Report PDF failed")
@@ -365,7 +376,11 @@ def _notify_clients(customer: str, subject: str, message: str) -> None:
 		)
 		if not users:
 			return
-		emails = [u.email for u in frappe.get_all("User", filters={"name": ["in", users]}, fields=["email"]) if u.email]
+		emails = [
+			u.email
+			for u in frappe.get_all("User", filters={"name": ["in", users]}, fields=["email"])
+			if u.email
+		]
 		if emails:
 			frappe.sendmail(recipients=emails, subject=subject, message=message)
 	except Exception:

@@ -189,7 +189,7 @@
   ],
   "permissions": [
     {
-      "role": "System Manager",
+      "role": " Менеджер системы",
       "read": 1,
       "write": 1,
       "create": 1,

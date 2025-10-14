@@ -9,9 +9,16 @@ This guide helps you configure roles, user permissions, and integrations for a p
 
 ## Roles and Access
 
-- Core roles used:
-  - Project Manager, Office Manager, Service Engineer, Chief Accountant, Client, Department Head, System Manager
-- Ensure these roles exist (fixtures included). Assign as appropriate to users.
+- Core roles (fixtures included):
+  - Project Manager, Office Manager, Service Engineer, Chief Accountant, Client, Department Head, General Director, System Manager
+  - Client is a portal role (no Desk access). Others have Desk access.
+- Role Profiles (to simplify assignment):
+  - Ferum Admin: System Manager + all Ferum roles (PM, Office, Engineer, Chief Accountant, Director, Dept Head)
+  - Ferum Management: General Director, Department Head, Project Manager
+  - Ferum Operations: Project Manager, Service Engineer
+  - Ferum Accounting: Chief Accountant, Office Manager
+  - Ferum Client: Client
+  Assign a Role Profile to a user to grant the grouped roles.
 
 ### Client access by Customer
 
@@ -55,6 +62,8 @@ Open Settings: `Ferum Custom Settings`.
 ### API & JWT
 
 - Enable `Enable JWT Auth for API` and set `JWT Secret` to allow token‑based access for external portals/integrations.
+- Ensure PyJWT is installed in the bench environment (app includes requirements):
+  - `bench pip install -r apps/ferum_custom/requirements.txt`
 
 ## Portal
 
@@ -66,4 +75,3 @@ Open Settings: `Ferum Custom Settings`.
 
 - GitHub Actions workflow (`.github/workflows/ci.yml`) installs the app and runs tests.
 - Tests cover workflows and permission basics, including Client visibility by Customer.
-
