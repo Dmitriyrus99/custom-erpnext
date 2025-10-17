@@ -127,3 +127,4 @@
 "Related","Связанные"
 "Cannot delete Service Object. Linked to active Service Projects: {projects}","Нельзя удалить объект. Связан с активными проектами: {projects}"
 "Cannot delete Service Object. Linked to active Service Requests: {requests}","Нельзя удалить объект. Связан с активными заявками: {requests}"
+"Document Share Report","Отчёт по доступу к документам"

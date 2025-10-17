@@ -4,14 +4,13 @@ from typing import Optional
 
 from .frappe_client import FrappeClient
 
-_CLIENT: Optional[FrappeClient] = None
+_CLIENT: FrappeClient | None = None
 
 
 def set_client(client: FrappeClient) -> None:
-    global _CLIENT
-    _CLIENT = client
+	global _CLIENT
+	_CLIENT = client
 
 
-def get_client() -> Optional[FrappeClient]:
-    return _CLIENT
-
+def get_client() -> FrappeClient | None:
+	return _CLIENT

@@ -1,6 +1,7 @@
 import contextlib
 
 import frappe
+from frappe.model.document import Document
 from frappe.utils import add_days, add_months, add_years, getdate, nowdate
 
 try:
@@ -112,3 +113,7 @@ def generate_service_requests_from_schedule():
 				f"Failed to process Service Maintenance Schedule {row.name}: {e}",
 				"Maintenance schedule generation failed",
 			)
+
+
+class ServiceMaintenanceSchedule(Document):
+	pass

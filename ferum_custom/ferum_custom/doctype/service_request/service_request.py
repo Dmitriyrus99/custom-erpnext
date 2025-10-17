@@ -289,8 +289,19 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 def has_permission(doc, user: str | None = None) -> bool:
 	user = user or frappe.session.user
 	roles = user_roles(user)
-	if "System Manager" in roles or "Office Manager" in roles:
+	if "System Manager" in roles:
 		return True
+	if "Office Manager" in roles:
+		# Restrict by Company if explicit user permissions set; otherwise allow
+		try:
+			companies = set(
+				frappe.get_all(
+					"User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
+				)
+			)
+			return not companies or (getattr(doc, "company", None) in companies)
+		except Exception:
+			return True
 	if "Department Head" in roles:
 		allowed = set(
 			frappe.get_all(
