@@ -4,7 +4,7 @@ from ferum_custom.ferum_custom.integrations.google import refresh_service_accoun
 from ferum_custom.ferum_custom.settings import refresh_settings_cache
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def save_integrations(
 	telegram_chat_id: str | None = None,
 	telegram_token: str | None = None,
@@ -38,7 +38,7 @@ def save_integrations(
 	return updated
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_user_company_permission(user: str, company: str) -> dict:
 	"""Create (idempotent) User Permission mapping a user to a Company.
 
@@ -64,7 +64,7 @@ def add_user_company_permission(user: str, company: str) -> dict:
 	return {"name": up.name}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def bulk_add_user_company_permissions(pairs: list[dict] | str) -> dict:
 	"""Bulk mapping of users to companies.
 

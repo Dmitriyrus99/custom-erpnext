@@ -1,11 +1,13 @@
 import time
 
 import frappe
+from frappe.rate_limiter import rate_limit
 
 from ferum_custom.ferum_custom.metrics import iter_counters
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60, methods=["GET"])  # 60 req/min per IP
 def prometheus() -> None:
 	"""Return a simple Prometheus metrics exposition.
 

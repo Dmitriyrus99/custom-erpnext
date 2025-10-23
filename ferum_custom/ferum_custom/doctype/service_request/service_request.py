@@ -5,7 +5,13 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, add_to_date, getdate, nowdate
 
-from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
+try:
+    from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
+except Exception:
+    # During migrate/import, telegram module may not be importable; use no-op
+    def tg_send(*args, **kwargs):  # type: ignore
+        return False
+from ferum_custom.ferum_custom.notifications.dispatcher import notify as notify_dispatch
 from ferum_custom.ferum_custom.services import get_project_manager_email
 from ferum_custom.ferum_custom.utils import (
 	get_allowed_customers,
@@ -48,9 +54,23 @@ class ServiceRequest(Document):
 		# Audit: log status changes
 		try:
 			if self.has_value_changed("status"):
+				old_status = frappe.db.get_value("Service Request", self.name, "status") or "-"
 				self.add_comment(
 					"Info",
 					_("Status changed to {status}").format(status=self.status or "-"),
+				)
+				from ferum_custom.ferum_custom.services.audit import log_event
+
+				log_event(
+					event_type="status_change",
+					ref_doctype="Service Request",
+					ref_docname=self.name,
+					message=f"Status: {old_status} -> {self.status}",
+					details={
+						"old_status": old_status,
+						"new_status": self.status,
+						"linked_report": getattr(self, "linked_report", None),
+					},
 				)
 				# Notify clients on close
 				if self.status == "Closed" and getattr(self, "customer", None):
@@ -91,8 +111,15 @@ class ServiceRequest(Document):
 
 		if old_status == "Open" and self.status == "In Progress" and not self.assigned_to:
 			frappe.throw(_("Cannot set status to 'In Progress' without assigning an engineer."))
-		elif old_status == "In Progress" and self.status == "Completed" and not self.linked_report:
-			frappe.throw(_("Cannot set status to 'Completed' without linking a Service Report."))
+		elif old_status == "In Progress" and self.status == "Completed":
+			# Require a completion report only for billable or non-routine requests
+			request_type = (getattr(self, "type", "") or "").strip()
+			billable = bool(getattr(self, "is_billable", 0))
+			needs_report = billable or request_type not in ("Routine Maintenance", "Routine")
+			if needs_report and not getattr(self, "linked_report", None):
+				frappe.throw(
+					_("A completion report (Timesheet/Service Report) is required to complete this request.")
+				)
 		elif (
 			old_status == "Completed"
 			and self.status == "Closed"
@@ -119,6 +146,22 @@ class ServiceRequest(Document):
 			message = f"SLA for Service Request {self.name} has been breached! Title: {self.title}. Priority: {self.priority}. Due: {self.sla_deadline}"
 			frappe.msgprint(_(message))
 			frappe.log_error(message, "SLA Breach Alert")
+			try:
+				from ferum_custom.ferum_custom.services.audit import log_event
+
+				log_event(
+					event_type="sla_breach",
+					ref_doctype="Service Request",
+					ref_docname=self.name,
+					message=message,
+					details={
+						"priority": self.priority,
+						"due": str(self.sla_deadline),
+						"status": self.status,
+					},
+				)
+			except Exception:
+				pass
 			frappe.enqueue(
 				"ferum_custom.ferum_custom.doctype.service_request.service_request.send_sla_breach_notifications",
 				service_request_name=self.name,
@@ -150,27 +193,32 @@ class ServiceRequest(Document):
 		"""Send notifications on new request creation to PM, Office Managers and assigned engineer."""
 		try:
 			recipients: set[str] = set()
-			pm_email = None
+			# PM by email
 			if getattr(self, "project", None):
 				pm_email = get_project_manager_email(self.project)
 				if pm_email:
 					recipients.add(pm_email)
-			recipients.update(get_users_by_roles(["Office Manager"]))
-			if getattr(self, "assigned_to", None):
-				assigned_email = frappe.db.get_value("User", self.assigned_to, "email")
-				if assigned_email:
-					recipients.add(assigned_email)
-			if recipients:
-				frappe.sendmail(
-					recipients=list(recipients),
-					subject=_("New Service Request {0}").format(self.name),
-					message=_("A new service request {0} was created.").format(self.name),
-				)
-			# Optional Telegram broadcast
+			# Office Managers by role
 			try:
-				tg_send(_(f"New Service Request {self.name}: {self.title}"))
+				oms = frappe.get_all("Has Role", filters={"role": "Office Manager"}, pluck="parent")
+				recipients.update(oms)
 			except Exception:
 				pass
+			# Assigned engineer (user id)
+			if getattr(self, "assigned_to", None):
+				recipients.add(self.assigned_to)
+
+			if recipients:
+				notify_dispatch(
+					"new_service_request",
+					recipients=list(recipients),
+					context={
+						"name": self.name,
+						"title": self.title,
+						"priority": self.priority,
+						"project": self.project,
+					},
+				)
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Service Request notification failed")
 
@@ -201,31 +249,30 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 	try:
 		sr = frappe.get_doc("Service Request", service_request_name)
 		recipients: set[str] = set()
-
 		if sr.project:
 			pm_email = get_project_manager_email(sr.project)
 			if pm_email:
 				recipients.add(pm_email)
-
-			recipients.update(get_users_by_roles(["Office Manager"]))
-
+		try:
+			oms = frappe.get_all("Has Role", filters={"role": "Office Manager"}, pluck="parent")
+			recipients.update(oms)
+		except Exception:
+			pass
 		if recipients:
-			frappe.sendmail(
+			notify_dispatch(
+				"sla_breach",
 				recipients=list(recipients),
-				subject=_("SLA breached for Service Request {0}").format(service_request_name),
-				message=message,
+				context={
+					"name": sr.name,
+					"title": sr.title,
+					"priority": sr.priority,
+					"due": str(sr.sla_deadline or ""),
+				},
 			)
-			# Optional Telegram broadcast to default chat
-			try:
-				tg_send(message)
-			except Exception:
-				pass
 		else:
-			# Fallback to logging if no recipients resolved
 			frappe.logger().warning(
 				f"No recipients found for SLA breach notification on {service_request_name}"
 			)
-
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Failed to send SLA breach notification")
 

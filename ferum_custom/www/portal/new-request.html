@@ -2,21 +2,26 @@
         <h2>{{ _("Create Service Request") }}</h2>
         <div>
                 <div class="mb-2">
-                        <label>{{ _("Title") }}</label><input id="title" class="form-control" />
+                        <label class="form-label">{{ _("Title") }}</label>
+                        <input id="title" class="form-control" placeholder="{{ _('Brief summary of the issue') }}" />
+                        <small class="text-muted">{{ _("Try to be specific, e.g. 'Error when submitting form' or 'Need access to...' ") }}</small>
                 </div>
                 <div class="mb-2">
-                        <label>{{ _("Description") }}</label><textarea id="description" class="form-control"></textarea>
+                        <label class="form-label">{{ _("Description") }}</label>
+                        <textarea id="description" class="form-control" rows="4" placeholder="{{ _('Describe the problem, steps to reproduce, expected result') }}"></textarea>
                 </div>
                 <div class="mb-2">
-                        <label>{{ _("Service Object (optional)") }}</label>
-                        <input
-                                id="service_object"
-                                class="form-control"
-                                placeholder="{{ _('Service Object name') }}"
-                        />
+                        <label class="form-label">{{ _("Service Object (optional)") }}</label>
+                        <input id="service_object" class="form-control" placeholder="{{ _('Service Object name') }}" />
+                        <small class="text-muted">{{ _("If the request is related to a specific object/equipment") }}</small>
+                </div>
+                <div class="mb-2">
+                        <label class="form-label">{{ _("Attach File (optional)") }}</label>
+                        <input id="file" type="file" class="form-control" />
+                        <small class="text-muted">{{ _("Attach a screenshot or document to help us diagnose faster.") }}</small>
                 </div>
                 <button id="submit" class="btn btn-primary">{{ _("Submit") }}</button>
-                <div id="msg" class="mt-2"></div>
+                <div id="msg" class="mt-3"></div>
         </div>
         <p class="mt-3"><a href="/portal">{{ _("Back to list") }}</a></p>
 </div>
@@ -39,22 +44,43 @@
                                 document.getElementById("msg").innerText = __("Please enter a title.");
                                 return;
                         }
+                        const msgEl = document.getElementById("msg");
+                        msgEl.innerText = __("Submitting...");
                         frappe
                                 .call({
                                         method: "ferum_custom.api.service.create_service_request",
                                         args: { title, description, service_object },
                                         type: "POST",
                                 })
-                                .then((r) => {
-                                        document.getElementById("msg").innerHTML =
-                                                `${__("Created:")} <a href="/portal/service-request?name=${r.message}">${r.message}</a>`;
+                                .then(async (r) => {
+                                        const name = r.message;
+                                        const fileInput = document.getElementById('file');
+                                        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                                                const file = fileInput.files[0];
+                                                const fd = new FormData();
+                                                fd.append('file', file, file.name);
+                                                fd.append('is_private', '1');
+                                                fd.append('doctype', 'Issue');
+                                                fd.append('docname', name);
+                                                try {
+                                                        const res = await fetch('/api/method/upload_file', {
+                                                                method: 'POST',
+                                                                headers: { 'X-Frappe-CSRF-Token': frappe.csrf_token },
+                                                                body: fd,
+                                                        });
+                                                        if (!res.ok) throw new Error(await res.text());
+                                                } catch (err) {
+                                                        console.warn('File upload failed', err);
+                                                }
+                                        }
+                                        msgEl.innerHTML = `${__("Created:")} <a href="/portal/service-request?name=${name}">${name}</a>`;
                                 })
                                 .catch((e) => {
                                         let msg = e && (e.message || e._server_messages);
                                         if (msg) {
                                                 try { msg = JSON.parse(msg)[0]; } catch (err) {}
                                         }
-                                        document.getElementById("msg").innerText = msg || __("Error");
+                                        msgEl.innerText = msg || __("Error");
                                 });
                 });
         });

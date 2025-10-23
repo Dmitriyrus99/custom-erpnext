@@ -4,6 +4,7 @@ import json
 from typing import Any
 
 import frappe
+from frappe.rate_limiter import rate_limit
 from frappe.desk.query_report import run as frappe_query_report_run
 
 
@@ -36,6 +37,7 @@ def _apply_project_default(report_name: str, filters: Any) -> Any:
 
 
 @frappe.whitelist()
+@rate_limit(limit=60, seconds=60, methods=["GET"])  # 60 calls/min per IP
 def run_with_defaults(
 	report_name: str,
 	filters: Any | None = None,

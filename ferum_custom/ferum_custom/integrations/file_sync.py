@@ -15,7 +15,7 @@ from collections.abc import Iterable
 import frappe
 
 from ferum_custom.ferum_custom.integrations.drive import upload_bytes
-from ferum_custom.ferum_custom.settings import is_feature_enabled
+from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
 
 def _read_file_content(file_name: str) -> tuple[bytes | None, str | None]:
@@ -113,15 +113,20 @@ def sync_file_by_name(file_name: str) -> None:
 		frappe.log_error(frappe.get_traceback(), "FileSync: sync_file_by_name failed")
 
 
+def _drive_queue() -> str:
+    q = (get_setting("drive_upload_queue") or "").strip()
+    return q or "long"
+
+
 def enqueue_file_sync(file_name: str) -> None:
-	try:
-		frappe.enqueue(
-			"ferum_custom.ferum_custom.integrations.file_sync.sync_file_by_name",
-			queue="short",
-			file_name=file_name,
-		)
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "FileSync: enqueue_file_sync failed")
+    try:
+        frappe.enqueue(
+            "ferum_custom.ferum_custom.integrations.file_sync.sync_file_by_name",
+            queue=_drive_queue(),
+            file_name=file_name,
+        )
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "FileSync: enqueue_file_sync failed")
 
 
 def sync_custom_attachment_by_name(att_name: str) -> None:
@@ -159,11 +164,11 @@ def sync_custom_attachment_by_name(att_name: str) -> None:
 
 
 def enqueue_custom_attachment_sync(att_name: str) -> None:
-	try:
-		frappe.enqueue(
-			"ferum_custom.ferum_custom.integrations.file_sync.sync_custom_attachment_by_name",
-			queue="short",
-			att_name=att_name,
-		)
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "FileSync: enqueue_custom_attachment_sync failed")
+    try:
+        frappe.enqueue(
+            "ferum_custom.ferum_custom.integrations.file_sync.sync_custom_attachment_by_name",
+            queue=_drive_queue(),
+            att_name=att_name,
+        )
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "FileSync: enqueue_custom_attachment_sync failed")

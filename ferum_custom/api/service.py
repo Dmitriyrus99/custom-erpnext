@@ -22,29 +22,34 @@ def _paginate(start: int | None = None, page_length: int | None = None) -> tuple
 def create_service_request(
 	title: str, description: str | None = None, service_object: str | None = None
 ) -> str:
+	"""Create a standard ERPNext Issue (backward-compatible API name).
+
+	- Maps title → Issue.subject, description → Issue.description
+	- Tries to populate company from defaults
+	- If a Service Object is provided, appends its name to description for context
+	"""
 	_check_new_request_rate_limit()
-	doc = frappe.new_doc("Service Request")
-	doc.title = title
-	doc.description = description
-	# Ensure required company field is populated
+	issue = frappe.new_doc("Issue")
+	issue.subject = title
+	if description:
+		issue.description = description
+	# Company default
 	try:
 		default_company = None
 		if erpnext is not None and hasattr(erpnext, "get_default_company"):
 			default_company = erpnext.get_default_company()
 		if not default_company:
-			# Fallback to global default or the first Company
 			default_company = frappe.db.get_single_value("Global Defaults", "default_company")
 		if not default_company:
 			companies = frappe.get_all("Company", pluck="name", limit=1)
 			if companies:
 				default_company = companies[0]
 		if default_company:
-			doc.company = default_company
+			issue.company = default_company
 	except Exception:
-		# Do not block on company resolution; insert() will validate if still missing
 		pass
+	# Try to enrich customer/project from Service Object
 	if service_object:
-		# Accept either a docname or a human-friendly object_name
 		obj_name = service_object
 		if not frappe.db.exists("Service Object", obj_name):
 			try:
@@ -54,9 +59,17 @@ def create_service_request(
 			except Exception:
 				pass
 		if frappe.db.exists("Service Object", obj_name):
-			doc.service_object = obj_name
-	doc.insert()
-	return doc.name
+			try:
+				so = frappe.get_doc("Service Object", obj_name)
+				issue.customer = getattr(so, "customer", None)
+				if getattr(so, "project", None):
+					issue.project = so.project
+				note = f"\n\nService Object: {obj_name}"
+				issue.description = (issue.description or "") + note
+			except Exception:
+				pass
+	issue.insert()
+	return issue.name
 
 
 @frappe.whitelist(methods=["GET"])  # Listing is idempotent
@@ -82,18 +95,17 @@ def list_service_requests(
 	except Exception:
 		pass
 
+	# Provide Issue data compatible with portal (title alias)
 	data = frappe.get_list(
-		"Service Request",
+		"Issue",
 		filters=filters,
 		fields=[
 			"name",
-			"title",
+			"subject as title",
 			"status",
 			"priority",
 			"customer",
 			"project",
-			"service_object",
-			"sla_deadline",
 			"modified",
 		],
 		start=s,
@@ -105,8 +117,23 @@ def list_service_requests(
 
 @frappe.whitelist(methods=["GET"])  # Read-only fetch
 def get_service_request(name: str) -> dict:
-	doc = frappe.get_doc("Service Request", name)
-	return doc.as_dict()
+	"""Return Issue as a dict with a title alias for portal compatibility."""
+	doc = frappe.get_doc("Issue", name)
+	d = doc.as_dict()
+	if "title" not in d:
+		d["title"] = d.get("subject")
+	# Do not leak sensitive fields to website users
+	try:
+		user = frappe.session.user
+		user_type = frappe.get_cached_value("User", user, "user_type")
+		roles = set(frappe.get_roles(user))
+		if user_type == "Website User" or "Client" in roles:
+			# Strip common sensitive custom fields if present
+			for fld in ("financial_details",):
+				d.pop(fld, None)
+	except Exception:
+		pass
+	return d
 
 
 @frappe.whitelist(methods=["POST"])  # State change
@@ -115,8 +142,10 @@ def update_service_request_status(name: str, status: str) -> dict:
 
 	Requires authentication; relies on DocType validations and permission checks.
 	"""
-	doc = frappe.get_doc("Service Request", name)
-	doc.status = status
+	doc = frappe.get_doc("Issue", name)
+	# Map basic statuses if needed
+	allowed = {"Open", "Replied", "On Hold", "Resolved", "Closed"}
+	doc.status = status if status in allowed else "Open"
 	doc.save()  # will trigger workflow and validations
 	return {"ok": True, "name": doc.name, "status": doc.status}
 
@@ -134,35 +163,17 @@ def list_service_reports(
 		user_type = frappe.get_cached_value("User", user, "user_type")
 		roles = set(frappe.get_roles(user))
 		if user_type == "Website User" or "Client" in roles:
-			allowed = get_allowed_customers(user)
-			if allowed:
-				# restrict via join to Service Request customer
-				names = frappe.get_all(
-					"Service Report",
-					filters=filters,
-					pluck="name",
-					order_by="modified desc",
-					start=s,
-					page_length=pl,
-				)
-				if names:
-					keep = []
-					for n in names:
-						cust = frappe.db.get_value(
-							"Service Request",
-							frappe.db.get_value("Service Report", n, "service_request"),
-							"customer",
-						)
-						if cust in set(allowed):
-							keep.append(n)
-					filters = {"name": ["in", keep]} if keep else {"name": "__none__"}
+			# No direct customer link on Timesheet; restrict only if project provided
+			if not project:
+				return {"data": [], "start": 0, "page_length": pl}
 	except Exception:
 		pass
 
+		# Timesheet replacement (no customer link by default)
 	data = frappe.get_list(
-		"Service Report",
+		"Timesheet",
 		filters=filters,
-		fields=["name", "service_request", "status", "report_date", "total_amount", "modified"],
+		fields=["name", "start_date", "end_date", "total_hours", "company", "modified"],
 		start=s,
 		page_length=pl,
 		order_by="modified desc",
@@ -256,7 +267,7 @@ def list_invoices(
 @frappe.whitelist()
 def confirm_service_request(name: str) -> None:
 	"""Allow a Client to confirm completion of a Service Request by adding a comment."""
-	doc = frappe.get_doc("Service Request", name)
+	doc = frappe.get_doc("Issue", name)
 	# Permission check performed by Frappe via get_doc; add comment
 	try:
 		doc.add_comment("Comment", _("Client confirmed completion via portal."))
@@ -267,7 +278,7 @@ def confirm_service_request(name: str) -> None:
 @frappe.whitelist()
 def confirm_service_report(name: str) -> None:
 	"""Allow a Client to confirm a Service Report via a comment."""
-	doc = frappe.get_doc("Service Report", name)
+	doc = frappe.get_doc("Timesheet", name)
 	try:
 		doc.add_comment("Comment", _("Client confirmed Service Report via portal."))
 	except Exception:

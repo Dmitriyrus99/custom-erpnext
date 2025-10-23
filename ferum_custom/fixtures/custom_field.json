@@ -1,13 +1,81 @@
 [
   {
     "doctype": "Custom Field",
-    "name": "Timesheet-workflow_state",
-    "dt": "Timesheet",
-    "fieldname": "workflow_state",
-    "label": "Workflow State",
-    "fieldtype": "Data",
-    "insert_after": "status",
-    "read_only": 1,
-    "hidden": 1
+    "name": "Issue-assigned_engineer",
+    "dt": "Issue",
+    "fieldname": "assigned_engineer",
+    "fieldtype": "Link",
+    "label": "Assigned Engineer",
+    "options": "User",
+    "insert_after": "priority",
+    "in_list_view": 1,
+    "in_standard_filter": 1,
+    "translatable": 0
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Issue-asset",
+    "dt": "Issue",
+    "fieldname": "asset",
+    "fieldtype": "Link",
+    "label": "Asset",
+    "options": "Asset",
+    "insert_after": "project",
+    "translatable": 0
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Issue-financial_details",
+    "dt": "Issue",
+    "fieldname": "financial_details",
+    "fieldtype": "Small Text",
+    "label": "Financial Details",
+    "permlevel": 1,
+    "insert_after": "asset",
+    "translatable": 0
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Project-default_engineer",
+    "dt": "Project",
+    "fieldname": "default_engineer",
+    "fieldtype": "Link",
+    "label": "Default Engineer",
+    "options": "User",
+    "insert_after": "project_type",
+    "translatable": 0
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Asset-default_engineer",
+    "dt": "Asset",
+    "fieldname": "default_engineer",
+    "fieldtype": "Link",
+    "label": "Default Engineer",
+    "options": "User",
+    "insert_after": "asset_owner",
+    "translatable": 0
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Issue-service_maintenance_schedule",
+    "dt": "Issue",
+    "fieldname": "service_maintenance_schedule",
+    "fieldtype": "Link",
+    "label": "Service Maintenance Schedule",
+    "options": "Service Maintenance Schedule",
+    "insert_after": "asset",
+    "translatable": 0
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Issue-service_object",
+    "dt": "Issue",
+    "fieldname": "service_object",
+    "fieldtype": "Link",
+    "label": "Service Object",
+    "options": "Service Object",
+    "insert_after": "service_maintenance_schedule",
+    "translatable": 0
   }
 ]

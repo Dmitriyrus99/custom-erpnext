@@ -7,11 +7,21 @@ Run with:
 """
 
 from collections.abc import Iterable
+from datetime import date, datetime
+import os
+from pathlib import Path
+import shutil
+import subprocess
 
 import frappe
 from frappe.utils import cint
 
-from ferum_custom.ferum_custom.settings import is_feature_enabled
+from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
+from ferum_custom.ferum_custom.security.api_guard import (
+	require_post_if_http,
+	require_roles_if_http,
+)
+import contextlib
 
 
 def _ensure_dashboard_chart(
@@ -219,7 +229,10 @@ def backup_to_drive() -> dict:
 	Размещение: /<site>/Backups/<filename>.
 	Использует существующую интеграцию Google Drive.
 	"""
-	from frappe.utils.backups import new_backup
+	# Restrict when invoked via HTTP; scheduler/bench bypass
+	require_roles_if_http(["System Manager"])
+	require_post_if_http()
+	from frappe.utils.backups import new_backup, get_or_generate_backup_encryption_key
 
 	from ferum_custom.ferum_custom.integrations.drive import upload_bytes
 
@@ -233,11 +246,21 @@ def backup_to_drive() -> dict:
 		return {"status": "skipped", "reason": "drive-disabled"}
 
 	try:
-		with open(filepath, "rb") as f:
+		# Optional: encrypt backup on disk before upload
+		enc_path = None
+		if is_feature_enabled("enable_backup_encryption"):
+			passphrase = get_setting("backup_encryption_key") or get_or_generate_backup_encryption_key()
+			enc_path = _encrypt_file_with_gpg(filepath, passphrase)
+			if enc_path:
+				# Remove plaintext backup
+				with contextlib.suppress(Exception):
+					os.remove(filepath)
+		filepath_to_upload = enc_path or filepath
+		with open(filepath_to_upload, "rb") as f:
 			content = f.read()
 		site_name = frappe.local.site or frappe.utils.get_site_name(frappe.local.site_path)
 		parts = [site_name, "Backups"]
-		filename = filepath.split("/")[-1]
+		filename = Path(filepath_to_upload).name
 		file_id = upload_bytes(parts, filename, content)
 		return {"status": "ok", "file_id": file_id, "filename": filename}
 	except Exception as e:
@@ -255,13 +278,16 @@ def backfill_drive_ids(limit: int | None = 200) -> dict:
 
 	Returns a summary dict with processed counts.
 	"""
+	# Admin-only via HTTP, POST-only
+	require_roles_if_http(["System Manager"])
+	require_post_if_http()
 	if not is_feature_enabled("enable_google_drive_sync"):
 		return {"status": "skipped", "reason": "drive-disabled"}
 
 	from ferum_custom.ferum_custom.doctype.custom_attachment.custom_attachment import (
 		_upload_to_drive as _upload_custom_attachment,
 	)
-	from ferum_custom.ferum_custom.integrations import drive_file as drive_file_hook
+from ferum_custom.ferum_custom.integrations import drive_file as drive_file_hook
 
 	lim = int(limit) if (limit is not None and str(limit).isdigit()) else 200
 	att_ok = att_skip = file_ok = file_skip = 0
@@ -285,12 +311,12 @@ def backfill_drive_ids(limit: int | None = 200) -> dict:
 
 	# Files next (public only to avoid private file perms)
 	try:
-		files = frappe.get_all(
-			"File",
-			filters={"drive_file_id": ["in", ["", None]], "is_private": 0},
-			fields=["name"],
-			limit=max(0, lim - att_ok),
-		)
+	files = frappe.get_all(
+		"File",
+		filters={"drive_file_id": ["in", ["", None]]},
+		fields=["name"],
+		limit=max(0, lim - att_ok),
+	)
 		for f in files:
 			try:
 				doc = frappe.get_doc("File", f["name"])
@@ -311,6 +337,294 @@ def backfill_drive_ids(limit: int | None = 200) -> dict:
 
 
 @frappe.whitelist()
+def daily_backfill_drive_ids_small() -> dict:
+	"""Daily incremental Google Drive backfill with a safe limit.
+
+	Processes a smaller batch (e.g. 100) to avoid overloading quota.
+	"""
+	require_roles_if_http(["System Manager"])  # restrict manual HTTP calls
+	require_post_if_http()
+	return backfill_drive_ids(limit=100)
+
+
+@frappe.whitelist()
+def drive_healthcheck_and_alert(days: int = 1, threshold: int = 5) -> dict:
+    """Run Drive healthcheck and verify recent syncs; alert admins on issues.
+
+    - Calls integrations.drive.healthcheck to verify API connectivity and root access.
+    - Scans recent Files and Custom Attachments and counts items missing drive_file_id.
+    - Sends an email to System Managers if connectivity is down or if missing
+      uploads exceed `threshold` items within the last `days` days.
+    """
+    from datetime import datetime, timedelta
+
+    from ferum_custom.ferum_custom.integrations import drive as drive_integration
+    from ferum_custom.ferum_custom.utils import get_users_by_roles
+
+    if not is_feature_enabled("enable_google_drive_sync"):
+        return {"status": "skipped", "reason": "drive-disabled"}
+
+    problems: list[str] = []
+    hc = drive_integration.healthcheck()
+    if hc.get("status") != "ok":
+        problems.append(f"Drive healthcheck: {hc.get('status')} - {hc.get('message')}")
+
+    since = (datetime.utcnow() - timedelta(days=int(days))).strftime("%Y-%m-%d %H:%M:%S")
+
+    try:
+        missing_files = frappe.db.count(
+            "File",
+            filters={
+                "creation": [">=", since],
+                "is_private": 0,
+                "drive_file_id": ["in", ["", None]],
+            },
+        )
+    except Exception:
+        missing_files = 0
+
+    try:
+        missing_atts = frappe.db.count(
+            "Custom Attachment",
+            filters={
+                "modified": [">=", since],
+                "file_url": ["like", "/%"],
+                "drive_file_id": ["in", ["", None]],
+            },
+        )
+    except Exception:
+        missing_atts = 0
+
+    total_missing = (missing_files or 0) + (missing_atts or 0)
+    if total_missing > int(threshold):
+        problems.append(
+            f"Recent uploads pending Drive sync: Files={missing_files}, Attachments={missing_atts}"
+        )
+
+    status = "ok" if not problems else "degraded"
+    result = {
+        "status": status,
+        "health": hc,
+        "missing_files": missing_files,
+        "missing_attachments": missing_atts,
+    }
+
+    if problems:
+        try:
+            recipients = list(get_users_by_roles(["System Manager"]))
+            if recipients:
+                subject = "Google Drive healthcheck warnings"
+                body = "\n".join(problems)
+                frappe.sendmail(recipients=recipients, subject=subject, message=body)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Drive healthcheck notify failed")
+
+    return result
+
+
+# ------------------------------
+# Monitoring summaries (email)
+# ------------------------------
+
+
+@frappe.whitelist()
+def daily_overdue_summary_email(issue_fallback_days: int = 7) -> dict:
+    """Scan for overdue Service Requests (SLA) and Issues (due date) and email a summary.
+
+    - Service Requests: status not in (Completed, Closed) AND sla_deadline < today
+    - Issues: status open AND (resolution_by|due_date|expected_resolution) < today;
+      if no due field exists, fallback to issues older than `issue_fallback_days` days
+    Sent to Office Manager and Project Manager roles (email only).
+    """
+    from datetime import date, timedelta
+
+    today = date.today().isoformat()
+    rows_sr: list[dict] = []
+    rows_issue: list[dict] = []
+
+    # Service Requests overdue by SLA
+    try:
+        rows_sr = frappe.get_all(
+            "Service Request",
+            filters={
+                "status": ["not in", ["Completed", "Closed"]],
+                "sla_deadline": ["<", today],
+            },
+            fields=["name", "title", "priority", "project", "assigned_to", "sla_deadline", "status"],
+            order_by="sla_deadline asc",
+        )
+    except Exception:
+        rows_sr = []
+
+    # Issues overdue by due date field where available
+    due_field = None
+    try:
+        meta = frappe.get_meta("Issue")
+        for fn in ("resolution_by", "due_date", "expected_resolution", "sla_due_date"):
+            if meta.has_field(fn):
+                due_field = fn
+                break
+    except Exception:
+        due_field = None
+
+    try:
+        if due_field:
+            rows_issue = frappe.get_all(
+                "Issue",
+                filters={
+                    "status": ["not in", ["Resolved", "Closed"]],
+                    due_field: ["<", today],
+                },
+                fields=["name", "subject", "status", "priority", "project", "assigned_engineer", due_field],
+                order_by=f"{due_field} asc",
+            )
+        else:
+            # Fallback: very old open issues
+            since = (date.today() - timedelta(days=int(issue_fallback_days))).isoformat()
+            rows_issue = frappe.get_all(
+                "Issue",
+                filters={"status": ["not in", ["Resolved", "Closed"]], "creation": ["<", since]},
+                fields=["name", "subject", "status", "priority", "project", "assigned_engineer", "creation"],
+                order_by="creation asc",
+            )
+    except Exception:
+        rows_issue = []
+
+    if not rows_sr and not rows_issue:
+        return {"status": "ok", "sent": False, "reason": "no-overdue"}
+
+    def fmt_sr(r: dict) -> str:
+        return (
+            f"- {r.get('name')} | {r.get('title')} | {r.get('priority')} | "
+            f"{r.get('project') or '-'} | {r.get('assigned_to') or '-'} | SLA: {r.get('sla_deadline')} | {r.get('status')}"
+        )
+
+    def fmt_issue(r: dict) -> str:
+        due_val = r.get(due_field or "creation")
+        return (
+            f"- {r.get('name')} | {r.get('subject')} | {r.get('priority')} | "
+            f"{r.get('project') or '-'} | {r.get('assigned_engineer') or '-'} | Due: {due_val} | {r.get('status')}"
+        )
+
+    lines: list[str] = []
+    if rows_sr:
+        lines.append("Service Requests overdue (SLA):")
+        lines.extend(fmt_sr(r) for r in rows_sr)
+        lines.append("")
+    if rows_issue:
+        lines.append("Issues overdue:")
+        lines.extend(fmt_issue(r) for r in rows_issue)
+
+    body = "\n".join(lines)
+
+    # recipients: PM + OM
+    try:
+        from ferum_custom.ferum_custom.utils import get_users_by_roles
+
+        recipients = list(get_users_by_roles(["Project Manager", "Office Manager"]))
+        if recipients:
+            frappe.sendmail(
+                recipients=recipients,
+                subject="Daily Overdue Summary (Service Requests / Issues)",
+                message=body,
+            )
+            return {"status": "ok", "sent": True, "count_sr": len(rows_sr), "count_issue": len(rows_issue)}
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "daily_overdue_summary_email failed")
+    return {"status": "error", "sent": False}
+
+
+@frappe.whitelist()
+def weekly_overdue_maintenance_schedules_email() -> dict:
+    """Email a weekly summary of overdue maintenance schedules to PM/OM roles.
+
+    Overdue is defined as Service Maintenance Schedule.next_due_date < today (and not trashed).
+    """
+    from datetime import date
+
+    today = date.today().isoformat()
+    try:
+        rows = frappe.get_all(
+            "Service Maintenance Schedule",
+            filters={"next_due_date": ["<", today]},
+            fields=["name", "schedule_name", "customer", "service_project", "next_due_date", "frequency"],
+            order_by="next_due_date asc",
+        )
+    except Exception:
+        rows = []
+
+    if not rows:
+        return {"status": "ok", "sent": False, "reason": "no-overdue"}
+
+    lines = [
+        "Overdue Maintenance Schedules:",
+        *[
+            f"- {r['name']} | {r['schedule_name']} | Project: {r.get('service_project') or '-'} | Customer: {r.get('customer') or '-'} | Next due: {r.get('next_due_date')} | Freq: {r.get('frequency')}"
+            for r in rows
+        ],
+    ]
+    body = "\n".join(lines)
+
+    try:
+        from ferum_custom.ferum_custom.utils import get_users_by_roles
+
+        recipients = list(get_users_by_roles(["Project Manager", "Office Manager"]))
+        if recipients:
+            frappe.sendmail(
+                recipients=recipients,
+                subject="Weekly Overdue Maintenance Schedules",
+                message=body,
+            )
+            return {"status": "ok", "sent": True, "count": len(rows)}
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "weekly_overdue_maintenance_schedules_email failed")
+    return {"status": "error", "sent": False}
+
+
+@frappe.whitelist()
+def weekly_full_backup_to_drive() -> dict:
+	"""Create a full backup (DB + files) and upload to Google Drive.
+
+	Uses frappe.utils.backups.new_backup(ignore_files=False) and the same
+	upload helper as daily backups (if Drive sync feature is enabled).
+	"""
+	require_roles_if_http(["System Manager"])
+	require_post_if_http()
+	from frappe.utils.backups import new_backup, get_or_generate_backup_encryption_key
+
+	from ferum_custom.ferum_custom.integrations.drive import upload_bytes
+
+	# Create full backup (includes files)
+	bkp = new_backup(ignore_files=False)
+	filepath = getattr(bkp, "backup_path", None) or getattr(bkp, "backup_path_db", None)
+	if not filepath:
+		return {"status": "skipped", "reason": "no-backup-path"}
+
+	if not is_feature_enabled("enable_google_drive_sync"):
+		return {"status": "skipped", "reason": "drive-disabled"}
+
+	try:
+		enc_path = None
+		if is_feature_enabled("enable_backup_encryption"):
+			passphrase = get_setting("backup_encryption_key") or get_or_generate_backup_encryption_key()
+			enc_path = _encrypt_file_with_gpg(filepath, passphrase)
+			if enc_path:
+				with contextlib.suppress(Exception):
+					os.remove(filepath)
+		filepath_to_upload = enc_path or filepath
+		with open(filepath_to_upload, "rb") as f:
+			content = f.read()
+		site_name = frappe.local.site or frappe.utils.get_site_name(frappe.local.site_path)
+		parts = [site_name, "Backups", "Weekly"]
+		filename = Path(filepath_to_upload).name
+		file_id = upload_bytes(parts, filename, content)
+		return {"status": "ok", "file_id": file_id, "filename": filename}
+	except Exception as e:
+		frappe.log_error(frappe.get_traceback(), "Weekly full backup to Drive failed")
+		return {"status": "error", "error": str(e)}
+
+
+@frappe.whitelist()
 def harden_permissions() -> dict:
 	"""Harden access to admin pages/reports and align Client user type.
 
@@ -319,6 +633,8 @@ def harden_permissions() -> dict:
 	  "Permitted Documents For User" to System Manager only.
 	- Ensure users with role Client are Website Users (no Desk access).
 	"""
+	require_roles_if_http(["System Manager"])  # if executed via HTTP
+	require_post_if_http()
 	changed = {"rppr": 0, "clients": 0}
 
 	# Role Permission for Page and Report tightening
@@ -377,6 +693,156 @@ def harden_permissions() -> dict:
 		frappe.log_error(frappe.get_traceback(), "harden_permissions: client alignment failed")
 
 	return {"status": "ok", **changed}
+
+
+# ------------------------------
+# Backup encryption and retention
+# ------------------------------
+
+
+def _encrypt_file_with_gpg(file_path: str, passphrase: str | None) -> str | None:
+    """Encrypt file with gpg symmetric encryption (AES256). Returns new path."""
+    try:
+        if not passphrase:
+            return None
+        if shutil.which("gpg") is None:
+            frappe.logger().warning("gpg not available; skipping backup encryption")
+            return None
+        out_path = f"{file_path}.gpg"
+        cmd = [
+            "gpg",
+            "--batch",
+            "--yes",
+            "--symmetric",
+            "--cipher-algo",
+            "AES256",
+            "--pinentry-mode",
+            "loopback",
+            "--passphrase",
+            str(passphrase),
+            "-o",
+            out_path,
+            file_path,
+        ]
+        subprocess.run(cmd, check=True)
+        return out_path if os.path.exists(out_path) else None
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Encrypt backup with gpg failed")
+        return None
+
+
+@frappe.whitelist()
+def cleanup_backups_retention(daily_keep: int = 7, weekly_keep: int = 4, monthly_keep: int = 6) -> dict:
+    """Apply local backup retention: daily/weekly/monthly windows.
+
+    Keep:
+    - All backups in the last `daily_keep` days
+    - One per ISO week for the next `weekly_keep` weeks
+    - One per month for the next `monthly_keep` months
+    Delete older files outside of these windows.
+    """
+    try:
+        backups_dir = Path(frappe.utils.get_backups_path())
+        if not backups_dir.exists():
+            return {"status": "ok", "deleted": 0, "kept": 0}
+
+        today = datetime.utcnow().date()
+        items: list[tuple[Path, datetime]] = []
+        for p in backups_dir.iterdir():
+            if p.is_file():
+                try:
+                    ts = datetime.utcfromtimestamp(p.stat().st_mtime)
+                except Exception:
+                    ts = datetime.utcnow()
+                items.append((p, ts))
+
+        keep: set[Path] = set()
+        # Daily window
+        for path, ts in items:
+            age_days = (today - ts.date()).days
+            if age_days <= int(daily_keep):
+                keep.add(path)
+
+        # Weekly window
+        weekly_window_days = int(daily_keep) + 7 * int(weekly_keep)
+        weekly_groups: dict[tuple[int, int], tuple[Path, datetime]] = {}
+        for path, ts in items:
+            age_days = (today - ts.date()).days
+            if int(daily_keep) < age_days <= weekly_window_days:
+                iso = ts.isocalendar()
+                key = (iso.year, iso.week)
+                prev = weekly_groups.get(key)
+                if not prev or ts > prev[1]:
+                    weekly_groups[key] = (path, ts)
+        for p, _ in weekly_groups.values():
+            keep.add(p)
+
+        # Monthly window
+        monthly_window_days = weekly_window_days + 30 * int(monthly_keep)
+        monthly_groups: dict[tuple[int, int], tuple[Path, datetime]] = {}
+        for path, ts in items:
+            age_days = (today - ts.date()).days
+            if weekly_window_days < age_days <= monthly_window_days:
+                key = (ts.year, ts.month)
+                prev = monthly_groups.get(key)
+                if not prev or ts > prev[1]:
+                    monthly_groups[key] = (path, ts)
+        for p, _ in monthly_groups.values():
+            keep.add(p)
+
+        deleted = 0
+        for path, _ in items:
+            if path not in keep:
+                with contextlib.suppress(Exception):
+                    path.unlink()
+                    deleted += 1
+        return {"status": "ok", "deleted": deleted, "kept": len(keep), "dir": str(backups_dir)}
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "cleanup_backups_retention failed")
+        return {"status": "error"}
+
+
+@frappe.whitelist()
+def test_restore_latest_backup() -> dict:
+    """Best-effort test restore on a staging site to validate backups.
+
+    Reads `test_restore_site` from settings. Requires bench CLI in PATH.
+    This runs `bench --site <staging> restore <latest-db-dump>` (DB only).
+    Sends email to System Managers on failure.
+    """
+    staging = (get_setting("test_restore_site") or "").strip()
+    if not staging:
+        return {"status": "skipped", "reason": "no-staging-site-configured"}
+
+    try:
+        backups_dir = Path(frappe.utils.get_backups_path())
+        dumps = sorted(
+            [p for p in backups_dir.iterdir() if p.is_file() and p.suffix in (".gz", ".sql", ".gpg")],
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        if not dumps:
+            return {"status": "skipped", "reason": "no-backups-found"}
+        latest = dumps[0]
+        # If encrypted, skip automatic restore
+        if latest.suffix == ".gpg":
+            return {"status": "skipped", "reason": "latest-backup-encrypted"}
+
+        cmd = ["bench", "--site", staging, "restore", str(latest), "--force"]
+        frappe.utils.execute_in_shell(" ".join(cmd))
+        return {"status": "ok", "restored": True, "site": staging, "backup": str(latest)}
+    except Exception as exc:
+        with contextlib.suppress(Exception):
+            from ferum_custom.ferum_custom.utils import get_users_by_roles
+
+            recipients = list(get_users_by_roles(["System Manager"]))
+            if recipients:
+                frappe.sendmail(
+                    recipients=recipients,
+                    subject="Backup test restore failed",
+                    message=f"Error: {exc}",
+                )
+        return {"status": "error", "error": str(exc)}
 
 
 @frappe.whitelist()

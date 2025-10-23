@@ -1,0 +1,32 @@
+{
+ "charts": [
+  {"chart_name": "Открытые заявки по статусам"}
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Операционный менеджер\",\"col\":12}}]",
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "is_hidden": 0,
+ "label": "Операционный менеджер",
+ "links": [],
+ "modified": "2025-10-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ferum Custom",
+ "name": "Операционный менеджер",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {"role": "Office Manager"}
+ ],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {"label": "Заявки (Issues)", "type": "URL", "url": "/app/issue"},
+  {"label": "Нераспределенные заявки", "type": "Report", "link_to": "Unassigned Issues", "report_ref_doctype": "Issue"},
+  {"label": "Открытые заявки по инженерам", "type": "Report", "link_to": "Open Issues by Engineer", "report_ref_doctype": "Issue"},
+  {"label": "Счета (клиент)", "type": "URL", "url": "/app/sales-invoice"},
+  {"label": "Счета (суподрядчик)", "type": "URL", "url": "/app/purchase-invoice"}
+ ],
+ "title": "Операционный менеджер"
+}
+

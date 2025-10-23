@@ -3,6 +3,7 @@
   "allow_rename": 1,
   "creation": "2024-08-20 12:00:00.000000",
   "doctype": "DocType",
+  "title_field": "title",
   "engine": "InnoDB",
   "field_order": [
     "company",
@@ -40,7 +41,8 @@
       "fieldname": "title",
       "fieldtype": "Data",
       "label": "Title",
-      "reqd": 1
+      "reqd": 1,
+      "in_list_view": 1
     },
     {
       "fieldname": "status",
@@ -48,7 +50,9 @@
       "label": "Status",
       "options": "Open\nIn Progress\nCompleted\nClosed\nCancelled",
       "default": "Open",
-      "reqd": 1
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
     },
     {
       "fieldname": "type",
@@ -60,7 +64,16 @@
       "fieldname": "priority",
       "fieldtype": "Select",
       "label": "Priority",
-      "options": "Low\nMedium\nHigh"
+      "options": "Low\nMedium\nHigh",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "is_billable",
+      "fieldtype": "Check",
+      "label": "Billable",
+      "default": "0",
+      "description": "If checked, a completion report is required before closing."
     },
     {
       "fieldname": "customer",
@@ -74,7 +87,9 @@
       "fieldtype": "Link",
       "label": "Project",
       "options": "Service Project",
-      "read_only": 1
+      "read_only": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
     },
     {
       "fieldname": "service_department",
@@ -103,7 +118,9 @@
       "fieldname": "assigned_to",
       "fieldtype": "Link",
       "label": "Assigned To",
-      "options": "User"
+      "options": "User",
+      "in_list_view": 1,
+      "in_standard_filter": 1
     },
     {
       "fieldname": "timestamps_section",
@@ -161,6 +178,12 @@
       "label": "Service Report",
       "options": "Service Report",
       "read_only": 1
+    },
+    {
+      "fieldname": "financial_details",
+      "fieldtype": "Small Text",
+      "label": "Financial Details",
+      "permlevel": 1
     }
   ],
   "index_web_pages_for_search": 1,
@@ -209,6 +232,18 @@
     {
       "read": 1,
       "role": "Department Head"
+    },
+    {
+      "role": "System Manager",
+      "permlevel": 1,
+      "read": 1,
+      "write": 1
+    },
+    {
+      "role": "Project Manager",
+      "permlevel": 1,
+      "read": 1,
+      "write": 1
     }
   ],
   "sort_field": "modified",

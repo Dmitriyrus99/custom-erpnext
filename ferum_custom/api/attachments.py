@@ -10,9 +10,11 @@ Accepts multipart/form-data with field name 'file'.
 """
 
 from typing import Optional
+from ferum_custom.ferum_custom.integrations.antivirus import scan_bytes
 
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 
 
 def _require_auth() -> None:
@@ -29,12 +31,16 @@ def _store_file(
 	content: bytes,
 	content_type: str | None,
 ) -> tuple[str, str]:
+	# Antivirus scan (best-effort; see antivirus module for config)
+	ok, signature = scan_bytes(content, filename)
+	if not ok:
+		frappe.throw(_(f"Upload blocked by antivirus: {signature or 'infected'}"))
 	file_doc = frappe.get_doc(
 		{
 			"doctype": "File",
 			"file_name": filename,
 			"content": content,
-			"is_private": 0,
+			"is_private": 1,
 			"attached_to_doctype": doctype,
 			"attached_to_name": docname,
 		}
@@ -61,6 +67,7 @@ def _store_file(
 
 
 @frappe.whitelist(methods=["POST"])  # multipart upload
+@rate_limit(limit=30, seconds=60, methods=["POST"])  # 30 uploads/min per IP
 def attach_to_service_request(name: str) -> dict:
 	"""Attach an uploaded file to a Service Request.
 
@@ -104,6 +111,7 @@ def attach_to_service_request(name: str) -> dict:
 
 
 @frappe.whitelist(methods=["POST"])  # multipart upload
+@rate_limit(limit=30, seconds=60, methods=["POST"])  # 30 uploads/min per IP
 def attach_to_service_report(name: str) -> dict:
 	"""Attach an uploaded file to a Service Report (documents table).
 

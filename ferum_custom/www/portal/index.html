@@ -1,23 +1,25 @@
 <div class="container">
         <h2>{{ _("My Service Requests") }}</h2>
-        <div class="mb-2">
-                <label class="form-label">{{ _("Filter by status") }}</label>
-                <select id="status" class="form-select" style="max-width:240px;">
-                        <option value="">{{ _("All") }}</option>
-                        <option>Open</option>
-                        <option>In Progress</option>
-                        <option>Completed</option>
-                        <option>Closed</option>
-                </select>
-        </div>
+        <ul class="nav nav-tabs mb-3">
+                <li class="nav-item"><a class="nav-link active" href="#" data-status="">{{ _("All") }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-status="Open">{{ _("Open") }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-status="Replied">{{ _("Replied") }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-status="On Hold">{{ _("On Hold") }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-status="Resolved">{{ _("Resolved") }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-status="Closed">{{ _("Closed") }}</a></li>
+        </ul>
         <div id="sr-list"></div>
-        <p><a href="/portal/new-request">{{ _("Create New Request") }}</a></p>
+        <p class="mt-3">
+                <a class="btn btn-sm btn-primary" href="/portal/new-request">{{ _("Create New Request") }}</a>
+                <a class="btn btn-sm btn-outline-secondary" href="/portal/closed">{{ _("My Closed Requests") }}</a>
+        </p>
 </div>
 <script>
         frappe.ready(() => {
                 const el = document.getElementById("sr-list");
+                let currentStatus = '';
                 const load = () => {
-                        const status = document.getElementById("status").value || null;
+                        const status = currentStatus || null;
                         frappe
                                 .call({
                                         method: "ferum_custom.api.service.list_service_requests",
@@ -35,17 +37,25 @@
                                                 rows
                                                         .map((x) => {
                                                                 let style = "";
-                                                                if (x.sla_deadline && ["Completed","Closed"].indexOf(x.status) === -1) {
+                                                                if (x.sla_deadline && ["Resolved","Closed"].indexOf(x.status) === -1) {
                                                                         const due = new Date(x.sla_deadline);
                                                                         if (due < now) style = ' style="color:#c92a2a;"'; // red for overdue
                                                                 }
-                                                                return `<li${style}><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title} - ${x.status}</li>`;
+                                                                return `<li${style}><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title || ''} - ${x.status}</li>`;
                                                         })
                                                         .join("") +
                                                 "</ul>";
                                 });
                 };
-                document.getElementById("status").addEventListener("change", load);
+                document.querySelectorAll('.nav-link[data-status]').forEach(a => {
+                        a.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
+                                a.classList.add('active');
+                                currentStatus = a.getAttribute('data-status') || '';
+                                load();
+                        });
+                });
                 load();
         });
 </script>

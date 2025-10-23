@@ -1,5 +1,5 @@
-"""Domain-oriented service helpers for Ferum Custom."""
+"""Business services package.
 
-from .projects import get_project_manager_email
-
-__all__ = ["get_project_manager_email"]
+Contains orchestration logic (usecases) and business policies independent from
+DocType controllers to keep controllers thin and testable.
+"""

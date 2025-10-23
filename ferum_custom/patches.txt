@@ -13,9 +13,12 @@ ferum_custom.patches.v15_0.migrate_service_project_to_project
 ferum_custom.patches.v15_0.migrate_service_object_to_asset
 ferum_custom.patches.v15_0.migrate_service_request_to_issue
 ferum_custom.patches.v15_0.migrate_service_report_to_timesheet
+ferum_custom.patches.v15_2.hide_legacy_service_doctypes
 ferum_custom.patches.v15_0.bootstrap_default_item_for_invoices
 ferum_custom.patches.v15_0.migrate_invoice_to_erpnext
 ferum_custom.patches.v15_0.migrate_invoice_to_erpnext_retry
+ferum_custom.patches.v15_2.link_issues_to_assets
+ferum_custom.patches.v15_2.hide_legacy_master_doctypes
 ferum_custom.patches.v15_0.migrate_custom_attachment_to_file
 ferum_custom.patches.v15_0.finalize_freeze_legacy
 ferum_custom.patches.v15_0.add_file_drive_fields
@@ -23,3 +26,4 @@ ferum_custom.patches.v15_0.seed_query_reports
 ferum_custom.patches.v15_1.sync_service_report_attachment_links
 ferum_custom.patches.v15_1.bootstrap_telegram_settings
 ferum_custom.patches.v15_1.add_telegram_fields_to_user
+ferum_custom.patches.v15_3.add_performance_indexes

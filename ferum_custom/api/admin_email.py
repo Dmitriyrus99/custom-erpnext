@@ -11,7 +11,7 @@ def _clean_app_password(pwd: str) -> str:
 	return re.sub(r"\s+", "", (pwd or "").replace("\x00", ""))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def setup_outgoing(
 	*,
 	account_name: str,

@@ -21,7 +21,7 @@ def _ensure_roles(user: str, roles: Iterable[str]) -> None:
 	doc.save(ignore_permissions=True)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_telegram_bot_user(
 	email: str = "telegram.bot@ferumrus.ru",
 	full_name: str = "Telegram Bot",
@@ -34,6 +34,7 @@ def create_telegram_bot_user(
 	- Generates a strong random password if user is new
 	Returns: {"name": <user>, "password": <generated or None>}
 	"""
+	frappe.only_for("System Manager")
 	generated: str | None = None
 	if frappe.db.exists("User", email):
 		user = frappe.get_doc("User", email)
@@ -61,12 +62,15 @@ def create_telegram_bot_user(
 	return {"name": user.name, "password": generated}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])  # read-only; enforces doc permissions below
 def get_file_sync_status(doctype: str, name: str) -> dict:
 	"""Return Drive sync status for a File or Custom Attachment."""
 	doctype = (doctype or "").strip()
 	if doctype not in {"File", "Custom Attachment"}:
 		frappe.throw(_("Unsupported doctype. Use 'File' or 'Custom Attachment'."))
+	# Respect read permissions on the document
+	if not frappe.has_permission(doctype, ptype="read", doc=name):
+		frappe.throw(_("Not permitted"))
 	doc = frappe.get_doc(doctype, name)
 	status: dict[str, object] = {
 		"doctype": doctype,
@@ -86,12 +90,13 @@ def get_file_sync_status(doctype: str, name: str) -> dict:
 	return status
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])  # enqueues a job
 def trigger_file_sync(doctype: str, name: str) -> dict:
 	"""Enqueue Drive sync for a File or Custom Attachment via FileSyncService."""
 	doctype = (doctype or "").strip()
 	if doctype not in {"File", "Custom Attachment"}:
 		frappe.throw(_("Unsupported doctype. Use 'File' or 'Custom Attachment'."))
+	frappe.only_for("System Manager")
 	if doctype == "File":
 		enqueue_file_sync(name)
 	else:
@@ -99,12 +104,13 @@ def trigger_file_sync(doctype: str, name: str) -> dict:
 	return {"ok": True, "queued": True}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])  # admin diagnostics
 def list_unsynced_attachments(limit: int | None = 200) -> dict:
 	"""Return lists of Custom Attachments and Files missing Drive ID.
 
 	Meant for admin diagnostics; consider paging with `limit`.
 	"""
+	frappe.only_for("System Manager")
 	lim = int(limit) if (limit is not None and str(limit).isdigit()) else 200
 	atts = frappe.get_all(
 		"Custom Attachment",

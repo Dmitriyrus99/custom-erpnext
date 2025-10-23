@@ -1,0 +1,34 @@
+{
+ "charts": [
+  {"chart_name": "Открытые заявки по статусам"},
+  {"chart_name": "Счета по проектам"}
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Менеджер проекта\",\"col\":12}}]",
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "is_hidden": 0,
+ "label": "Менеджер проекта",
+ "links": [],
+ "modified": "2025-10-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ferum Custom",
+ "name": "Менеджер проекта",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {"role": "Project Manager"}
+ ],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {"label": "Проекты", "type": "DocType", "link_to": "Project"},
+  {"label": "Заявки (Issues)", "type": "URL", "url": "/app/issue"},
+  {"label": "Сервисные отчеты (Timesheets)", "type": "DocType", "link_to": "Timesheet"},
+  {"label": "Счета (клиент)", "type": "URL", "url": "/app/sales-invoice"},
+  {"label": "Заявки по проектам", "type": "Report", "link_to": "Service Requests by Project", "report_ref_doctype": "Service Request"},
+  {"label": "Счета по проектам", "type": "Report", "link_to": "Invoices by Project", "report_ref_doctype": "Invoice"},
+  {"label": "Upcoming Maintenance Tasks", "type": "Report", "link_to": "Upcoming Maintenance Tasks", "report_ref_doctype": "Service Maintenance Schedule"}
+],
+"title": "Менеджер проекта"
+}

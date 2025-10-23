@@ -9,9 +9,10 @@ class TestServiceRequestPortal(FrappeTestCase):
 		frappe.set_user("Administrator")
 		name = None
 		try:
-			name = create_service_request(title="Portal API Smoke", description="from test", service_object=None)
+			name = create_service_request(
+				title="Portal API Smoke", description="from test", service_object=None
+			)
 			self.assertTrue(frappe.db.exists("Service Request", name))
 		finally:
 			if name:
 				frappe.delete_doc("Service Request", name, force=1)
-

@@ -17,6 +17,7 @@ import frappe
 from frappe import _
 
 from ferum_custom.ferum_custom.integrations import telegram as telegram_integration
+from frappe.rate_limiter import rate_limit
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
 try:  # pragma: no cover - optional dependency, exercised in production
@@ -34,12 +35,58 @@ class CommandError(Exception):
 
 
 def _reply(chat_id: int | str | None, text: str) -> None:
-	if chat_id is None:
-		return
-	try:
-		telegram_integration.send_message(text, chat_id=str(chat_id))
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Telegram reply failed")
+    if chat_id is None:
+        return
+    try:
+        ok = telegram_integration.send_message(text, chat_id=str(chat_id), max_retries=5)
+        if not ok:
+            frappe.log_error(
+                f"Telegram reply send failed after retries to chat={chat_id}",
+                "Telegram reply failed",
+            )
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Telegram reply failed")
+
+
+# ------------------------------
+# Idempotency helpers
+# ------------------------------
+
+def _idempotency_key(update: dict[str, Any]) -> str | None:
+    try:
+        if update.get("update_id") is not None:
+            return f"telegram:update:{update['update_id']}"
+    except Exception:
+        pass
+    try:
+        msg = update.get("message") or {}
+        mid = msg.get("message_id")
+        chat = ((msg.get("chat") or {}).get("id"))
+        if mid is not None and chat is not None:
+            return f"telegram:message:{chat}:{mid}"
+    except Exception:
+        pass
+    return None
+
+
+def _already_processed(update: dict[str, Any]) -> bool:
+    key = _idempotency_key(update)
+    if not key:
+        return False
+    try:
+        return bool(frappe.cache().get_value(key, expires=True) is not None)
+    except Exception:
+        return False
+
+
+def _mark_processed(update: dict[str, Any], ttl_seconds: int = 7 * 24 * 60 * 60) -> None:
+    key = _idempotency_key(update)
+    if not key:
+        return
+    try:
+        frappe.cache().set_value(key, 1, expires_in_sec=ttl_seconds)
+    except Exception:
+        pass
 
 
 def _user_from_update(update: dict[str, Any]) -> str | None:
@@ -340,11 +387,15 @@ def _verify_secret(query_secret: str | None) -> None:
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=120, seconds=60, methods=["POST"])  # 120 updates/min per IP
 def handle_update(secret: str | None = None, update: str | dict[str, Any] | None = None) -> dict[str, Any]:
 	"""Process Telegram webhook updates with simple chat commands."""
 
 	_verify_secret(secret)
-	payload = frappe.parse_json(update) if isinstance(update, str) else (update or {})
+    payload = frappe.parse_json(update) if isinstance(update, str) else (update or {})
+    # Idempotency check
+    if _already_processed(payload):
+        return {"ok": True, "duplicate": True}
 	ctx = _build_context(payload)
 
 	if not is_feature_enabled("enable_telegram_notifications"):
@@ -395,14 +446,98 @@ def handle_update(secret: str | None = None, update: str | dict[str, Any] | None
 	if not ctx.text and not ctx.has_photo:
 		return {"ok": True}
 
-	try:
-		if _handle_photo_payload(ctx):
-			return {"ok": True}
-		_dispatch_command(ctx)
-	except CommandError as exc:
-		ctx.reply(exc.message)
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Telegram bot update failed")
-		ctx.reply(_("Error processing command"))
+    try:
+        if _handle_photo_payload(ctx):
+            return {"ok": True}
+        _dispatch_command(ctx)
+    except CommandError as exc:
+        ctx.reply(exc.message)
+    except Exception as exc:
+        frappe.log_error(frappe.get_traceback(), "Telegram bot update failed")
+        try:
+            if get_setting("telegram_alert_admin_on_failure"):
+                subject = "Telegram bot update processing failed"
+                body = (
+                    f"Exception: {exc}\n\n"
+                    f"Payload: {frappe.safe_encode(frappe.as_json(payload))[:8000]}\n"
+                )
+                # Reuse email notifier from integration module
+                from ferum_custom.ferum_custom.integrations.telegram import _notify_admins_email  # type: ignore
 
-	return {"ok": True}
+                _notify_admins_email(subject, body)
+        except Exception:
+            pass
+        ctx.reply(_("Error processing command"))
+
+    # Mark processed on successful path (no raised exceptions)
+    _mark_processed(payload)
+    return {"ok": True}
+
+
+# ------------------------------
+# Webhook utilities (optional, for switching from polling)
+# ------------------------------
+
+@frappe.whitelist()
+def set_webhook(base_url: str | None = None, secret: str | None = None) -> dict[str, Any]:
+    """Configure Telegram to deliver updates to this site via webhook.
+
+    Requires System Manager permission. Provide base_url (e.g., https://your.site)
+    if not configured in settings as site_url. Uses the same secret as handle_update.
+    """
+    if not frappe.has_permission(doctype=None, ptype="write", user=frappe.session.user):
+        frappe.throw(_("Not permitted"))
+
+    token = get_setting("telegram_bot_token")
+    if not token:
+        frappe.throw(_("Telegram bot token not configured"))
+
+    site = base_url or (get_setting("site_url") or "").strip()
+    if not site:
+        frappe.throw(_("Provide base_url or configure site_url in settings"))
+
+    secret = (secret or get_setting("telegram_webhook_secret") or "").strip()
+    if not secret:
+        frappe.throw(_("Configure telegram_webhook_secret in settings"))
+
+    endpoint = f"{site.rstrip('/')}/api/method/ferum_custom.api.telegram_bot.handle_update?secret={secret}"
+
+    try:
+        import requests  # type: ignore
+        url = f"{telegram_integration.API_BASE}/bot{token}/setWebhook"
+        resp = requests.post(
+            url,
+            json={
+                "url": endpoint,
+                "secret_token": secret,
+                "allowed_updates": ["message", "edited_message"],
+                "max_connections": 40,
+                # keep certificate defaults (let Telegram fetch via public HTTPS)
+            },
+            timeout=15,
+        )
+        data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {"http": resp.text}
+        if not resp.ok or not data.get("ok"):
+            frappe.throw(_("Failed to set webhook: {0}").format(data))
+        return {"ok": True, "result": data.get("result")}
+    except Exception as exc:
+        frappe.log_error(frappe.get_traceback(), "Telegram set_webhook failed")
+        frappe.throw(_("Error setting webhook: {0}").format(str(exc)))
+
+
+@frappe.whitelist()
+def delete_webhook() -> dict[str, Any]:
+    token = get_setting("telegram_bot_token")
+    if not token:
+        frappe.throw(_("Telegram bot token not configured"))
+    try:
+        import requests  # type: ignore
+        url = f"{telegram_integration.API_BASE}/bot{token}/deleteWebhook"
+        resp = requests.post(url, timeout=15)
+        data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {"http": resp.text}
+        if not resp.ok or not data.get("ok"):
+            frappe.throw(_("Failed to delete webhook: {0}").format(data))
+        return {"ok": True, "result": data.get("result")}
+    except Exception as exc:
+        frappe.log_error(frappe.get_traceback(), "Telegram delete_webhook failed")
+        frappe.throw(_("Error deleting webhook: {0}").format(str(exc)))

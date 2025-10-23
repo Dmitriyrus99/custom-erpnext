@@ -30,4 +30,3 @@ class TestServiceMaintenanceSchedule(FrappeTestCase):
 		finally:
 			if name:
 				frappe.delete_doc("Service Maintenance Schedule", name, force=1)
-
