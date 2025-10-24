@@ -1,44 +1,24 @@
-# Ferum Customizations - Technical Specification
+# Ferum Customizations — MariaDB Architecture
+* Multi-company isolation (User Permission)
+* Normalized Contracts, Invoices, Payments
+* Views for analytics (vw_invoice_balance, vw_contract_overview)
+* Triggers for integrity and auto-status
+* ETL scripts for data import
+* Tests and documentation
 
-- This directory contains the detailed technical specification for Ferum Customizations, broken down into smaller, more manageable Markdown files for easier navigation and study.
+---
+### MariaDB Migration Notes
+* All triggers moved to Python patch (`041_triggers.py`)
+* SQL patches applied via `apply_schema.py`
+* Conflicts with Frappe ORM avoided by converting `CREATE TABLE` → `ALTER TABLE`
+* Added to `patches.txt` for automatic migration
+* Verified with `bench migrate` and pytest (see repo README for latest status)
 
-## Table of Contents
-
-- [System Overview](system_overview.md)
-- [Business Processes](business_processes/README.md)
-  - [Project & Contract Management](business_processes/project_contract_management.md)
-  - [Service Request Management](business_processes/service_request_management.md)
-  - [Work Reporting](business_processes/work_reporting.md)
-  - [Invoicing & Payments](business_processes/invoicing_payments.md)
-  - [HR & Payroll Management](business_processes/hr_payroll_management.md)
-  - [Document & Attachment Management](business_processes/document_attachment_management.md)
-  - [Monitoring, Analytics & Security (Business Process)](business_processes/monitoring_analytics_security_bp.md)
-- [Entity-Relationship Model](entity_relationship_model.md)
-- [Module Breakdown](module_breakdown/README.md)
-  - [Project & Contract Management Module](module_breakdown/project_contract_management_module.md)
-  - [Service Request Management Module](module_breakdown/service_request_management_module.md)
-  - [Work Report & Completion Module](module_breakdown/work_report_completion_module.md)
-  - [Invoicing Module](module_breakdown/invoicing_module.md)
-  - [HR & Payroll Module](module_breakdown/hr_payroll_module.md)
-  - [Document Management Module](module_breakdown/document_management_module.md)
-  - [Notifications & Communications Module](module_breakdown/notifications_communications_module.md)
-  - [Analytics & Reporting Module](module_breakdown/analytics_reporting_module.md)
-- [User Roles and Permissions Matrix](user_roles_permissions_matrix.md)
-- [API Design](api_design.md)
-- [Integrations](integrations.md)
-- [Security Architecture](security_architecture.md)
-- [Deployment and CI/CD](deployment_ci_cd.md)
-- [User Stories and Functional Requirements](user_stories/user_stories_intro.md)
-  - [Administrator User Stories](user_stories/administrator_user_stories.md)
-  - [General Director User Stories](user_stories/general_director_user_stories.md)
-  - [Chief Accountant User Stories](user_stories/chief_accountant_user_stories.md)
-  - [Department Head User Stories](user_stories/department_head_user_stories.md)
-  - [Project Manager User Stories](user_stories/project_manager_user_stories.md)
-  - [Service Engineer User Stories](user_stories/service_engineer_user_stories.md)
-  - [Office Manager User Stories](user_stories/office_manager_user_stories.md)
-  - [Client User Stories](user_stories/client_user_stories.md)
-- [Glossary and Appendix](glossary_appendix.md)
-
-Translations
-
-- Русская документация (summary): ru/README.md
+---
+### MariaDB Schema Deployment (Gemini → Codex)
+* YAML schema parsed and deployed as SQL + Python patches
+* Triggers moved to 041_triggers.py
+* Stored procedures moved to 042_procedures.py
+* All SQL scripts executed through apply_schema.py
+* Connected to patches.txt for automatic migrations
+* Verified via bench migrate & pytest

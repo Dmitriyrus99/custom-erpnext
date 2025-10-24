@@ -6,6 +6,8 @@
   "engine": "InnoDB",
   "field_order": [
     "company",
+    "invoice_no",
+    "invoice_year",
     "project",
     "counterparty_type",
     "counterparty_name",
@@ -24,6 +26,19 @@
       "label": "Company",
       "options": "Company",
       "reqd": 1
+    },
+    {
+      "fieldname": "invoice_no",
+      "fieldtype": "Data",
+      "label": "Invoice No",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "invoice_year",
+      "fieldtype": "Int",
+      "label": "Year",
+      "in_standard_filter": 1
     },
     {
       "fieldname": "project",

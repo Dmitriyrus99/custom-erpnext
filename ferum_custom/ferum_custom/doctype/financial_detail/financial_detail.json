@@ -1,0 +1,40 @@
+
+{
+    "name": "Financial Detail",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "module": "Ferum Custom",
+    "istable": 1,
+    "fields": [
+        {
+            "fieldname": "item_name",
+            "fieldtype": "Data",
+            "label": "Item Name",
+            "reqd": 1
+        },
+        {
+            "fieldname": "amount",
+            "fieldtype": "Currency",
+            "label": "Amount",
+            "reqd": 1
+        },
+        {
+            "fieldname": "currency",
+            "fieldtype": "Link",
+            "label": "Currency",
+            "options": "Currency",
+            "reqd": 1
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Small Text",
+            "label": "Description"
+        }
+    ],
+    "field_order": [
+        "item_name",
+        "amount",
+        "currency",
+        "description"
+    ]
+}

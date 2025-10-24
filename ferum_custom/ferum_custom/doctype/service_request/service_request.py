@@ -45,11 +45,9 @@ class ServiceRequest(Document):
 
 	def validate(self):
 		self.set_customer_and_project()
-		self.validate_workflow_transitions()
 		self.calculate_sla_deadline()
 
 	def on_update(self):
-		self.check_sla_breach()
 		self.update_timestamps()
 		# Audit: log status changes
 		try:
@@ -104,37 +102,27 @@ class ServiceRequest(Document):
 				self.project = None
 				# keep company unchanged unless explicitly cleared elsewhere
 
-	def validate_workflow_transitions(self):
-		old_status = (
-			frappe.db.get_value("Service Request", self.name, "status") if not self.is_new() else None
-		)
-
-		if old_status == "Open" and self.status == "In Progress" and not self.assigned_to:
-			frappe.throw(_("Cannot set status to 'In Progress' without assigning an engineer."))
-		elif old_status == "In Progress" and self.status == "Completed":
-			# Require a completion report only for billable or non-routine requests
-			request_type = (getattr(self, "type", "") or "").strip()
-			billable = bool(getattr(self, "is_billable", 0))
-			needs_report = billable or request_type not in ("Routine Maintenance", "Routine")
-			if needs_report and not getattr(self, "linked_report", None):
-				frappe.throw(
-					_("A completion report (Timesheet/Service Report) is required to complete this request.")
-				)
-		elif (
-			old_status == "Completed"
-			and self.status == "Closed"
-			and "System Manager" not in frappe.get_roles()
-		):
-			frappe.throw(_("Only a Manager can close a Service Request."))
-
 	def calculate_sla_deadline(self):
-		if self.type == "Emergency" and self.priority == "High":
-			self.sla_deadline = add_to_date(self.creation, hours=4)
-		elif self.type == "Emergency" and self.priority == "Medium":
-			self.sla_deadline = add_to_date(self.creation, hours=8)
-		elif self.type == "Routine Maintenance" and self.priority == "High":
-			self.sla_deadline = add_days(self.creation, 1)
+		"""Calculate SLA deadline based on matching SLA policies."""
+		hours = None
+		if self.priority and getattr(self, "type", None):
+			policy = frappe.db.get_value(
+				"SLA Policy",
+				filters={
+					"priority": self.priority,
+					"type": self.type,
+					"enabled": 1,
+				},
+				fieldname="duration_hours",
+				order_by="creation DESC",
+			)
+			if policy:
+				hours = float(policy)
+
+		if hours is not None:
+			self.sla_deadline = add_to_date(self.creation, hours=hours)
 		else:
+			# Default SLA if no policy matches
 			self.sla_deadline = add_days(self.creation, 3)
 
 	def check_sla_breach(self):
@@ -277,100 +265,265 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 		frappe.log_error(frappe.get_traceback(), "Failed to send SLA breach notification")
 
 
-def get_permission_query_conditions(user: str | None = None) -> str | None:
-	user = user or frappe.session.user
-	roles = set(frappe.get_roles(user))
-	if "System Manager" in roles:
-		return None
-	conds = []
 
-	# Company restriction for internal users (skip for Website/Client)
-	try:
-		user_type = frappe.get_cached_value("User", user, "user_type")
-		companies = frappe.get_all(
-			"User Permission",
-			filters={"user": user, "allow": "Company"},
-			pluck="for_value",
-		)
-		if user_type != "Website User" and companies:
-			vals = ", ".join(frappe.db.escape(x) for x in companies)
-			conds.append(f"`tabService Request`.company in ({vals})")
-	except Exception:
-		pass
 
-	# Office Manager and Department Head can access all within allowed companies
-	if "Office Manager" in roles:
-		return " and ".join(f"({c})" for c in conds) if conds else None
-	if "Department Head" in roles:
-		depts = frappe.get_all(
-			"User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
-		)
-		if depts:
-			vals = ", ".join(frappe.db.escape(x) for x in depts)
-			conds.append(f"`tabService Request`.service_department in ({vals})")
-			return " and ".join(f"({c})" for c in conds)
-		# fallback: broad within company
-		return " and ".join(f"({c})" for c in conds) if conds else None
 
-	role_conds = []
-	if "Project Manager" in roles:
-		role_conds.append(
-			"exists(select 1 from `tabService Project` sp where sp.name = `tabService Request`.project and sp.project_manager=%(user)s)"
-		)
-	if "Service Engineer" in roles:
-		role_conds.append("`tabService Request`.assigned_to=%(user)s")
-	if "Client" in roles:
-		customers = get_allowed_customers(user)
-		if customers:
-			vals = ", ".join(frappe.db.escape(x) for x in customers)
-			role_conds.append(f"`tabService Request`.customer in ({vals})")
-		else:
-			# fallback to owner when no explicit customer permission is set
-			role_conds.append("`tabService Request`.owner=%(user)s")
+from ferum_custom.ferum_custom.permissions import (
 
-	if role_conds:
-		conds.append("(" + ") or (".join(role_conds) + ")")
-	return " and ".join(f"({c})" for c in conds) if conds else None
+
+
+
+
+    get_company_conditions,
+
+
+
+
+
+    get_department_conditions,
+
+
+
+
+
+    get_project_manager_conditions,
+
+
+
+
+
+    get_service_engineer_conditions,
+
+
+
+
+
+    get_client_conditions,
+
+
+
+
+
+    has_company_permission,
+
+
+
+
+
+    has_department_permission,
+
+
+
+
+
+    has_project_manager_permission,
+
+
+
+
+
+    has_service_engineer_permission,
+
+
+
+
+
+    has_client_permission,
+
+
+
+
+
+)
+
+
+
+
+
+
+
+
+
 
 
 def has_permission(doc, user: str | None = None) -> bool:
-	user = user or frappe.session.user
-	roles = user_roles(user)
-	if "System Manager" in roles:
-		return True
-	if "Office Manager" in roles:
-		# Restrict by Company if explicit user permissions set; otherwise allow
-		try:
-			companies = set(
-				frappe.get_all(
-					"User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
-				)
-			)
-			return not companies or (getattr(doc, "company", None) in companies)
-		except Exception:
-			return True
-	if "Department Head" in roles:
-		allowed = set(
-			frappe.get_all(
-				"User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
-			)
-		)
-		if allowed:
-			if getattr(doc, "service_department", None) in allowed:
-				return True
-		else:
-			return True
-	if doc.assigned_to == user:
-		return True
-	if doc.project and frappe.db.get_value("Service Project", doc.project, "project_manager") == user:
-		return True
-	if "Client" in roles:
-		customers = set(get_allowed_customers(user))
-		if customers and getattr(doc, "customer", None) in customers:
-			return True
-	if doc.owner == user:
-		return True
-	return False
+
+
+
+
+
+    user = user or frappe.session.user
+
+
+
+
+
+    roles = set(user_roles(user))
+
+
+
+
+
+
+
+
+
+
+
+    if "System Manager" in roles:
+
+
+
+
+
+        return True
+
+
+
+
+
+
+
+
+
+
+
+    if not has_company_permission(doc, user):
+
+
+
+
+
+        return False
+
+
+
+
+
+
+
+
+
+
+
+    if "Office Manager" in roles:
+
+
+
+
+
+        return True
+
+
+
+
+
+
+
+
+
+
+
+    if "Department Head" in roles:
+
+
+
+
+
+        if has_department_permission(doc, user):
+
+
+
+
+
+            return True
+
+
+
+
+
+
+
+
+
+
+
+    if "Project Manager" in roles:
+
+
+
+
+
+        if has_project_manager_permission(doc, user):
+
+
+
+
+
+            return True
+
+
+
+
+
+
+
+
+
+
+
+    if "Service Engineer" in roles:
+
+
+
+
+
+        if has_service_engineer_permission(doc, user):
+
+
+
+
+
+            return True
+
+
+
+
+
+
+
+
+
+
+
+    if "Client" in roles:
+
+
+
+
+
+        if has_client_permission(doc, user):
+
+
+
+
+
+            return True
+
+
+
+
+
+
+
+
+
+
+
+    return False
+
+
+
 
 
 def _notify_clients(customer: str, subject: str, message: str) -> None:

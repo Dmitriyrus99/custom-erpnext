@@ -181,8 +181,9 @@
     },
     {
       "fieldname": "financial_details",
-      "fieldtype": "Small Text",
+      "fieldtype": "Table",
       "label": "Financial Details",
+      "options": "Financial Detail",
       "permlevel": 1
     }
   ],

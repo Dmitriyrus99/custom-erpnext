@@ -4,6 +4,8 @@
 import frappe
 from frappe import _
 
+from ferum_custom.ferum_custom.domain.finance import application as finance_app
+
 try:
 	import gspread  # type: ignore[import-untyped]
 except Exception:
@@ -70,6 +72,8 @@ class Invoice(Document):
 					self.company = proj_company
 		except Exception:
 			pass
+
+		finance_app.ensure_invoice_number(self)
 
 	def after_insert(self):
 		self.notify_on_subcontractor_invoice()

@@ -12,7 +12,7 @@ class TestServiceRequestPortal(FrappeTestCase):
 			name = create_service_request(
 				title="Portal API Smoke", description="from test", service_object=None
 			)
-			self.assertTrue(frappe.db.exists("Service Request", name))
+			self.assertTrue(frappe.db.exists("Issue", name))
 		finally:
 			if name:
-				frappe.delete_doc("Service Request", name, force=1)
+				frappe.delete_doc("Issue", name, force=1)

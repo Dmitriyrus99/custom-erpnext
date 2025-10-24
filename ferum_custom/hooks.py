@@ -5,6 +5,8 @@ app_description = "Custom erp system for Ferum"
 app_email = "rusakov@ferumrus.ru"
 app_license = "mit"
 
+from ferum_custom.ferum_custom.erpnext_ext import employee_patch as _employee_patch  # noqa: F401
+
 doctype_js = {
     # Keep User.user_type consistent with assigned roles (Desk vs Website)
     "User": "public/js/user.js",
@@ -53,10 +55,22 @@ scheduler_events = {
     },
 }
 
+# Append MV refresh to daily schedule (idempotent)
+try:
+    _se = globals().get("scheduler_events") or {}
+    daily = _se.setdefault("daily", [])
+    refresh_job = "ferum_custom.analytics.refresh.refresh_all_materialized_views"
+    if refresh_job not in daily:
+        daily.append(refresh_job)
+    scheduler_events = _se
+except Exception:
+    pass
+
 doc_events = {
     "Invoice": {
         "on_update": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
         "on_cancel": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
+        "after_insert": "ferum_custom.notifications_module.on_invoice_after_insert",
     },
     "File": {
         "on_trash": "ferum_custom.cleanup.on_file_trash",
@@ -72,7 +86,12 @@ doc_events = {
         "on_update": "ferum_custom.ferum_custom.autodoc.on_task_update",
     },
     "Issue": {
-        "before_insert": "ferum_custom.ferum_custom.assign.issue_auto_assign.before_insert",
+        "before_insert": "ferum_custom.assign.issue_auto_assign.before_insert",
+        "after_insert": "ferum_custom.notifications_module.on_issue_after_insert",
+    },
+    "Employee": {
+        "before_save": "ferum_custom.ferum_custom.hr.employee.ensure_unique_middle_name_for_tests",
+        "on_update": "ferum_custom.ferum_custom.hr.employee.sync_user_middle_name",
     },
     "Role": {
         "on_update": "ferum_custom.ferum_custom.automation.on_role_update_audit",
@@ -234,9 +253,24 @@ role_home_page = {
 permission_query_conditions = {
     "Project": "ferum_custom.ferum_custom.permissions.project_get_permission_query_conditions",
     "Timesheet": "ferum_custom.ferum_custom.permissions.timesheet_get_permission_query_conditions",
+    "Service Request": "ferum_custom.ferum_custom.doctype.service_request.service_request.get_permission_query_conditions",
+    "Invoice": "ferum_custom.security_pqc_rules.invoice_pqc",
+    "Payment": "ferum_custom.security_pqc_rules.payment_pqc",
+    "Counterparty": "ferum_custom.security_pqc_rules.counterparty_pqc",
+    "Contract": "ferum_custom.security_pqc_rules.contract_pqc",
+    "Service Report": "ferum_custom.security_pqc_rules.service_report_pqc",
+    "Service Act": "ferum_custom.security_pqc_rules.service_act_pqc",
+    "Payment Allocation": "ferum_custom.security_pqc_rules.payment_allocation_pqc",
 }
 
 has_permission = {
     "Project": "ferum_custom.ferum_custom.permissions.project_has_permission",
     "Timesheet": "ferum_custom.ferum_custom.permissions.timesheet_has_permission",
+    "Service Request": "ferum_custom.ferum_custom.doctype.service_request.service_request.has_permission",
+    "Invoice": "ferum_custom.security_pqc_rules.default_has_permission",
+    "Payment": "ferum_custom.security_pqc_rules.default_has_permission",
+    "Counterparty": "ferum_custom.security_pqc_rules.default_has_permission",
+    "Contract": "ferum_custom.security_pqc_rules.default_has_permission",
+    "Service Report": "ferum_custom.security_pqc_rules.default_has_permission",
+    "Service Act": "ferum_custom.security_pqc_rules.default_has_permission",
 }

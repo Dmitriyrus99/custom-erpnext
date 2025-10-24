@@ -20,52 +20,60 @@
                         return;
                 }
 
-                frappe
-                        .call({
-                                method: "ferum_custom.api.service.get_service_request",
-                                args: { name },
-                        })
-                        .then((r) => {
-                                const doc = r.message || {};
-                                document.getElementById("sr-title").innerText =
-                                        `${doc.name || name} - ${doc.title || ""}`;
-                                const pieces = [
-                                        `<p><strong>${__("Status")}:</strong> ${doc.status || ""}</p>`,
-                                ];
-                                if (doc.description) {
-                                        pieces.push(
-                                                `<p><strong>${__("Description")}:</strong> ${
-                                                        frappe.utils.escape_html(doc.description)
-                                                }</p>`,
-                                        );
-                                }
-                                detailsEl.innerHTML = pieces.join("\n");
-                                if (doc.status === 'Completed') {
-                                        document.getElementById("confirm-wrapper").style.display = "";
-                                        document.getElementById("confirm-btn").onclick = () => {
-                                                frappe.call({ method: 'ferum_custom.api.service.confirm_service_request', args: { name } }).then(() => {
-                                                        frappe.show_alert({ message: __('Confirmed'), indicator: 'green' });
-                                                });
-                                        };
-                                }
-                                if (doc.linked_report) {
-                                        const reportLink = document.getElementById("report-link");
-                                        reportLink.href =
-                                                "/api/method/frappe.utils.print_format.download_pdf?doctype=" +
-                                                encodeURIComponent("Service Report") +
-                                                "&name=" +
-                                                encodeURIComponent(doc.linked_report);
-                                        document.getElementById("report-wrapper").style.display = "";
-                                        document.getElementById("confirm-report-btn").style.display = "inline-block";
-                                        document.getElementById("confirm-report-btn").onclick = () => {
-                                                frappe.call({ method: 'ferum_custom.api.service.confirm_service_report', args: { name: doc.linked_report } }).then(() => {
-                                                        frappe.show_alert({ message: __('Report confirmed'), indicator: 'green' });
-                                                });
-                                        };
-                                }
-                        })
-                        .catch((e) => {
-                                detailsEl.innerHTML = `<p>${__("Not found.")}</p>`;
-                        });
+        frappe
+                .call({
+                        method: "ferum_custom.api.service.get_service_request",
+                        args: { name },
+                })
+                .then((r) => {
+                        const doc = r.message || {};
+                        // Minimal field projection for website users
+                        const safe = {
+                                name: doc.name,
+                                title: doc.title,
+                                status: doc.status,
+                                description: doc.description,
+                                linked_report: doc.linked_report,
+                        };
+                        document.getElementById("sr-title").innerText =
+                                `${safe.name || name} - ${safe.title || ""}`;
+                        const pieces = [
+                                `<p><strong>${__("Status")}:</strong> ${safe.status || ""}</p>`,
+                        ];
+                        if (safe.description) {
+                                pieces.push(
+                                        `<p><strong>${__("Description")}:</strong> ${
+                                                frappe.utils.escape_html(safe.description)
+                                        }</p>`,
+                                );
+                        }
+                        detailsEl.innerHTML = pieces.join("\n");
+                        if (safe.status === 'Completed') {
+                                document.getElementById("confirm-wrapper").style.display = "";
+                                document.getElementById("confirm-btn").onclick = () => {
+                                        frappe.call({ method: 'ferum_custom.api.service.confirm_service_request', args: { name } }).then(() => {
+                                                frappe.show_alert({ message: __('Confirmed'), indicator: 'green' });
+                                        });
+                                };
+                        }
+                        if (safe.linked_report) {
+                                const reportLink = document.getElementById("report-link");
+                                reportLink.href =
+                                        "/api/method/frappe.utils.print_format.download_pdf?doctype=" +
+                                        encodeURIComponent("Service Report") +
+                                        "&name=" +
+                                        encodeURIComponent(safe.linked_report);
+                                document.getElementById("report-wrapper").style.display = "";
+                                document.getElementById("confirm-report-btn").style.display = "inline-block";
+                                document.getElementById("confirm-report-btn").onclick = () => {
+                                        frappe.call({ method: 'ferum_custom.api.service.confirm_service_report', args: { name: safe.linked_report } }).then(() => {
+                                                frappe.show_alert({ message: __('Report confirmed'), indicator: 'green' });
+                                        });
+                                };
+                        }
+                })
+                .catch((e) => {
+                        detailsEl.innerHTML = `<p>${__("Not found.")}</p>`;
+                });
         });
 </script>

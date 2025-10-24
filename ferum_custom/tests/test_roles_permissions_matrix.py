@@ -57,14 +57,16 @@ class TestRolesPermissionsMatrix(FrappeTestCase):
 			u.first_name = "OM"
 			u.user_type = "System User"
 			u.insert()
-			u.add_roles("Office Manager")
+		if "Office Manager" not in frappe.get_roles("om@example.com"):
+			frappe.get_doc("User", "om@example.com").add_roles("Office Manager")
 		if not frappe.db.exists("User", "dh@example.com"):
 			u = frappe.new_doc("User")
 			u.email = "dh@example.com"
 			u.first_name = "DH"
 			u.user_type = "System User"
 			u.insert()
-			u.add_roles("Department Head")
+		if "Department Head" not in frappe.get_roles("dh@example.com"):
+			frappe.get_doc("User", "dh@example.com").add_roles("Department Head")
 
 		# User Permission: DH -> SD-A only
 		if not frappe.db.exists(

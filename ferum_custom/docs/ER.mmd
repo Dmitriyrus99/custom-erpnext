@@ -1,0 +1,7 @@
+flowchart LR
+  Company --> Contract --> "Contract Stage" --> "Service Act"
+  Company --> Project --> "Service Request" --> "Service Report"
+  Company --> Counterparty
+  Contract --> Invoice --> "Payment Allocation" --> Payment
+  Payment --> "Cashflow Article"
+

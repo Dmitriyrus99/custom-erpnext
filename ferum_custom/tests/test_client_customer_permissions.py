@@ -12,7 +12,8 @@ class TestClientCustomerPermissions(FrappeTestCase):
 			u.first_name = "Cust1"
 			u.user_type = "System User"
 			u.insert()
-			u.add_roles("Client")
+		if "Client" not in frappe.get_roles("cust1@example.com"):
+			frappe.get_doc("User", "cust1@example.com").add_roles("Client")
 		# Customers
 		for name in ("Cust A", "Cust B"):
 			if not frappe.db.exists("Customer", name):

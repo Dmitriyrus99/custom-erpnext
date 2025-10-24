@@ -125,6 +125,86 @@ def timesheet_get_permission_query_conditions(user: str | None = None) -> str | 
 
     return " or ".join(f"({c})" for c in conds) if conds else None
 
+# Compatibility helpers expected by Service Request module
+def get_company_conditions(user: str) -> str | None:
+    try:
+        companies = frappe.get_all("User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value")
+        if companies:
+            vals = ", ".join(frappe.db.escape(x) for x in companies)
+            return f"`tabService Request`.company IN ({vals})"
+    except Exception:
+        return None
+    return None
+
+def get_department_conditions(user: str) -> str | None:
+    try:
+        depts = frappe.get_all("User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value")
+        if depts:
+            vals = ", ".join(frappe.db.escape(x) for x in depts)
+            return f"`tabService Request`.service_department IN ({vals})"
+    except Exception:
+        return None
+    return None
+
+def get_project_manager_conditions(user: str) -> str:
+    return (
+        "`tabService Request`.project IN ("
+        "SELECT name FROM `tabService Project` WHERE project_manager = "
+        f"{frappe.db.escape(user)})"
+    )
+
+def get_service_engineer_conditions(user: str) -> str:
+    return f"`tabService Request`.assigned_to = {frappe.db.escape(user)}"
+
+def get_client_conditions(user: str) -> str:
+    from ferum_custom.ferum_custom.utils import get_allowed_customers
+    allowed = get_allowed_customers(user)
+    if allowed:
+        vals = ", ".join(frappe.db.escape(x) for x in allowed)
+        return f"`tabService Request`.customer IN ({vals})"
+    return f"`tabService Request`.owner = {frappe.db.escape(user)}"
+
+def has_company_permission(doc, user: str) -> bool:
+    try:
+        companies = set(
+            frappe.get_all("User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value")
+        )
+        return not companies or getattr(doc, "company", None) in companies
+    except Exception:
+        return True
+
+def has_department_permission(doc, user: str) -> bool:
+    try:
+        depts = set(
+            frappe.get_all("User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value")
+        )
+        return not depts or getattr(doc, "service_department", None) in depts
+    except Exception:
+        return True
+
+def has_project_manager_permission(doc, user: str) -> bool:
+    try:
+        if getattr(doc, "project", None):
+            pm = frappe.db.get_value("Service Project", doc.project, "project_manager")
+            return pm == user
+    except Exception:
+        pass
+    return False
+
+def has_service_engineer_permission(doc, user: str) -> bool:
+    return getattr(doc, "assigned_to", None) == user
+
+def has_client_permission(doc, user: str) -> bool:
+    try:
+        from ferum_custom.ferum_custom.utils import get_allowed_customers
+        allowed = set(get_allowed_customers(user))
+        cust = getattr(doc, "customer", None)
+        if allowed and cust in allowed:
+            return True
+    except Exception:
+        pass
+    return getattr(doc, "owner", None) == user
+
 
 def timesheet_has_permission(doc, user: str | None = None) -> bool:
     user = user or frappe.session.user
@@ -169,4 +249,3 @@ def timesheet_has_permission(doc, user: str | None = None) -> bool:
         except Exception:
             pass
     return False
-

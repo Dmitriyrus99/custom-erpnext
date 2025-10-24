@@ -3,6 +3,7 @@ import typing as t
 import frappe
 from frappe import _
 
+from ferum_custom.ferum_custom.domain.service import application as service_app
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
 try:
@@ -29,47 +30,39 @@ def create_service_request(
 	- If a Service Object is provided, appends its name to description for context
 	"""
 	_check_new_request_rate_limit()
-	issue = frappe.new_doc("Issue")
-	issue.subject = title
-	if description:
-		issue.description = description
-	# Company default
+	company = None
+	project = None
+	customer = None
 	try:
-		default_company = None
-		if erpnext is not None and hasattr(erpnext, "get_default_company"):
+		default_company = frappe.db.get_single_value("Global Defaults", "default_company")
+		if not default_company and erpnext is not None and hasattr(erpnext, "get_default_company"):
 			default_company = erpnext.get_default_company()
-		if not default_company:
-			default_company = frappe.db.get_single_value("Global Defaults", "default_company")
 		if not default_company:
 			companies = frappe.get_all("Company", pluck="name", limit=1)
 			if companies:
 				default_company = companies[0]
-		if default_company:
-			issue.company = default_company
+		company = default_company
 	except Exception:
 		pass
-	# Try to enrich customer/project from Service Object
+
 	if service_object:
 		obj_name = service_object
 		if not frappe.db.exists("Service Object", obj_name):
-			try:
-				val = frappe.db.get_value("Service Object", {"object_name": obj_name}, "name")
-				if val:
-					obj_name = val
-			except Exception:
-				pass
+			obj_name = frappe.db.get_value("Service Object", {"object_name": obj_name}, "name") or service_object
 		if frappe.db.exists("Service Object", obj_name):
-			try:
-				so = frappe.get_doc("Service Object", obj_name)
-				issue.customer = getattr(so, "customer", None)
-				if getattr(so, "project", None):
-					issue.project = so.project
-				note = f"\n\nService Object: {obj_name}"
-				issue.description = (issue.description or "") + note
-			except Exception:
-				pass
-	issue.insert()
-	return issue.name
+			so = frappe.get_doc("Service Object", obj_name)
+			customer = getattr(so, "customer", None)
+			project = getattr(so, "project", None)
+			company = company or getattr(so, "company", None)
+
+	return service_app.create_service_request(
+		title=title,
+		description=description,
+		service_object=service_object,
+		company=company,
+		project=project,
+		customer=customer,
+	)
 
 
 @frappe.whitelist(methods=["GET"])  # Listing is idempotent
@@ -95,45 +88,25 @@ def list_service_requests(
 	except Exception:
 		pass
 
-	# Provide Issue data compatible with portal (title alias)
-	data = frappe.get_list(
-		"Issue",
-		filters=filters,
-		fields=[
-			"name",
-			"subject as title",
-			"status",
-			"priority",
-			"customer",
-			"project",
-			"modified",
-		],
-		start=s,
-		page_length=pl,
-		order_by="modified desc",
-	)
+	data = service_app.list_service_requests(filters=filters, start=s, page_length=pl)
 	return {"data": data, "start": s, "page_length": pl}
 
 
 @frappe.whitelist(methods=["GET"])  # Read-only fetch
 def get_service_request(name: str) -> dict:
 	"""Return Issue as a dict with a title alias for portal compatibility."""
-	doc = frappe.get_doc("Issue", name)
-	d = doc.as_dict()
-	if "title" not in d:
-		d["title"] = d.get("subject")
-	# Do not leak sensitive fields to website users
+	data = service_app.fetch_service_request(name)
 	try:
 		user = frappe.session.user
 		user_type = frappe.get_cached_value("User", user, "user_type")
 		roles = set(frappe.get_roles(user))
 		if user_type == "Website User" or "Client" in roles:
-			# Strip common sensitive custom fields if present
-			for fld in ("financial_details",):
-				d.pop(fld, None)
+			allowed = get_allowed_customers(user)
+			if allowed and data.get("customer") not in allowed:
+				frappe.throw(_("Not permitted"))
 	except Exception:
 		pass
-	return d
+	return data
 
 
 @frappe.whitelist(methods=["POST"])  # State change
@@ -267,19 +240,10 @@ def list_invoices(
 @frappe.whitelist()
 def confirm_service_request(name: str) -> None:
 	"""Allow a Client to confirm completion of a Service Request by adding a comment."""
-	doc = frappe.get_doc("Issue", name)
-	# Permission check performed by Frappe via get_doc; add comment
-	try:
-		doc.add_comment("Comment", _("Client confirmed completion via portal."))
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Client confirm SR failed")
+	service_app.confirm_service_request(name)
 
 
 @frappe.whitelist()
 def confirm_service_report(name: str) -> None:
 	"""Allow a Client to confirm a Service Report via a comment."""
-	doc = frappe.get_doc("Timesheet", name)
-	try:
-		doc.add_comment("Comment", _("Client confirmed Service Report via portal."))
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Client confirm report failed")
+	service_app.confirm_service_report(name)

@@ -27,3 +27,15 @@ ferum_custom.patches.v15_1.sync_service_report_attachment_links
 ferum_custom.patches.v15_1.bootstrap_telegram_settings
 ferum_custom.patches.v15_1.add_telegram_fields_to_user
 ferum_custom.patches.v15_3.add_performance_indexes
+ferum_custom.patches.v15_3.ensure_customer_group_root
+ferum_custom.patches.v15_3.ensure_default_tree_roots
+ferum_custom.patches.v15_erp.apply_sql
+ferum_custom.patches.v15_mariadb.001_add_company
+ferum_custom.patches.v15_mariadb.010_counterparty
+ferum_custom.patches.v15_mariadb.020_contracts
+ferum_custom.patches.v15_mariadb.030_service
+ferum_custom.patches.v15_mariadb.040_invoices
+ferum_custom.patches.v15_mariadb.041_triggers
+ferum_custom.patches.v15_mariadb.invoice_numbering_sql
+ferum_custom.patches.v15_mariadb.invoice_numbering_backfill
+ferum_custom.patches.v15_mariadb.invoice_numbering_indexes_sql
