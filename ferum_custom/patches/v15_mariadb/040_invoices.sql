@@ -1,0 +1,47 @@
+ALTER TABLE `tabInvoice`
+  ADD COLUMN IF NOT EXISTS `company` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `invoice_no` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `invoice_year` INT,
+  ADD COLUMN IF NOT EXISTS `invoice_date` DATE,
+  ADD COLUMN IF NOT EXISTS `contract` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `project` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `customer` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `amount` DECIMAL(18,2),
+  ADD COLUMN IF NOT EXISTS `vat_rate` FLOAT,
+  ADD COLUMN IF NOT EXISTS `status` VARCHAR(32) DEFAULT 'sent',
+  ADD COLUMN IF NOT EXISTS `source_email` VARCHAR(255),
+  ADD UNIQUE KEY IF NOT EXISTS `ux_invoice_company_year_no`(`company`, `invoice_year`, `invoice_no`);
+
+ALTER TABLE `tabInvoice Item`
+  ADD COLUMN IF NOT EXISTS `invoice` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `item_name` VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS `qty` FLOAT,
+  ADD COLUMN IF NOT EXISTS `uom` VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS `price` DECIMAL(18,2),
+  ADD COLUMN IF NOT EXISTS `amount` DECIMAL(18,2);
+
+ALTER TABLE `tabCashflow Article`
+  ADD COLUMN IF NOT EXISTS `direction` VARCHAR(3),
+  ADD COLUMN IF NOT EXISTS `group_name` VARCHAR(140);
+
+ALTER TABLE `tabPayment`
+  ADD COLUMN IF NOT EXISTS `company` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `trx_date` DATE,
+  ADD COLUMN IF NOT EXISTS `amount` DECIMAL(18,2),
+  ADD COLUMN IF NOT EXISTS `account` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `direction` VARCHAR(3),
+  ADD COLUMN IF NOT EXISTS `article` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `counterparty` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `doc_ref` VARCHAR(255);
+
+ALTER TABLE `tabPayment`
+  ADD CONSTRAINT `payment_amount_positive_chk` CHECK (`amount` > 0);
+
+ALTER TABLE `tabPayment Allocation`
+  ADD COLUMN IF NOT EXISTS `payment` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `invoice` VARCHAR(140),
+  ADD COLUMN IF NOT EXISTS `amount` DECIMAL(18,2),
+  ADD UNIQUE KEY IF NOT EXISTS `ux_payment_invoice`(`payment`, `invoice`);
+
+ALTER TABLE `tabPayment Allocation`
+  ADD CONSTRAINT `payment_allocation_positive_chk` CHECK (`amount` > 0);
