@@ -1,27 +1,13 @@
-#!/usr/bin/env python3
-from __future__ import annotations
-
-import sys
+import os
 from pathlib import Path
 
+ROOT = Path("apps/ferum_custom/ferum_custom/doctype")
+missing = []
 
-def main() -> int:
-    base = Path("apps/ferum_custom/ferum_custom/ferum_custom/doctype")
-    if not base.exists():
-        return 0
-    missing: list[str] = []
-    for child in base.iterdir():
-        if child.is_dir():
-            init_py = child / "__init__.py"
-            if not init_py.exists():
-                missing.append(str(init_py))
-    if missing:
-        print("Missing __init__.py in doctype packages:")
-        for p in missing:
-            print(" -", p)
-        return 1
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+for p in ROOT.rglob("*"):
+    if p.is_dir() and not (p / "__init__.py").exists():
+        missing.append(str(p))
+if missing:
+    print("❌ Missing __init__.py in:", *missing, sep="\n - ")
+    exit(1)
+print("✅ Doctype init check passed.")
