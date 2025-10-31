@@ -1,7 +1,7 @@
 repos:
   # Basic hygiene hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v4.6.0
     hooks:
       - id: check-merge-conflict
       - id: check-yaml
@@ -14,6 +14,7 @@ repos:
       - id: mixed-line-ending
       - id: check-added-large-files
         exclude: '^(env/|\.venv/|node_modules/|sites/|build/)'
+
 
   # Python: Ruff (lint + fix)
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -73,6 +74,11 @@ repos:
   # Local custom hooks
   - repo: local
     hooks:
+      - id: git-secrets-scan
+        name: git-secrets (pattern scan)
+        entry: python3 scripts/precommit/git_secrets_scan.py
+        language: system
+        pass_filenames: true
       - id: frappe-migrate-dry-run
         name: Frappe migrate dry-run (all sites)
         entry: python3 scripts/precommit/frappe_migrate_dry_run.py

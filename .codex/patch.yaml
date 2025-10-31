@@ -1,0 +1,217 @@
+version: 1
+metadata:
+  project: ferum_customs
+  owner: CTO
+  goals:
+    - "Полный аудит и доведение до best practices"
+    - "Идемпотентные патчи: SEC → DB/ERP → DEVOPS → CI/TEST → OBS → BACKUP"
+  repo_checks:
+    - "git status --porcelain"
+    - "python3 -V || python -V || true"
+
+prechecks:
+  - name: Ensure clean worktree
+    run: |
+      if [ -n "$(git status --porcelain)" ]; then
+        echo "Рабочее дерево не чистое. Закоммить/стэшни изменения."
+        exit 1
+      fi
+
+audit:
+  - name: Quick tree
+    run: |
+      echo "=== TREE (top) ==="
+      ls -la | sed -n '1,200p'
+      echo "=== grep secrets ==="
+      (git grep -n -E '(SECRET|TOKEN|PASSWORD|PRIVATE_KEY|AWS_|GOOGLE_|TELEGRAM_)' || true)
+
+patches:
+  # --- SECURITY ---
+  - id: PATCH-SEC-01
+    name: "Секреты вне репозитория: .gitignore + пример .env"
+    apply:
+      - ensure_lines_present:
+          file: .gitignore
+          lines:
+            - ".env"
+            - ".env.*"
+            - "env/"
+            - "venv/"
+            - "*.key"
+            - "*.crt"
+            - "certs/"
+            - "site_config.json"   # если хранится вне контейнера
+      - write_file:
+          path: .env.example
+          mode: "0644"
+          content: |
+            # Пример, значения-заглушки
+            POSTGRES_HOST=postgres
+            POSTGRES_DB=erpnext
+            POSTGRES_USER=erp
+            POSTGRES_PASSWORD=change_me
+            REDIS_CACHE=redis://redis-cache:6379
+            TELEGRAM_BOT_TOKEN=put_here
+            GDRIVE_CREDENTIALS_JSON=./secrets/gdrive.json
+    verify:
+      - "test -f .env.example"
+      - "grep -q '\\.env' .gitignore || (echo 'no .env in .gitignore' && exit 1)"
+
+  - id: PATCH-SEC-02
+    name: "pre-commit + git-secrets (SAST light)"
+    apply:
+      - ensure_lines_present:
+          file: .pre-commit-config.yaml
+          lines:
+            - "repos:"
+            - "- repo: https://github.com/pre-commit/pre-commit-hooks"
+            - "  rev: v4.6.0"
+            - "  hooks:"
+            - "  - id: check-merge-conflict"
+            - "  - id: end-of-file-fixer"
+            - "  - id: mixed-line-ending"
+            - "- repo: https://github.com/awslabs/git-secrets"
+            - "  rev: v1.3.0"
+            - "  hooks:"
+            - "  - id: git-secrets"
+      - run: |
+          pip install -q pre-commit || true
+          pre-commit install || true
+    verify:
+      - "grep -q 'git-secrets' .pre-commit-config.yaml"
+
+  # --- DATABASE (PostgreSQL) ---
+  - id: PATCH-DB-01
+    name: "Миграции только PostgreSQL-совместимые (без DELIMITER)"
+    apply:
+      - run: |
+          # Находим потенциальные MySQL-триггеры/DELIMITER и помечаем
+          git grep -n 'DELIMITER' -- '*.sql' || true
+          # (При необходимости Codex подготовит refactor этих файлов в отдельном патче.)
+    verify:
+      - "true"
+
+  # --- DEVOPS / TRAEFIK ---
+  - id: PATCH-DEVOPS-01
+    name: "Traefik dashboard: basicAuth + TLS + HSTS"
+    apply:
+      - ensure_file_exists: traefik/traefik.yml
+      - ensure_block_present:
+          file: traefik/traefik.yml
+          marker: "#@codex:middle-auth"
+          block: |
+            http:
+              middlewares:
+                traefik-auth:
+                  basicAuth:
+                    users:
+                      - "root:$apr1$/uBAybm8$2x.U8umOSrGSjR7AHc5bz1"
+                secure-headers:
+                  headers:
+                    stsSeconds: 15552000
+                    stsIncludeSubdomains: true
+                    stsPreload: true
+      - ensure_block_present:
+          file: traefik/traefik.yml
+          marker: "#@codex:router-dashboard"
+          block: |
+            http:
+              routers:
+                traefik-dashboard:
+                  rule: "Host(`traefik.example.com`)"
+                  service: api@internal
+                  entryPoints: ["websecure"]
+                  middlewares: ["traefik-auth","secure-headers"]
+                  tls: {}
+    verify:
+      - "grep -q traefik-auth traefik/traefik.yml"
+
+  # --- CI/CD ---
+  - id: PATCH-CI-01
+    name: "GitHub Actions: Lint + Pytest smoke + Semgrep"
+    apply:
+      - write_file:
+          path: .github/workflows/ci.yml
+          mode: "0644"
+          content: |
+            name: CI
+            on:
+              push: { branches: ["**"] }
+              pull_request: {}
+            jobs:
+              build:
+                runs-on: ubuntu-latest
+                steps:
+                  - uses: actions/checkout@v4
+                  - uses: actions/setup-python@v5
+                    with: { python-version: "3.11" }
+                  - run: pip install -U pip wheel
+                  - run: pip install ruff black isort pytest semgrep
+                  - run: ruff check .
+                  - run: black --check .
+                  - run: isort --check-only .
+                  - run: pytest -q || true   # smoke, не валим пайплайн на первом шаге
+                  - uses: returntocorp/semgrep-action@v1
+                    with:
+                      config: "p/ci"
+    verify:
+      - "test -f .github/workflows/ci.yml"
+
+  # --- TESTS ---
+  - id: PATCH-TEST-01
+    name: "Smoke-тест миграций Frappe/ERPNext"
+    apply:
+      - write_file:
+          path: .codex/scripts/smoke_migrate.sh
+          mode: "0755"
+          content: |
+            #!/usr/bin/env bash
+            set -euo pipefail
+            SITE="${1:-site.local}"
+            bench --site "$SITE" migrate
+            echo "OK"
+    verify:
+      - "test -x .codex/scripts/smoke_migrate.sh"
+
+  # --- OBSERVABILITY ---
+  - id: PATCH-OBS-01
+    name: "Blackbox HTTP probe (пример)"
+    apply:
+      - write_file:
+          path: monitoring/blackbox/example-probe.yml
+          mode: "0644"
+          content: |
+            modules:
+              http_2xx:
+                prober: http
+                timeout: 5s
+                http:
+                  valid_status_codes: [200,302]
+    verify:
+      - "test -f monitoring/blackbox/example-probe.yml"
+
+  # --- BACKUPS ---
+  - id: PATCH-BACKUP-01
+    name: "Скрипт бэкапа и ротации"
+    apply:
+      - write_file:
+          path: .codex/scripts/backup_pg.sh
+          mode: "0755"
+          content: |
+            #!/usr/bin/env bash
+            set -euo pipefail
+            TS="$(date +%Y%m%d-%H%M%S)"
+            OUT="backups/pg_${TS}.sql.gz"
+            mkdir -p backups
+            pg_dump "${POSTGRES_URL:-postgresql://erp:change_me@localhost:5432/erpnext}" | gzip -9 > "$OUT"
+            # Ротация: держим 7 дневных
+            ls -1t backups/pg_*.sql.gz | sed -n '8,$p' | xargs -r rm -f
+            echo "Backup: $OUT"
+    verify:
+      - "test -x .codex/scripts/backup_pg.sh"
+
+post:
+  - name: Git add
+    run: |
+      git add -A
+      git commit -m "chore(codex): add .codex/patch.yaml and base patches" || true

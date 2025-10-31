@@ -15,9 +15,17 @@ node_modules/
 
 # Local env files (keep examples committed)
 .env
+.env.*
 *.env
+!.env.example
 config/.env.integrations
 config/.env.local.integrations
+site_config.json
+
+# Credentials and certificates
+*.key
+*.crt
+certs/
 *.acl
 *.rdb
 *.lock
@@ -31,6 +39,7 @@ assets/
 
 # Virtual environments
 .venv/
+venv/
 env/
 
 # Bench build artefacts
@@ -40,23 +49,3 @@ sites/*/private/
 sites/*/public/files/
 __pycache__/
 *.pyc
-
-# Auto-generated ignore
-.venv/
-env/
-*.pyc
-__pycache__/
-sites/*/locks/
-sites/*/indexes/
-sites/*/private/
-sites/*/public/files/
-
-# Auto-generated ignore
-.venv/
-env/
-*.pyc
-__pycache__/
-sites/*/locks/
-sites/*/indexes/
-sites/*/private/
-sites/*/public/files/
