@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@ferumrus.ru"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./certs:/letsencrypt"
+
+  backend:
+    image: ferum/erpnext:latest
+    depends_on: [postgres]
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.erpclone.rule=Host(`erp.ferumrus.ru`)"
+      - "traefik.http.routers.erpclone.entrypoints=websecure"
+      - "traefik.http.routers.erpclone.tls.certresolver=letsencrypt"
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: frappe
+      POSTGRES_PASSWORD: frappe
+      POSTGRES_DB: erpnext
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
