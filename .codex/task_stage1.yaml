@@ -1,0 +1,40 @@
+name: "Stage 1 — Repository Cleanup & Initial Audit"
+description: |
+  Этап 1. Полная очистка проекта от временных и устаревших файлов,
+  перенос legacy-документов, обновление .gitignore, и первичный аудит структуры.
+
+context:
+  project_root: "/home/frappe/frappe-bench/frappe-bench"
+  branch: "feature/codex-audit-impl"
+
+steps:
+  - title: "Очистка проекта"
+    run: |
+      mkdir -p legacy
+      mv *.log legacy/ 2>/dev/null || true
+      mv *.md legacy/ 2>/dev/null || true
+      mv changes/ legacy/changes/ 2>/dev/null || true
+      echo "[OK] Legacy файлы перенесены."
+
+  - title: "Обновление .gitignore"
+    run: |
+      echo -e "\n# Auto-generated ignore\n.venv/\nenv/\n*.pyc\n__pycache__/\nsites/*/locks/\nsites/*/indexes/\nsites/*/private/\nsites/*/public/files/\n" >> .gitignore
+      git add .gitignore
+
+  - title: "Удаление мусора из git index"
+    run: |
+      git rm -r --cached .venv env sites/*/locks/ || true
+      echo "[OK] Index очищен."
+
+  - title: "Создание каркаса документации"
+    run: |
+      mkdir -p docs/audit docs/architecture docs/legacy
+      touch docs/audit/audit_report.md docs/index.md docs/legacy_notes.md
+      echo "[OK] Документы созданы."
+
+  - title: "Git Commit"
+    run: |
+      git add .
+      git commit -m "chore(cleanup): repository structure normalized and legacy isolated"
+
+success_message: "✅ Stage 1 выполнен — проект очищен и готов к архитектурному анализу."

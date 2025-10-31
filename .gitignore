@@ -40,3 +40,13 @@ sites/*/private/
 sites/*/public/files/
 __pycache__/
 *.pyc
+
+# Auto-generated ignore
+.venv/
+env/
+*.pyc
+__pycache__/
+sites/*/locks/
+sites/*/indexes/
+sites/*/private/
+sites/*/public/files/
