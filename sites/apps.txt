@@ -1,0 +1,3 @@
+frappe
+erpnext
+ferum_custom

@@ -1,0 +1,62 @@
+{
+  "name": "Project Telegram User Item",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "istable": 1,
+  "fields": [
+    {
+      "fieldname": "telegram_user",
+      "fieldtype": "Link",
+      "label": "Telegram User",
+      "options": "Telegram User Link",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "user",
+      "fieldtype": "Link",
+      "label": "ERPNext User",
+      "options": "User",
+      "read_only": 1,
+      "fetch_from": "telegram_user.user",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "telegram_username",
+      "fieldtype": "Data",
+      "label": "Telegram Username",
+      "read_only": 1,
+      "fetch_from": "telegram_user.telegram_username",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "chat_id",
+      "fieldtype": "Data",
+      "label": "Chat ID",
+      "read_only": 1,
+      "fetch_from": "telegram_user.chat_id",
+      "in_list_view": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    },
+    {
+      "role": "Project Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1
+    },
+    {
+      "role": "Office Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1
+    }
+  ]
+}

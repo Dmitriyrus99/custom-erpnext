@@ -1,0 +1,11 @@
+{
+    "git.ignoreLimitWarning": true,
+    "geminicodeassist.inlineSuggestions.nextEditPredictions": true,
+    "geminicodeassist.codeGenerationPaneViewEnabled": true,
+    "geminicodeassist.agentDebugMode": true,
+    "geminicodeassist.agentYoloMode": true,
+    "geminicodeassist.updateChannel": "Insiders",
+    "geminicodeassist.rules": "geminicodeassist.agentYoloMode\ngeminicodeassist.inlineSuggestions.nextEditPredictions",
+    "chatgpt.openOnStartup": true,
+    "geminicodeassist.verboseLogging": true
+}

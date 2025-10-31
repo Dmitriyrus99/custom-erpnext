@@ -1,0 +1,33 @@
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+extend-exclude = [
+  '^env/',
+  '^\\.venv/',
+  '^node_modules/',
+  '^sites/',
+]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 100
+skip_gitignore = true
+skip = ["env", ".venv", "node_modules", "sites"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ['env', '.venv', 'node_modules', 'sites']
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
+# Keep E203 ignored for Black compatibility; remove W503 to avoid parser issues
+ignore = ["E203"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+follow_imports = "silent"
+pretty = true
+exclude = ['env/', '\.venv/', 'node_modules/', 'sites/']

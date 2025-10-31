@@ -1,0 +1,28 @@
+{
+  "name": "Document Attachment Item",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "istable": 1,
+  "fields": [
+    {
+      "fieldname": "attachment",
+      "fieldtype": "Attach",
+      "label": "Attachment",
+      "reqd": 1
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Description"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
+  ]
+}

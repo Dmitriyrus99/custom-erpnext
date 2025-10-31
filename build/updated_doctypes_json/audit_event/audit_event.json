@@ -1,0 +1,60 @@
+{
+  "name": "Audit Event",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "autoname": "field:label",
+  "track_changes": 0,
+  "is_submittable": 0,
+  "issingle": 0,
+  "allow_rename": 1,
+  "fields": [
+    {
+      "fieldname": "event_time",
+      "fieldtype": "Datetime",
+      "label": "Event Time",
+      "default": "Now"
+    },
+    {
+      "fieldname": "user",
+      "fieldtype": "Link",
+      "label": "User",
+      "options": "User"
+    },
+    {
+      "fieldname": "ref_doctype",
+      "fieldtype": "Link",
+      "label": "Ref DocType",
+      "options": "DocType"
+    },
+    {
+      "fieldname": "ref_docname",
+      "fieldtype": "Dynamic Link",
+      "label": "Ref Name",
+      "options": "ref_doctype"
+    },
+    {
+      "fieldname": "event_type",
+      "fieldtype": "Data",
+      "label": "Event Type"
+    },
+    {
+      "fieldname": "message",
+      "fieldtype": "Small Text",
+      "label": "Message"
+    },
+    {
+      "fieldname": "details_json",
+      "fieldtype": "JSON",
+      "label": "Details JSON"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "create": 1,
+      "write": 1,
+      "delete": 1
+    }
+  ]
+}

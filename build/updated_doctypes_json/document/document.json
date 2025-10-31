@@ -1,0 +1,56 @@
+{
+  "doctype": "DocType",
+  "name": "Document",
+  "module": "Ferum Custom",
+  "autoname": "hash",
+  "custom": 1,
+  "fields": [
+    {
+      "fieldname": "company",
+      "label": "Company",
+      "fieldtype": "Link",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
+      "fieldname": "date",
+      "label": "Date",
+      "fieldtype": "Date",
+      "reqd": 1
+    },
+    {
+      "fieldname": "direction",
+      "label": "Direction",
+      "fieldtype": "Select",
+      "options": "in\nout",
+      "reqd": 1
+    },
+    {
+      "fieldname": "document_type",
+      "label": "Type",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "counterparty",
+      "label": "Counterparty",
+      "fieldtype": "Link",
+      "options": "Counterparty"
+    },
+    {
+      "fieldname": "employee",
+      "label": "Employee",
+      "fieldtype": "Link",
+      "options": "User"
+    },
+    {
+      "fieldname": "description",
+      "label": "Description",
+      "fieldtype": "Small Text"
+    },
+    {
+      "fieldname": "file_link",
+      "label": "File Link",
+      "fieldtype": "Data"
+    }
+  ]
+}

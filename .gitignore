@@ -1,0 +1,42 @@
+# Caches and compiled files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Bench/site runtime logs and test artifacts
+logs/
+sites/*/logs/
+sites/.hypothesis/
+
+# Node modules (if present at root)
+node_modules/
+
+# Local env files (keep examples committed)
+.env
+*.env
+config/.env.integrations
+config/.env.local.integrations
+*.acl
+*.rdb
+*.lock
+*.log
+/legacy/
+/sites/*/private/backups/
+dist/
+assets/
+.bench/
+.DS_Store
+
+# Virtual environments
+.venv/
+env/
+
+# Bench build artefacts
+sites/*/locks/
+sites/*/indexes/
+sites/*/private/
+sites/*/public/files/
+__pycache__/
+*.pyc

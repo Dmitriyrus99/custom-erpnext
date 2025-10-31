@@ -1,0 +1,7 @@
+# Документация проекта (каркас)
+- [Аудит](./audit/current_audit.md)
+- [Архитектура](./architecture/architecture_overview.md)
+- [План поставки](./delivery_plan.md)
+- [Инфраструктура и CI/CD](./infrastructure_and_ci.md)
+- [Роли и ACL](./roles_and_acl.md)
+- [Заметки по легаси](./legacy_notes.md)
