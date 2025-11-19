@@ -1,5 +1,16 @@
 version: "3.9"
 
+x-erp-service: &erp-service
+  image: ${ERPNEXT_IMAGE:-ferum/erpnext:latest}
+  env_file:
+    - .env
+  restart: unless-stopped
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   traefik:
     image: traefik:v2.10
@@ -8,7 +19,7 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.email=admin@ferumrus.ru"
+      - "--certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL:-admin@ferumrus.ru}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
@@ -16,25 +27,68 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./certs:/letsencrypt"
+    networks:
+      - traefik
+      - app
 
   backend:
-    image: ferum/erpnext:latest
-    depends_on: [postgres]
-    env_file: .env
+    <<: *erp-service
+    depends_on:
+      - postgres
+      - redis
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.erpclone.rule=Host(`erp.ferumrus.ru`)"
+      - 'traefik.http.routers.erpclone.rule=Host(`${SITE_NAME}`)'
       - "traefik.http.routers.erpclone.entrypoints=websecure"
       - "traefik.http.routers.erpclone.tls.certresolver=letsencrypt"
+    networks:
+      - app
+
+  worker:
+    <<: *erp-service
+    depends_on:
+      - postgres
+      - redis
+    command: bash -c "bench worker"
+    networks:
+      - app
+
+  scheduler:
+    <<: *erp-service
+    depends_on:
+      - postgres
+      - redis
+    command: bash -c "bench scheduler"
+    networks:
+      - app
 
   postgres:
     image: postgres:13
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: frappe
-      POSTGRES_PASSWORD: frappe
-      POSTGRES_DB: erpnext
+      POSTGRES_USER: ${DB_USER:-frappe}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-frappe}
+      POSTGRES_DB: ${DB_NAME:-erpnext}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app
+
+  redis:
+    image: redis:7.2-alpine
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - app
 
 volumes:
-  pgdata:
+  postgres_data:
+  redis_data:
+
+networks:
+  app:
+  traefik:
