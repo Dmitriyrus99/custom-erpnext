@@ -1,63 +1,47 @@
-import frappe
-from frappe.tests.utils import FrappeTestCase
+from ferum_custom.ferum_custom import security_pqc_rules as sr
 
 
-class TestPermissions(FrappeTestCase):
-	def setUp(self):
-		# Ensure administrator context for setup
-		frappe.set_user("Administrator")
-		# Users
-		if not frappe.db.exists("User", "client@example.com"):
-			u = frappe.new_doc("User")
-			u.email = "client@example.com"
-			u.first_name = "Client"
-			u.user_type = "System User"
-			u.insert()
-			# Grant role using Frappe API on the User document
-			u.add_roles("Client")
+def _set_roles(monkeypatch, roles):
+    monkeypatch.setattr("frappe.get_roles", lambda user: roles)
 
-		# Ensure the Client role can access desk queries for this test context
-		if frappe.db.exists("Role", "Client"):
-			try:
-				frappe.db.set_value("Role", "Client", "desk_access", 1)
-			except Exception:
-				pass
 
-		if not frappe.db.exists("Customer", "Perm Customer"):
-			c = frappe.new_doc("Customer")
-			c.customer_name = "Perm Customer"
-			c.insert()
+def _set_companies(monkeypatch, companies):
+    monkeypatch.setattr("ferum_custom.security_pqc_rules._companies", lambda user: companies)
 
-		if not frappe.db.exists("Service Object", {"object_name": "Perm-Obj"}):
-			so = frappe.new_doc("Service Object")
-			so.object_name = "Perm-Obj"
-			so.customer = "Perm Customer"
-			so.insert()
 
-	def test_client_sees_own_requests(self):
-		# Create two requests with different owners
-		sr1 = frappe.new_doc("Service Request")
-		sr1.title = "Client-owned"
-		sr1.service_object = frappe.db.get_value("Service Object", {"object_name": "Perm-Obj"})
-		sr1.insert()
-		# Force owner to client
-		sr1.db_set("owner", "client@example.com")
+def test_service_request_pqc_engineer(monkeypatch):
+    _set_roles(monkeypatch, ["Service Engineer"])
+    _set_companies(monkeypatch, ["Ferum Co"])
+    cond = sr.service_request_pqc("engineer@example.com")
+    assert cond is not None
+    assert "assigned_to" in cond
 
-		sr2 = frappe.new_doc("Service Request")
-		sr2.title = "Other-owned"
-		sr2.service_object = frappe.db.get_value("Service Object", {"object_name": "Perm-Obj"})
-		sr2.insert()
 
-		# Emulate PGC for client and verify only own doc is selected
-		rows = frappe.get_list(
-			"Service Request",
-			filters={
-				"owner": "client@example.com",
-				"name": ["in", [sr1.name, sr2.name]],
-			},
-			pluck="name",
-			ignore_permissions=True,
-		)
-		assert sr1.name in rows
-		assert sr2.name not in rows
-		frappe.set_user("Administrator")
+def test_invoice_pqc_chief_accountant(monkeypatch):
+    _set_roles(monkeypatch, ["Chief Accountant"])
+    _set_companies(monkeypatch, ["Ferum Co"])
+    cond = sr.invoice_pqc("acct@example.com")
+    assert cond and "`tabInvoice`.company" in cond
+
+
+def test_service_request_pqc_client(monkeypatch):
+    _set_roles(monkeypatch, ["Client"])
+    monkeypatch.setattr(
+        "ferum_custom.security_pqc_rules.get_allowed_customers",
+        lambda user: ["Cust Inc"],
+    )
+    cond = sr.service_request_pqc("client@example.com")
+    assert cond
+    assert "`tabService Request`.customer" in cond
+
+
+def test_data_issue_pqc_security_role(monkeypatch):
+    _set_roles(monkeypatch, ["Security Engineer"])
+    cond = sr.data_issue_pqc("security@example.com")
+    assert cond is None
+
+
+def test_data_issue_pqc_other_user(monkeypatch):
+    _set_roles(monkeypatch, ["Service Engineer"])
+    cond = sr.data_issue_pqc("engineer@example.com")
+    assert cond == "FALSE"

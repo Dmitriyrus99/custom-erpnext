@@ -29,6 +29,8 @@ def _service_account_info() -> dict[str, Any] | None:
 		return None
 	try:
 		file_doc = frappe.get_doc("File", {"file_url": file_url})
+		if file_doc and int(getattr(file_doc, "is_private", 0)) != 1:
+			file_doc.db_set("is_private", 1, commit=True)
 		content = file_doc.get_content()
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Google service account file load failed")

@@ -17,6 +17,12 @@ class FrappeAuth:
 	token: str
 
 
+def _normalize_response(payload: Any) -> dict[str, Any]:
+	if isinstance(payload, dict):
+		return payload
+	return {"status": "ok", "value": payload}
+
+
 class FrappeClient:
 	def __init__(
 		self,
@@ -113,8 +119,9 @@ class FrappeClient:
 			data={"title": title, "description": description},
 		)
 		r.raise_for_status()
-		data = r.json().get("message") or r.json()
-		return str(data)
+		payload = _normalize_response(r.json().get("message") or r.json())
+		name = payload.get("name") or payload.get("data", {}).get("name") or payload.get("value")
+		return str(name)
 
 	async def list_requests(self, status: str | None = None) -> list[dict]:
 		params: dict[str, Any] = {}
@@ -127,8 +134,8 @@ class FrappeClient:
 			params=params,
 		)
 		r.raise_for_status()
-		data = r.json().get("message") or r.json()
-		return list(data.get("data", []))
+		payload = _normalize_response(r.json().get("message") or r.json())
+		return list(payload.get("data", []))
 
 	async def update_request_status(self, name: str, status: str) -> dict:
 		headers = await self._headers()
@@ -138,8 +145,8 @@ class FrappeClient:
 			data={"name": name, "status": status},
 		)
 		r.raise_for_status()
-		data = r.json().get("message") or r.json()
-		return dict(data)
+		payload = _normalize_response(r.json().get("message") or r.json())
+		return dict(payload)
 
 	async def attach_to_request(self, name: str, file_name: str, content: bytes, content_type: str) -> dict:
 		files = {"file": (file_name, content, content_type)}

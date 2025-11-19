@@ -1,1 +1,1 @@
-"""Test package for ferum_custom smoke tests."""
+"""Package marker to allow importing Ferum Custom tests via nested module paths."""

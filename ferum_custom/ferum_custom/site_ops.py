@@ -928,9 +928,10 @@ def audit_fix_tasks() -> dict:
         # Create via API under Administrator context (portal UI проверяется отдельно)
         from ferum_custom.ferum_custom.api.service import create_service_request
 
-        sr_name = create_service_request(
+        resp = create_service_request(
             title="Portal API Audit", description="from audit", service_object=None
         )
+        sr_name = resp.get("name") if isinstance(resp, dict) else resp
         out["portal_sr"] = sr_name
         return out
 

@@ -1,4 +1,5 @@
 import time
+from typing import Any
 
 import frappe
 from frappe import _
@@ -23,6 +24,49 @@ except Exception:
 
 
 @frappe.whitelist(allow_guest=True)
+def _jwt_payload(username: str, expires_in: int | None = None) -> dict[str, Any]:
+	now_ts = int(time.time())
+	expiry = now_ts + (expires_in or 3600)
+	return {
+		"sub": username,
+		"iat": now_ts,
+		"exp": expiry,
+		"aud": "ferum.api",
+		"scope": "ferum:api",
+	}
+
+
+def _get_jwt_secret() -> str | None:
+	return get_setting("jwt_secret")
+
+
+def issue_jwt_for_user(username: str, expires_in: int | None = None) -> str:
+	if jwt is None:
+		frappe.throw(_("pyjwt not installed on server"))
+	if not is_feature_enabled("enable_jwt"):
+		frappe.throw(_("JWT is disabled"))
+	secret = _get_jwt_secret()
+	if not secret:
+		frappe.throw(_("JWT secret not configured"))
+	payload = _jwt_payload(username, expires_in=expires_in)
+	return jwt.encode(payload, secret, algorithm="HS256")
+
+
+def decode_jwt(token: str, verify_aud: bool = False) -> dict[str, Any]:
+	if jwt is None:
+		raise frappe.AuthenticationError(_("pyjwt not installed on server"))
+	if not is_feature_enabled("enable_jwt"):
+		raise frappe.AuthenticationError(_("JWT is disabled"))
+	secret = _get_jwt_secret()
+	if not secret:
+		raise frappe.AuthenticationError(_("JWT secret not configured"))
+	options = {"verify_aud": verify_aud}
+	try:
+		return jwt.decode(token, secret, algorithms=["HS256"], options=options)  # type: ignore[arg-type]
+	except Exception as exc:
+		raise frappe.AuthenticationError(str(exc)) from exc
+
+
 def login(username: str, password: str, otp: str | None = None) -> dict:
 	"""Issue JWT for API usage (optional)."""
 	_check_auth_rate_limit()
@@ -51,20 +95,7 @@ def login(username: str, password: str, otp: str | None = None) -> dict:
 			)
 
 	lm.post_login()
-
-	secret = get_setting("jwt_secret")
-	if not secret:
-		frappe.throw(_("JWT secret not configured"))
-	# Issue short-lived token with audience/scope claims
-	payload = {
-		"sub": username,
-		"iat": int(time.time()),
-		"exp": int(time.time()) + 3600,
-		"aud": "ferum.api",
-		"scope": "ferum:api",
-	}
-	token = jwt.encode(payload, secret, algorithm="HS256")
-	return {"token": token}
+	return {"token": issue_jwt_for_user(username)}
 
 
 def jwt_before_request():

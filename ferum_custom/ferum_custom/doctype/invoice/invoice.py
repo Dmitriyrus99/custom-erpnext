@@ -8,8 +8,12 @@ from ferum_custom.ferum_custom.domain.finance import application as finance_app
 
 try:
 	import gspread  # type: ignore[import-untyped]
-except Exception:
+	from gspread.exceptions import CellNotFound  # type: ignore[import-untyped]
+except Exception:  # pragma: no cover
 	gspread = None  # Optional dependency; handled at runtime
+
+	class CellNotFound(Exception):  # type: ignore[valid-type]
+		pass
 from frappe.model.document import Document
 from frappe.utils.background_jobs import enqueue
 
@@ -52,6 +56,17 @@ def get_google_sheet():
 		except Exception:
 			pass
 		return None
+
+
+def _fetch_invoice_metadata(names: list[str]) -> dict[str, dict[str, object]]:
+	if not names:
+		return {}
+	rows = frappe.get_all(
+		"Invoice",
+		filters={"name": ["in", names]},
+		fields=["name", "status", "docstatus"],
+	)
+	return {row["name"]: row for row in rows}
 
 
 from ferum_custom.ferum_custom.integrations.telegram import send_message as tg_send
@@ -129,7 +144,17 @@ def sync_to_google_sheets(docname: str):
 	try:
 		doc = frappe.get_doc("Invoice", docname)
 		# Check if invoice already exists
-		cell = sheet.find(doc.name)
+		cell = None
+		try:
+			cell = sheet.find(doc.name)
+		except CellNotFound:
+			cell = None
+		except Exception:
+			frappe.log_error(
+				f"Google Sheets lookup failed for invoice {doc.name}",
+				"Google Sheets Sync Error",
+			)
+			cell = None
 		# Resolve PM email for the project (if any) and creator email
 		pm_email = None
 		try:
@@ -307,14 +332,20 @@ def bulk_mark_sent(names: list[str] | str) -> dict:
 
 	updated: list[str] = []
 	skipped: list[str] = []
+	meta_map = _fetch_invoice_metadata(names_list)
 
 	for name in names_list:
 		try:
-			doc = frappe.get_doc("Invoice", name)
-			if doc.status in ("Paid", "Cancelled"):
+			metadata = meta_map.get(name)
+			if not metadata:
 				skipped.append(name)
 				continue
-			if doc.status == "Sent":
+			status = metadata.get("status")
+			doc = frappe.get_doc("Invoice", name)
+			if status in ("Paid", "Cancelled"):
+				skipped.append(name)
+				continue
+			if status == "Sent":
 				skipped.append(name)
 				continue
 			# Prefer workflow transition if configured
@@ -354,11 +385,16 @@ def bulk_mark_paid(names: list[str] | str) -> dict:
 
 	updated: list[str] = []
 	skipped: list[str] = []
+	meta_map = _fetch_invoice_metadata(names_list)
 
 	for name in names_list:
 		try:
+			metadata = meta_map.get(name)
+			if not metadata:
+				skipped.append(name)
+				continue
 			doc = frappe.get_doc("Invoice", name)
-			if doc.status in ("Paid", "Cancelled"):
+			if metadata.get("status") in ("Paid", "Cancelled"):
 				skipped.append(name)
 				continue
 

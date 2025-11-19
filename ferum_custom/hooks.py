@@ -5,7 +5,6 @@ app_description = "Custom erp system for Ferum"
 app_email = "rusakov@ferumrus.ru"
 app_license = "mit"
 
-from ferum_custom.ferum_custom.erpnext_ext import employee_patch as _employee_patch  # noqa: F401
 
 doctype_js = {
     # Keep User.user_type consistent with assigned roles (Desk vs Website)
@@ -28,6 +27,8 @@ scheduler_events = {
         "ferum_custom.ferum_custom.site_ops.drive_healthcheck_and_alert",
         # Daily report on overdue service requests
         "ferum_custom.ferum_custom.automation.send_daily_overdue_report",
+        # Contract normalization data cleanup
+        "ferum_custom.ferum_custom.data_cleanup.jobs.normalize_contracts_job",
         # Apply backup retention locally (7 daily, 4 weekly, 6 monthly)
         "ferum_custom.ferum_custom.site_ops.cleanup_backups_retention",
     ],
@@ -59,9 +60,13 @@ scheduler_events = {
 try:
     _se = globals().get("scheduler_events") or {}
     daily = _se.setdefault("daily", [])
-    refresh_job = "ferum_custom.analytics.refresh.refresh_all_materialized_views"
-    if refresh_job not in daily:
-        daily.append(refresh_job)
+    additional_jobs = [
+        "ferum_custom.analytics.refresh.refresh_all_materialized_views",
+        "ferum_custom.ferum_custom.data_cleanup.jobs.cleanup_stg_raw_job",
+    ]
+    for job in additional_jobs:
+        if job not in daily:
+            daily.append(job)
     scheduler_events = _se
 except Exception:
     pass
@@ -168,7 +173,23 @@ fixtures = [
     },
     {
         "doctype": "Module Def",
-        "filters": [["name", "=", "Ferum Custom"]],
+        "filters": [
+            [
+                "name",
+                "in",
+                [
+                    "Ferum Custom",
+                    "Project & Contract Management",
+                    "Service Request Management",
+                    "Work Reporting",
+                    "Invoicing",
+                    "HR & Payroll",
+                    "Document Management",
+                    "Notifications",
+                    "Analytics",
+                ],
+            ]
+        ],
     },
     {
         "doctype": "Role Profile",
@@ -253,7 +274,7 @@ role_home_page = {
 permission_query_conditions = {
     "Project": "ferum_custom.ferum_custom.permissions.project_get_permission_query_conditions",
     "Timesheet": "ferum_custom.ferum_custom.permissions.timesheet_get_permission_query_conditions",
-    "Service Request": "ferum_custom.ferum_custom.doctype.service_request.service_request.get_permission_query_conditions",
+        "Service Request": "ferum_custom.security_pqc_rules.service_request_pqc",
     "Invoice": "ferum_custom.security_pqc_rules.invoice_pqc",
     "Payment": "ferum_custom.security_pqc_rules.payment_pqc",
     "Counterparty": "ferum_custom.security_pqc_rules.counterparty_pqc",
@@ -261,16 +282,18 @@ permission_query_conditions = {
     "Service Report": "ferum_custom.security_pqc_rules.service_report_pqc",
     "Service Act": "ferum_custom.security_pqc_rules.service_act_pqc",
     "Payment Allocation": "ferum_custom.security_pqc_rules.payment_allocation_pqc",
+    "Data Issue": "ferum_custom.security_pqc_rules.data_issue_pqc",
 }
 
 has_permission = {
     "Project": "ferum_custom.ferum_custom.permissions.project_has_permission",
     "Timesheet": "ferum_custom.ferum_custom.permissions.timesheet_has_permission",
-    "Service Request": "ferum_custom.ferum_custom.doctype.service_request.service_request.has_permission",
+        "Service Request": "ferum_custom.security_pqc_rules.service_request_has_permission",
     "Invoice": "ferum_custom.security_pqc_rules.default_has_permission",
     "Payment": "ferum_custom.security_pqc_rules.default_has_permission",
     "Counterparty": "ferum_custom.security_pqc_rules.default_has_permission",
     "Contract": "ferum_custom.security_pqc_rules.default_has_permission",
     "Service Report": "ferum_custom.security_pqc_rules.default_has_permission",
     "Service Act": "ferum_custom.security_pqc_rules.default_has_permission",
+    "Data Issue": "ferum_custom.security_pqc_rules.default_has_permission",
 }

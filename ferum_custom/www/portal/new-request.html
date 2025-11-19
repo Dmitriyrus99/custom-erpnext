@@ -29,14 +29,40 @@
         frappe.ready(() => {
                 // Require authentication: redirect guests to login
                 try {
-                        if ((frappe.session && frappe.session.user) === 'Guest') {
+                        if ((frappe.session && frappe.session.user) === "Guest") {
                                 const ret = encodeURIComponent(window.location.pathname);
                                 window.location.href = `/login?redirect-to=${ret}`;
                                 return;
                         }
                 } catch (e) {}
 
-                document.getElementById("submit").addEventListener("click", () => {
+                let portalJwtToken = null;
+                let portalJwtPromise = null;
+
+                const getPortalJwt = async () => {
+                        if (portalJwtToken) {
+                                return portalJwtToken;
+                        }
+                        if (portalJwtPromise) {
+                                return portalJwtPromise;
+                        }
+                        portalJwtPromise = frappe
+                                .call({
+                                        method: "ferum_custom.api.service.portal_token",
+                                })
+                                .then((res) => {
+                                        const payload = res?.message || res;
+                                        portalJwtToken = payload?.token || null;
+                                        return portalJwtToken;
+                                })
+                                .catch(() => null)
+                                .finally(() => {
+                                        portalJwtPromise = null;
+                                });
+                        return portalJwtPromise;
+                };
+
+                document.getElementById("submit").addEventListener("click", async () => {
                         const title = document.getElementById("title").value;
                         const description = document.getElementById("description").value;
                         const service_object = document.getElementById("service_object").value || null;
@@ -46,31 +72,43 @@
                         }
                         const msgEl = document.getElementById("msg");
                         msgEl.innerText = __("Submitting...");
+                        const token = await getPortalJwt();
+                        const headers = token
+                                ? { Authorization: `Bearer ${token}` }
+                                : undefined;
                         frappe
                                 .call({
                                         method: "ferum_custom.api.service.create_service_request",
                                         args: { title, description, service_object },
                                         type: "POST",
+                                        headers,
                                 })
                                 .then(async (r) => {
-                                        const name = r.message;
-                                        const fileInput = document.getElementById('file');
+                                        const response = r.message || r;
+                                        if (!response || response.status !== "ok") {
+                                                throw new Error(response?.error || __("Create request failed"));
+                                        }
+                                        const name = response.name || response.data?.name;
+                                        if (!name) {
+                                                throw new Error(__("No request name returned"));
+                                        }
+                                        const fileInput = document.getElementById("file");
                                         if (fileInput && fileInput.files && fileInput.files.length > 0) {
                                                 const file = fileInput.files[0];
                                                 const fd = new FormData();
-                                                fd.append('file', file, file.name);
-                                                fd.append('is_private', '1');
-                                                fd.append('doctype', 'Issue');
-                                                fd.append('docname', name);
+                                                fd.append("file", file, file.name);
+                                                fd.append("is_private", "1");
+                                                fd.append("doctype", "Issue");
+                                                fd.append("docname", name);
                                                 try {
-                                                        const res = await fetch('/api/method/upload_file', {
-                                                                method: 'POST',
-                                                                headers: { 'X-Frappe-CSRF-Token': frappe.csrf_token },
+                                                        const res = await fetch("/api/method/upload_file", {
+                                                                method: "POST",
+                                                                headers: { "X-Frappe-CSRF-Token": frappe.csrf_token },
                                                                 body: fd,
                                                         });
                                                         if (!res.ok) throw new Error(await res.text());
                                                 } catch (err) {
-                                                        console.warn('File upload failed', err);
+                                                        console.warn("File upload failed", err);
                                                 }
                                         }
                                         msgEl.innerHTML = `${__("Created:")} <a href="/portal/service-request?name=${name}">${name}</a>`;
@@ -78,7 +116,9 @@
                                 .catch((e) => {
                                         let msg = e && (e.message || e._server_messages);
                                         if (msg) {
-                                                try { msg = JSON.parse(msg)[0]; } catch (err) {}
+                                                try {
+                                                        msg = JSON.parse(msg)[0];
+                                                } catch (err) {}
                                         }
                                         msgEl.innerText = msg || __("Error");
                                 });

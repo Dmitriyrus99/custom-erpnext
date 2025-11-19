@@ -19,6 +19,13 @@ _ENV_FILES = (
 	"config/.env.integrations",
 )
 
+ENV_PRIORITY_FIELDS = {
+	"jwt_secret",
+	"telegram_bot_token",
+	"telegram_webhook_secret",
+	"google_service_account_json",
+}
+
 
 def _load_env_files() -> None:
 	"""Best-effort load of integration env files into process env.
@@ -130,8 +137,23 @@ def _get_from_env(field: str) -> Any | None:
 	return os.getenv(env_key)
 
 
+def _get_env_priority(field: str) -> Any | None:
+	try:
+		if field in ENV_PRIORITY_FIELDS:
+			value = _get_from_env(field)
+			if _value_is_set(value):
+				return value
+	except Exception:
+		pass
+	return None
+
+
 def get_setting(field: str, default: Any | None = None) -> Any | None:
 	"""Read a single attribute from settings, falling back to site config/env."""
+
+	env_value = _get_env_priority(field)
+	if env_value is not None:
+		return env_value
 
 	data = _settings_snapshot()
 	if data and _value_is_set(data.get(field)):

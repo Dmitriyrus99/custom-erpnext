@@ -14,6 +14,7 @@ Current implementation (this repo)
 - Token lifetime is 1 hour; refresh flow is not implemented.
 - Login rate limiting can be enabled with settings `enable_rate_limit_auth` and `rate_limit_auth_per_minute`.
 - ERPNext’s desk login 2FA is supported by ERPNext; the JWT login enforces OTP verification for users who have 2FA enabled on their account.
+- Portal users can also request a JWT via `GET /api/method/ferum_custom.api.service.portal_token` (requires an authenticated session). Supply the returned token in `Authorization: Bearer <token>` headers for POST operations.
 
 Frappe method endpoints (examples)
 
@@ -38,9 +39,7 @@ Frappe method endpoints (examples)
 
 - The API returns standard HTTP status codes.
 - 200 for success (with JSON payload), 4xx for client errors (401 for unauthorized, 403 for forbidden actions, 400 for validation errors detailing what was wrong), and 500 for server errors.
-- The payload typically contains a JSON object; for example, for a GET list request, it might be {"data": [ ...items...
-- ]}; for a single get, {"data": { ...item...
-- }}; for errors, something like {"error": "Description of error"}.
+- Successful responses are wrapped as `{"status": "ok", ...}` (e.g., `{"status": "ok", "data": [...]}`), while error responses include `{"status": "error", "message": "..."}` so clients can inspect `status` before parsing the payload.
 
 Now, the major endpoints by module:
 

@@ -39,3 +39,7 @@ ferum_custom.patches.v15_mariadb.041_triggers
 ferum_custom.patches.v15_mariadb.invoice_numbering_sql
 ferum_custom.patches.v15_mariadb.invoice_numbering_backfill
 ferum_custom.patches.v15_mariadb.invoice_numbering_indexes_sql
+ferum_custom.patches.v15_4.normalize_contracts
+ferum_custom.patches.v15_4.add_unique_indexes
+ferum_custom.patches.v15_4.cleanup_legacy_service_request_tables
+ferum_custom.patches.v15_4.ensure_settings_permissions

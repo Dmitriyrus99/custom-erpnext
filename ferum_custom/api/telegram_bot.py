@@ -532,12 +532,22 @@ def delete_webhook() -> dict[str, Any]:
         frappe.throw(_("Telegram bot token not configured"))
     try:
         import requests  # type: ignore
+
         url = f"{telegram_integration.API_BASE}/bot{token}/deleteWebhook"
         resp = requests.post(url, timeout=15)
-        data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {"http": resp.text}
+        data = (
+            resp.json()
+            if resp.headers.get("content-type", "").startswith("application/json")
+            else {"http": resp.text}
+        )
         if not resp.ok or not data.get("ok"):
             frappe.throw(_("Failed to delete webhook: {0}").format(data))
         return {"ok": True, "result": data.get("result")}
     except Exception as exc:
         frappe.log_error(frappe.get_traceback(), "Telegram delete_webhook failed")
         frappe.throw(_("Error deleting webhook: {0}").format(str(exc)))
+
+
+@frappe.whitelist(allow_guest=True)
+def health() -> dict[str, Any]:
+	return telegram_integration.healthcheck()

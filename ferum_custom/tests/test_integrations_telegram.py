@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from ferum_custom.ferum_custom.api import telegram_bot as telegram_api
 from ferum_custom.ferum_custom.integrations import telegram
 
 
@@ -137,3 +138,10 @@ def test_telegram_healthcheck_missing_token(monkeypatch):
 	result = telegram.healthcheck()
 	assert result["status"] == "error"
 	assert "token" in result["message"].lower()
+
+
+def test_telegram_api_health(monkeypatch):
+	monkeypatch.setattr(telegram, "healthcheck", lambda: {"status": "ok", "details": {"username": "bot"}})
+	result = telegram_api.health()
+	assert result["status"] == "ok"
+	assert result["details"]["username"] == "bot"

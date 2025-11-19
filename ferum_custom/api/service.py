@@ -3,6 +3,7 @@ import typing as t
 import frappe
 from frappe import _
 
+from ferum_custom.api import auth as auth_api
 from ferum_custom.ferum_custom.domain.service import application as service_app
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
@@ -19,16 +20,63 @@ def _paginate(start: int | None = None, page_length: int | None = None) -> tuple
 	return s, max(1, min(pl, 200))
 
 
+def _response_ok(**payload: t.Any) -> dict[str, t.Any]:
+	return {"status": "ok", **payload}
+
+
+def _get_bearer_token() -> str | None:
+	authz = frappe.get_request_header("Authorization")
+	if authz and authz.startswith("Bearer "):
+		return authz.split(" ", 1)[1]
+	return None
+
+
+def _require_jwt_authentication() -> None:
+	if not is_feature_enabled("enable_jwt"):
+		return
+	token = _get_bearer_token()
+	if not token:
+		frappe.throw(_("Authorization token required"), frappe.AuthenticationError)
+	try:
+		payload = auth_api.decode_jwt(token)
+	except Exception as exc:
+		frappe.throw(_("Invalid JWT token: {0}").format(str(exc)), frappe.AuthenticationError)
+	user_from_token = payload.get("sub")
+	if user_from_token:
+		frappe.set_user(user_from_token)
+
+
+def _rate_limit_key(scope: str, identifier: str) -> str:
+	return f"ferum:rate:{scope}:{identifier}"
+
+
+def _enforce_rate_limit(scope: str, identifier: str | None, limit: int) -> None:
+	if not identifier:
+		return
+	cache = frappe.cache()
+	key = _rate_limit_key(scope, identifier)
+	current = cache.get_value(key) or 0
+	try:
+		current_val = int(current)
+	except Exception:
+		current_val = 0
+	current_val += 1
+	cache.set_value(key, current_val, expires_in_sec=60)
+	if current_val > limit:
+		frappe.throw(_("Too many requests. Please try again later."))
+
+
 @frappe.whitelist(methods=["POST"])  # API used by bot/portal: POST only
 def create_service_request(
 	title: str, description: str | None = None, service_object: str | None = None
-) -> str:
+) -> dict[str, t.Any]:
 	"""Create a standard ERPNext Issue (backward-compatible API name).
 
 	- Maps title → Issue.subject, description → Issue.description
 	- Tries to populate company from defaults
 	- If a Service Object is provided, appends its name to description for context
 	"""
+	_require_jwt_authentication()
 	_check_new_request_rate_limit()
 	company = None
 	project = None
@@ -55,7 +103,7 @@ def create_service_request(
 			project = getattr(so, "project", None)
 			company = company or getattr(so, "company", None)
 
-	return service_app.create_service_request(
+	name = service_app.create_service_request(
 		title=title,
 		description=description,
 		service_object=service_object,
@@ -63,6 +111,7 @@ def create_service_request(
 		project=project,
 		customer=customer,
 	)
+	return _response_ok(name=name, data={"name": name})
 
 
 @frappe.whitelist(methods=["GET"])  # Listing is idempotent
@@ -89,7 +138,7 @@ def list_service_requests(
 		pass
 
 	data = service_app.list_service_requests(filters=filters, start=s, page_length=pl)
-	return {"data": data, "start": s, "page_length": pl}
+	return _response_ok(data=data, start=s, page_length=pl)
 
 
 @frappe.whitelist(methods=["GET"])  # Read-only fetch
@@ -106,7 +155,18 @@ def get_service_request(name: str) -> dict:
 				frappe.throw(_("Not permitted"))
 	except Exception:
 		pass
-	return data
+	return _response_ok(data=data)
+
+
+@frappe.whitelist()
+def portal_token() -> dict[str, t.Any]:
+	if not is_feature_enabled("enable_jwt"):
+		frappe.throw(_("JWT is disabled"))
+	user = frappe.session.user
+	if not user or user == "Guest":
+		frappe.throw(_("Login required for portal token"))
+	token = auth_api.issue_jwt_for_user(user)
+	return _response_ok(token=token, user=user)
 
 
 @frappe.whitelist(methods=["POST"])  # State change
@@ -115,12 +175,13 @@ def update_service_request_status(name: str, status: str) -> dict:
 
 	Requires authentication; relies on DocType validations and permission checks.
 	"""
+	_require_jwt_authentication()
 	doc = frappe.get_doc("Issue", name)
 	# Map basic statuses if needed
 	allowed = {"Open", "Replied", "On Hold", "Resolved", "Closed"}
 	doc.status = status if status in allowed else "Open"
 	doc.save()  # will trigger workflow and validations
-	return {"ok": True, "name": doc.name, "status": doc.status}
+	return _response_ok(name=doc.name, status=doc.status)
 
 
 @frappe.whitelist()
@@ -138,7 +199,7 @@ def list_service_reports(
 		if user_type == "Website User" or "Client" in roles:
 			# No direct customer link on Timesheet; restrict only if project provided
 			if not project:
-				return {"data": [], "start": 0, "page_length": pl}
+				return _response_ok(data=[], start=0, page_length=pl)
 	except Exception:
 		pass
 
@@ -151,7 +212,7 @@ def list_service_reports(
 		page_length=pl,
 		order_by="modified desc",
 	)
-	return {"data": data, "start": s, "page_length": pl}
+	return _response_ok(data=data, start=s, page_length=pl)
 
 
 def _get_client_ip() -> str:
@@ -180,17 +241,10 @@ def _check_new_request_rate_limit() -> None:
 		except Exception:
 			limit_val = 10
 		ip = _get_client_ip()
-		key = f"ferum:rate:new_request:{ip}"
-		cache = frappe.cache()
-		current = cache.get_value(key) or 0
-		try:
-			current_val = int(current) if current is not None else 0
-		except Exception:
-			current_val = 0
-		current_val += 1
-		cache.set_value(key, current_val, expires_in_sec=60)
-		if current_val > max(1, limit_val):
-			frappe.throw(_("Too many new requests. Please try again later."))
+		_enforce_rate_limit("new_request_ip", ip, max(1, limit_val))
+		user = frappe.session.user
+		if user and user not in {"Guest", "Administrator"}:
+			_enforce_rate_limit("new_request_user", user, max(1, limit_val))
 	except Exception:
 		# Never block due to rate-limit implementation errors
 		pass
@@ -234,7 +288,7 @@ def list_invoices(
 		page_length=pl,
 		order_by="modified desc",
 	)
-	return {"data": data, "start": s, "page_length": pl}
+	return _response_ok(data=data, start=s, page_length=pl)
 
 
 @frappe.whitelist()

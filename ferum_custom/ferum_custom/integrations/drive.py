@@ -215,8 +215,32 @@ def delete_file(file_id: str) -> bool:
 		return False
 
 
+def _create_health_file(service: Any, root: str) -> dict[str, Any] | None:
+	"""Create and remove a small file under the root folder to prove write access."""
+	if MediaInMemoryUpload is None:
+		return None
+	upload_name = f"healthcheck-{int(time.time())}.txt"
+	try:
+		media = MediaInMemoryUpload(b"healthcheck", "text/plain")
+		resp = (
+			service.files()
+			.create(body={"name": upload_name, "parents": [root], "mimeType": "text/plain"}, media_body=media, fields="id")
+			.execute()
+		)
+		file_id = resp.get("id")
+		if file_id:
+			try:
+				service.files().delete(fileId=file_id).execute()
+			except Exception:
+				pass
+		return {"id": file_id, "name": upload_name}
+	except Exception as exc:
+		frappe.log_error(frappe.get_traceback(), "Drive healthfile create failed")
+		return {"error": str(exc)}
+
+
 def healthcheck() -> dict[str, Any]:
-	"""Return basic health information for the Drive integration."""
+	"""Return health information for the Drive integration, including write verification."""
 
 	if not is_feature_enabled("enable_google_drive_sync"):
 		return {"status": "disabled", "message": "Drive sync feature flag disabled"}
@@ -239,16 +263,17 @@ def healthcheck() -> dict[str, Any]:
 			.execute()
 		)
 		owner = (meta.get("owners") or [{}])[0].get("displayName")
-		return {
-			"status": "ok",
-			"details": {
-				"id": meta.get("id"),
-				"name": meta.get("name"),
-				"trashed": meta.get("trashed"),
-				"owner": owner,
-				"link": meta.get("webViewLink"),
-			},
+		health_file = _create_health_file(service, root)
+		details = {
+			"id": meta.get("id"),
+			"name": meta.get("name"),
+			"trashed": meta.get("trashed"),
+			"owner": owner,
+			"link": meta.get("webViewLink"),
 		}
+		if health_file:
+			details["health_file"] = health_file
+		return {"status": "ok", "details": details}
 	except Exception as exc:
 		category, context = _classify_failure(exc)
 		return {

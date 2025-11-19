@@ -334,6 +334,25 @@ def has_permission(doc, user: str | None = None) -> bool:
 	roles = user_roles(user)
 	if "System Manager" in roles or "Office Manager" in roles:
 		return True
+
+	service_department = getattr(doc, "service_department", None)
+	service_request_info: dict[str, object] | None = None
+	if doc.service_request:
+		info = frappe.db.sql(
+			"""
+			select sr.assigned_to, sr.project, sr.service_department, sr.customer,
+				sp.project_manager
+			from `tabService Request` sr
+			left join `tabService Project` sp on sp.name=sr.project
+			where sr.name=%s
+			""",
+			(doc.service_request,),
+			as_dict=True,
+		)
+		if info:
+			service_request_info = info[0]
+			service_department = service_department or service_request_info.get("service_department")
+
 	if "Department Head" in roles:
 		allowed = set(
 			frappe.get_all(
@@ -341,31 +360,24 @@ def has_permission(doc, user: str | None = None) -> bool:
 			)
 		)
 		if allowed:
-			dept = getattr(doc, "service_department", None)
-			if not dept and getattr(doc, "service_request", None):
-				dept = frappe.db.get_value("Service Request", doc.service_request, "service_department")
+			dept = service_department or (service_request_info or {}).get("service_department")
 			if dept in allowed:
 				return True
 		else:
 			return True
-	pm = None
-	assigned = None
-	if doc.service_request:
-		pm = frappe.db.sql(
-			"select sp.project_manager from `tabService Request` sr left join `tabService Project` sp on sp.name=sr.project where sr.name=%s",
-			(doc.service_request,),
-		)
-		assigned = frappe.db.get_value("Service Request", doc.service_request, "assigned_to")
+
+	assigned = (service_request_info or {}).get("assigned_to")
+	project_manager = (service_request_info or {}).get("project_manager")
+	customer = (service_request_info or {}).get("customer")
+
 	if assigned == user:
 		return True
-	if pm and pm[0][0] == user:
+	if project_manager == user:
 		return True
 	if "Client" in roles and getattr(doc, "service_request", None):
 		customers = set(get_allowed_customers(user))
-		if customers:
-			cust = frappe.db.get_value("Service Request", doc.service_request, "customer")
-			if cust in customers:
-				return True
+		if customers and customer in customers:
+			return True
 	return False
 
 

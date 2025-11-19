@@ -9,9 +9,10 @@ class TestServiceRequestPortal(FrappeTestCase):
 		frappe.set_user("Administrator")
 		name = None
 		try:
-			name = create_service_request(
+			result = create_service_request(
 				title="Portal API Smoke", description="from test", service_object=None
 			)
+			name = result.get("name") if isinstance(result, dict) else str(result)
 			self.assertTrue(frappe.db.exists("Issue", name))
 		finally:
 			if name:
