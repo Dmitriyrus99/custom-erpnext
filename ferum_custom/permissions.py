@@ -76,3 +76,59 @@ def has_client_permission(doc, user: str) -> bool:
     if doc.owner == user:
         return True
     return False
+
+
+# --- Project permissions ----------------------------------------------------
+
+
+def _user_companies(user: str) -> list[str]:
+    return frappe.get_all(
+        "User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
+    )
+
+
+def _user_departments(user: str) -> list[str]:
+    return frappe.get_all(
+        "User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
+    )
+
+
+def project_get_permission_query_conditions(user: str, doctype: str | None = None) -> str | None:
+    if not user or user == "Administrator":
+        return None
+
+    clauses: list[str] = []
+    companies = _user_companies(user)
+    if companies:
+        esc = ", ".join(frappe.db.escape(c) for c in companies)
+        clauses.append(f"`tabProject`.company IN ({esc})")
+
+    departments = _user_departments(user)
+    if departments:
+        esc = ", ".join(frappe.db.escape(d) for d in departments)
+        clauses.append(
+            "`tabProject`.name in (select name from `tabService Project` where service_department in ({0}))".format(
+                esc
+            )
+        )
+
+    return " and ".join(f"({clause})" for clause in clauses) if clauses else None
+
+
+def project_has_permission(doc, user: str) -> bool:
+    if not user or user == "Administrator":
+        return True
+
+    companies = set(_user_companies(user))
+    if companies and getattr(doc, "company", None) not in companies:
+        return False
+
+    departments = set(_user_departments(user))
+    if departments:
+        department = getattr(doc, "service_department", None)
+        if not department:
+            department = frappe.db.get_value("Service Project", doc.name, "service_department")
+        if department and department not in departments:
+            return False
+
+    return True

@@ -43,3 +43,5 @@ ferum_custom.patches.v15_4.normalize_contracts
 ferum_custom.patches.v15_4.add_unique_indexes
 ferum_custom.patches.v15_4.cleanup_legacy_service_request_tables
 ferum_custom.patches.v15_4.ensure_settings_permissions
+ferum_custom.patches.v15_5.website_defaults
+ferum_custom.patches.v15_5.fix_service_request_notification

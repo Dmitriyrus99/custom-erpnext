@@ -3,7 +3,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-from ferum_custom.ferum_custom.notifications.dispatcher import notify
+from ferum_custom.notifications.dispatcher import notify
 
 
 def on_issue_after_insert(doc, method=None):  # Service Request proxy (Issue)
@@ -45,4 +45,3 @@ def on_invoice_after_insert(doc, method=None):
 def test_notify(kind: str = "ping") -> dict:
     ctx = {"name": kind, "title": kind, "priority": "Low", "project": ""}
     return notify("new_service_request", recipients=[frappe.session.user], context=ctx)
-

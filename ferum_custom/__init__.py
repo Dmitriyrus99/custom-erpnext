@@ -11,7 +11,14 @@ try:
 except PackageNotFoundError:
     __version__ = "0.0.0"
 
-from .api import reports as _report_overrides
+try:
+    from .api import reports as _report_overrides
+except ModuleNotFoundError as exc:
+    # `flit` imports this module while building metadata in an isolated env where
+    # Frappe isn't installed, so gracefully skip optional integrations there.
+    if exc.name != "frappe":
+        raise
+    _report_overrides = None
 
 # Extend __path__ through nested ferum_custom directories so deep imports resolve.
 current_dir = Path(__file__).resolve().parent

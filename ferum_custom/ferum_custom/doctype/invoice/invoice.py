@@ -1,6 +1,8 @@
 # Copyright (c) 2024, Frappe Technologies and contributors
 # For license information, please see license.txt
 
+import re
+
 import frappe
 from frappe import _
 
@@ -32,6 +34,17 @@ from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 # --- Google Sheets Integration ---
 
 
+def _extract_sheet_id(reference: str | None) -> str | None:
+	if not reference:
+		return None
+	match = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", reference)
+	if match:
+		return match.group(1)
+	if re.fullmatch(r"[a-zA-Z0-9-_]{20,}", reference):
+		return reference
+	return None
+
+
 def get_google_sheet():
 	"""Connects to Google Sheets and returns the worksheet object using Settings."""
 	if gspread is None or not is_feature_enabled("enable_google_sheets_sync"):
@@ -40,9 +53,12 @@ def get_google_sheet():
 		creds = build_service_account_credentials([SERVICE_ACCOUNT_SCOPE_SHEETS])
 		if not creds:
 			return None
-		sheet_name = get_setting("google_sheet_name") or "Ferum Invoices Tracker"
+		sheet_reference = get_setting("google_sheet_name") or "Ferum Invoices Tracker"
 		client = gspread.authorize(creds)
-		return client.open(sheet_name).sheet1
+		sheet_id = _extract_sheet_id(sheet_reference)
+		if sheet_id:
+			return client.open_by_key(sheet_id).sheet1
+		return client.open(sheet_reference).sheet1
 	except Exception as e:
 		frappe.log_error(f"Google Sheets connection failed: {e!s}", "Google Sheets Connection Error")
 		try:

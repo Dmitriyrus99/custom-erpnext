@@ -26,6 +26,16 @@ def _companies(user: str) -> list[str]:
         return []
 
 
+def _departments(user: str) -> list[str]:
+    try:
+        vals = frappe.get_all(
+            "User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
+        )
+        return vals or []
+    except Exception:
+        return []
+
+
 def _company_condition(tab: str, field: str, user: str) -> str | None:
     comps = _companies(user)
     if not comps:
@@ -82,6 +92,10 @@ def service_request_pqc(user: str | None = None) -> str | None:
     company_cond = _company_condition("tabService Request", "company", user)
     if company_cond:
         conds.append(company_cond)
+    departments = _departments(user)
+    if departments:
+        esc = ", ".join(frappe.db.escape(x) for x in departments)
+        conds.append(f"`tabService Request`.service_department IN ({esc})")
     if "Service Engineer" in _roles(user):
         conds.append(_engineer_condition(user))
     customer_cond = _customers_condition(user)

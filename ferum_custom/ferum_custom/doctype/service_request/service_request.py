@@ -11,7 +11,7 @@ except Exception:
     # During migrate/import, telegram module may not be importable; use no-op
     def tg_send(*args, **kwargs):  # type: ignore
         return False
-from ferum_custom.ferum_custom.notifications.dispatcher import notify as notify_dispatch
+from ferum_custom.notifications.dispatcher import notify as notify_dispatch
 from ferum_custom.ferum_custom.services import get_project_manager_email
 from ferum_custom.ferum_custom.utils import (
 	get_allowed_customers,

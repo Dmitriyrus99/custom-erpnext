@@ -136,15 +136,21 @@ def run_nightly_backup_to_gdrive():
 def run_permission_audit():
     """Weekly job to audit Page and Report permissions for non-admin roles."""
     suspicious_page_perms = frappe.get_all(
-        "Role Permission for Page",
-        filters={"role": ["notin", ALLOWED_ADMIN_ROLES]},
-        fields=["parent", "role", "page"]
+        "Role Permission for Page and Report",
+        filters={
+            "role": ["not in", ALLOWED_ADMIN_ROLES],
+            "page": ["is", "set"],
+        },
+        fields=["name", "role", "page"],
     )
-    
+
     suspicious_report_perms = frappe.get_all(
-        "Role Permission for Report",
-        filters={"role": ["notin", ALLOWED_ADMIN_ROLES]},
-        fields=["parent", "role", "report"]
+        "Role Permission for Page and Report",
+        filters={
+            "role": ["not in", ALLOWED_ADMIN_ROLES],
+            "report": ["is", "set"],
+        },
+        fields=["name", "role", "report"],
     )
 
     if not suspicious_page_perms and not suspicious_report_perms:
@@ -205,20 +211,33 @@ def on_role_update_audit(doc, method):
 
 # Helper Functions
 
-def get_report_recipients(roles: list) -> list:
-    """Fetch email addresses for all active users with the given roles."""
-    user_names = frappe.get_users_with_role(roles)
-    
+def get_report_recipients(roles: list[str] | tuple[str, ...] | set[str] | str) -> list[str]:
+    """Fetch email addresses for all active users with *any* of the given roles."""
+    role_list: list[str] = []
+    if isinstance(roles, (list, tuple, set)):
+        role_list = [r for r in (str(x).strip() for x in roles) if r]
+    else:
+        role_list = [str(roles or "").strip()]
+
+    user_names: set[str] = set()
+    for role in role_list:
+        if not role:
+            continue
+        try:
+            user_names.update(frappe.get_users_with_role(role))
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), f"get_report_recipients failed for role {role}")
+
     if not user_names:
         return []
 
     recipients = frappe.get_all(
         "User",
-        filters={"name": ["in", user_names], "enabled": 1},
+        filters={"name": ["in", list(user_names)], "enabled": 1},
         fields=["email"],
         pluck="email",
     )
-    return list(set(recipients)) # Return unique emails
+    return [email for email in set(recipients or []) if email]
 
 
 def build_report_html(title: str, items: list) -> str:

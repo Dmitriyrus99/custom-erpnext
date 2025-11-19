@@ -3,7 +3,7 @@ from __future__ import annotations
 """Unified notification dispatcher for email, Telegram and future channels.
 
 Usage:
-    from ferum_custom.ferum_custom.notifications.dispatcher import notify
+    from ferum_custom.notifications.dispatcher import notify
 
     notify(
         event_type="new_service_request",

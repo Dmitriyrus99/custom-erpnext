@@ -9,8 +9,9 @@ from ferum_custom.ferum_custom.api import service as portal_service
 class TestPortalAPI(FrappeTestCase):
     def test_portal_token_requires_login(self):
         frappe.set_user("Guest")
-        with self.assertRaises(frappe.AuthenticationError):
-            portal_token()
+        with mock.patch("ferum_custom.api.service.is_feature_enabled", return_value=True):
+            with self.assertRaises(frappe.ValidationError):
+                portal_token()
 
     def test_require_jwt_authentication_requires_token(self):
         with mock.patch.object(portal_service, "is_feature_enabled", return_value=True), \

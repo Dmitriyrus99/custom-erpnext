@@ -4,8 +4,10 @@ from unittest import mock
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import getdate
 
 from ferum_custom.ferum_custom.doctype.invoice import invoice as invoice_module
+from ferum_custom.ferum_custom.tests import smoke_tools
 
 
 class _DummySheet:
@@ -21,17 +23,16 @@ class _DummySheet:
 
 class TestGoogleSheetsSync(FrappeTestCase):
 	def test_append_row_on_missing_cell(self):
-		company = frappe.get_all("Company", filters={"name": "Ferum Co"}, pluck="name")
-		if not company:
-			frappe.get_doc({"doctype": "Company", "company_name": "Ferum Co"}).insert()
+		company = smoke_tools.ensure_company()
 
 		doc = frappe.get_doc(
 			{
 				"doctype": "Invoice",
-				"company": "Ferum Co",
+				"company": company,
 				"counterparty_type": "Customer",
 				"counterparty_name": "Dummy Client",
 				"amount": 100,
+				"invoice_date": getdate(),
 			}
 		)
 		doc.insert()

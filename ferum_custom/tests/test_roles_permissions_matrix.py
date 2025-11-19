@@ -1,53 +1,38 @@
+import contextlib
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
+
+from ferum_custom.ferum_custom.tests import smoke_tools
 
 
 class TestRolesPermissionsMatrix(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
+		company = smoke_tools.ensure_company()
 		# Create customers and objects
+		self.customers = {}
 		for cust in ("Perm C1", "Perm C2"):
-			if not frappe.db.exists("Customer", cust):
-				c = frappe.new_doc("Customer")
-				c.customer_name = cust
-				c.insert()
-		if not frappe.db.exists("Service Object", {"object_name": "Obj-C1"}):
-			so = frappe.new_doc("Service Object")
-			so.object_name = "Obj-C1"
-			so.customer = "Perm C1"
-			so.insert()
-		if not frappe.db.exists("Service Object", {"object_name": "Obj-C2"}):
-			so = frappe.new_doc("Service Object")
-			so.object_name = "Obj-C2"
-			so.customer = "Perm C2"
-			so.insert()
+			self.customers[cust] = smoke_tools.ensure_customer(cust, company=company)
+		for obj, cust in (("Obj-C1", "Perm C1"), ("Obj-C2", "Perm C2")):
+			smoke_tools.ensure_service_object(obj, customer=self.customers[cust], company=company)
 
 		# Departments
 		for dept in ("SD-A", "SD-B"):
-			if not frappe.db.exists("Service Department", dept):
-				d = frappe.new_doc("Service Department")
-				d.department_name = dept
-				d.insert()
+			smoke_tools.ensure_service_department(dept, company=company)
 
-		# Projects per department
-		for proj, cust, _obj, dept in (
-			("SP-A", "Perm C1", "Obj-C1", "SD-A"),
-			("SP-B", "Perm C2", "Obj-C2", "SD-B"),
+		# Service Requests per department
+		for title, obj, dept, cust in (
+			("SR-A", "Obj-C1", "SD-A", "Perm C1"),
+			("SR-B", "Obj-C2", "SD-B", "Perm C2"),
 		):
-			if not frappe.db.exists("Service Project", proj):
-				p = frappe.new_doc("Service Project")
-				p.project_name = proj
-				p.customer = cust
-				p.service_department = dept
-				p.insert()
-
-		# Service Requests under projects
-		for title, obj, proj in (("SR-A", "Obj-C1", "SP-A"), ("SR-B", "Obj-C2", "SP-B")):
 			if not frappe.db.exists("Service Request", {"title": title}):
 				sr = frappe.new_doc("Service Request")
 				sr.title = title
+				sr.company = company
+				sr.customer = self.customers[cust]
 				sr.service_object = frappe.db.get_value("Service Object", {"object_name": obj})
-				sr.project = frappe.db.get_value("Service Project", {"project_name": proj}, "name")
+				sr.service_department = dept
 				sr.insert()
 
 		# Users

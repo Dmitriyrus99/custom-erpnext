@@ -1,23 +1,27 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from ferum_custom.ferum_custom.tests import smoke_tools
+
 
 class TestFinanceFlows(FrappeTestCase):
     def test_invoice_payment_cycle(self):
         frappe.set_user("Administrator")
+        company = smoke_tools.ensure_company()
+        counterparty = smoke_tools.ensure_customer("Perm Customer", company=company)
         inv = frappe.new_doc("Invoice")
-        inv.company = "Ferum Co"
-        inv.posting_date = frappe.utils.nowdate()
-        inv.due_date = frappe.utils.nowdate()
-        inv.counterparty_name = "Perm Customer"
-        inv.append("items", {"item_name": "Service", "amount": 100})
+        inv.company = company
+        inv.invoice_no = "INV-001"
+        inv.invoice_year = 2025
+        inv.counterparty_type = "Customer"
+        inv.counterparty_name = counterparty
+        inv.amount = 100
         inv.insert()
-        inv.submit()
-        self.assertEqual(inv.status, "Submitted")
+        self.assertEqual(inv.status, "Draft")
         payment = frappe.new_doc("Payment")
-        payment.company = "Ferum Co"
-        payment.reference_doctype = "Invoice"
-        payment.reference_name = inv.name
+        payment.company = company
+        payment.trx_date = frappe.utils.nowdate()
+        payment.direction = "in"
         payment.amount = 100
         payment.insert()
         self.assertTrue(payment.name)

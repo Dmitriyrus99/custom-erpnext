@@ -7,11 +7,14 @@ from decimal import Decimal
 import typing as t
 
 import frappe
+from frappe.utils import getdate
 
 
 def ensure_invoice_number(doc) -> None:
+    invoice_date = getdate(doc.invoice_date) if getattr(doc, "invoice_date", None) else dt.date.today()
+    doc.invoice_date = invoice_date
     if not getattr(doc, "invoice_year", None):
-        doc.invoice_year = (doc.invoice_date or dt.date.today()).year
+        doc.invoice_year = invoice_date.year
     if not getattr(doc, "invoice_no", None):
         doc.invoice_no = doc.name
 

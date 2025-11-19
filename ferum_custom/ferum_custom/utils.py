@@ -70,3 +70,17 @@ def parse_names_argument(names: Iterable[str] | str | None) -> list[str]:
 		if text:
 			result.append(text)
 	return result
+
+
+def get_logger(module: str):
+	"""Lightweight wrapper that falls back to frappe.logger()."""
+	try:
+		return frappe.logger(module)
+	except Exception:
+		class _FallbackLogger:
+			def debug(self, *args, **kwargs):
+				pass
+
+			info = warning = error = critical = debug
+
+		return _FallbackLogger()

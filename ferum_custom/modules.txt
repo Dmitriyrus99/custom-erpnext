@@ -1,1 +1,9 @@
 Ferum Custom
+Project & Contract Management
+Service Request Management
+Work Reporting
+Invoicing
+HR & Payroll
+Document Management
+Notifications
+Analytics
