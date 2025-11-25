@@ -335,19 +335,22 @@ def _attach_photo(ctx: TelegramContext, request_name: str) -> None:
 
 
 def _handle_photo_payload(ctx: TelegramContext) -> bool:
-    if not ctx.has_photo:
-        return False
+	if not ctx.has_photo:
+		return False
 
-    caption = ctx.caption
-    if not caption.startswith("/attach") or " " not in caption:
-        return False
+	caption = ctx.caption
+	if not caption.startswith("/attach"):
+		return False
 
-    request_name = caption.split(" ", 1)[1].strip()
-    if not request_name:
-        raise CommandError(_("Usage: /attach <request_name>"))
+	if " " not in caption:
+		raise CommandError(_("Usage: /attach <request_name>"))
 
-    _attach_photo(ctx, request_name)
-    return True
+	request_name = caption.split(" ", 1)[1].strip()
+	if not request_name:
+		raise CommandError(_("Usage: /attach <request_name>"))
+
+	_attach_photo(ctx, request_name)
+	return True
 
 
 def _dispatch_command(ctx: TelegramContext) -> None:

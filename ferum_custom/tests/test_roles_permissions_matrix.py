@@ -35,6 +35,12 @@ class TestRolesPermissionsMatrix(FrappeTestCase):
 				sr.service_department = dept
 				sr.insert()
 
+		# Normalize legacy requests missing a department to the primary allowed department
+		frappe.db.sql(
+			"update `tabService Request` set service_department=%s where coalesce(service_department, '')=''",
+			("SD-A",),
+		)
+
 		# Users
 		if not frappe.db.exists("User", "om@example.com"):
 			u = frappe.new_doc("User")
@@ -50,6 +56,8 @@ class TestRolesPermissionsMatrix(FrappeTestCase):
 			u.first_name = "DH"
 			u.user_type = "System User"
 			u.insert()
+		if "System Manager" in frappe.get_roles("dh@example.com"):
+			frappe.get_doc("User", "dh@example.com").remove_roles("System Manager")
 		if "Department Head" not in frappe.get_roles("dh@example.com"):
 			frappe.get_doc("User", "dh@example.com").add_roles("Department Head")
 

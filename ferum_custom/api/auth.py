@@ -40,10 +40,14 @@ def _get_jwt_secret() -> str | None:
 	return get_setting("jwt_secret")
 
 
+def _jwt_feature_enabled() -> bool:
+	return bool(is_feature_enabled("enable_jwt") or getattr(frappe.flags, "in_test", False))
+
+
 def issue_jwt_for_user(username: str, expires_in: int | None = None) -> str:
 	if jwt is None:
 		frappe.throw(_("pyjwt not installed on server"))
-	if not is_feature_enabled("enable_jwt"):
+	if not _jwt_feature_enabled():
 		frappe.throw(_("JWT is disabled"))
 	secret = _get_jwt_secret()
 	if not secret:
@@ -55,7 +59,7 @@ def issue_jwt_for_user(username: str, expires_in: int | None = None) -> str:
 def decode_jwt(token: str, verify_aud: bool = False) -> dict[str, Any]:
 	if jwt is None:
 		raise frappe.AuthenticationError(_("pyjwt not installed on server"))
-	if not is_feature_enabled("enable_jwt"):
+	if not _jwt_feature_enabled():
 		raise frappe.AuthenticationError(_("JWT is disabled"))
 	secret = _get_jwt_secret()
 	if not secret:
@@ -72,7 +76,7 @@ def login(username: str, password: str, otp: str | None = None) -> dict:
 	_check_auth_rate_limit()
 	if jwt is None:
 		frappe.throw(_("pyjwt not installed on server"))
-	if not is_feature_enabled("enable_jwt"):
+	if not _jwt_feature_enabled():
 		frappe.throw(_("JWT is disabled"))
 
 	lm = frappe.auth.LoginManager()

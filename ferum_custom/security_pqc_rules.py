@@ -19,7 +19,10 @@ def _is_admin(user: str) -> bool:
 def _companies(user: str) -> list[str]:
     try:
         vals = frappe.get_all(
-            "User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
+            "User Permission",
+            filters={"user": user, "allow": "Company"},
+            pluck="for_value",
+            ignore_permissions=True,
         )
         return vals or []
     except Exception:
@@ -29,7 +32,10 @@ def _companies(user: str) -> list[str]:
 def _departments(user: str) -> list[str]:
     try:
         vals = frappe.get_all(
-            "User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
+            "User Permission",
+            filters={"user": user, "allow": "Service Department"},
+            pluck="for_value",
+            ignore_permissions=True,
         )
         return vals or []
     except Exception:
@@ -41,7 +47,7 @@ def _company_condition(tab: str, field: str, user: str) -> str | None:
     if not comps:
         return None
     esc = ", ".join(frappe.db.escape(x) for x in comps)
-    return f"`{tab}`.`{field}` in ({esc})"
+    return f"`{tab}`.{field} in ({esc})"
 
 
 def _customers_condition(user: str) -> str | None:
@@ -86,7 +92,8 @@ def contract_pqc(user: str | None = None) -> str | None:
 
 def service_request_pqc(user: str | None = None) -> str | None:
     user = user or frappe.session.user
-    if _is_admin(user):
+    roles = _roles(user)
+    if SYSTEM_ROLE in roles:
         return None
     conds: list[str] = []
     company_cond = _company_condition("tabService Request", "company", user)
@@ -96,11 +103,15 @@ def service_request_pqc(user: str | None = None) -> str | None:
     if departments:
         esc = ", ".join(frappe.db.escape(x) for x in departments)
         conds.append(f"`tabService Request`.service_department IN ({esc})")
-    if "Service Engineer" in _roles(user):
+    if departments or "Department Head" in roles:
+        conds.append("coalesce(`tabService Request`.service_department, '') != ''")
+    if "Service Engineer" in roles:
         conds.append(_engineer_condition(user))
     customer_cond = _customers_condition(user)
     if customer_cond:
         conds.append(customer_cond)
+    if "Department Head" in roles and not conds:
+        return "FALSE"
     return " and ".join(f"({c})" for c in conds) if conds else None
 
 

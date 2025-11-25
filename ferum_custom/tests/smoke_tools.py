@@ -7,6 +7,18 @@ from typing import Any
 import frappe
 
 
+def _ensure_module_registered() -> None:
+	"""Make sure custom DocTypes resolve even if module map cache is stale."""
+
+	if not getattr(frappe.local, "module_app", None) or "ferum_custom" not in frappe.local.module_app:
+		# Flush potentially stale module maps so custom doctypes import cleanly
+		frappe.cache().delete_value("app_modules")
+		frappe.cache().delete_value("installed_app_modules")
+		frappe.local.app_modules = None
+		frappe.local.module_app = None
+		frappe.setup_module_map(include_all_apps=True)
+
+
 def _ensure_currency(name: str) -> str:
 	if frappe.db.exists("Currency", name):
 		return name
@@ -27,6 +39,7 @@ def _ensure_currency(name: str) -> str:
 def ensure_company(name: str = "Ferum Co", currency: str = "USD") -> str:
 	"""Ensure a minimal Company exists and set it as the default."""
 
+	_ensure_module_registered()
 	if frappe.db.exists("Company", name):
 		return name
 
@@ -123,6 +136,7 @@ def ensure_customer(name: str = "Perm Customer", company: str | None = None) -> 
 
 
 def ensure_service_object(object_name: str, customer: str | None = None, company: str | None = None) -> str:
+	_ensure_module_registered()
 	existing = frappe.db.get_value("Service Object", {"object_name": object_name})
 	if existing:
 		return existing
@@ -146,6 +160,7 @@ def ensure_service_object(object_name: str, customer: str | None = None, company
 
 
 def ensure_service_department(name: str, company: str | None = None) -> str:
+	_ensure_module_registered()
 	existing = frappe.db.exists("Service Department", name)
 	if existing:
 		return existing
@@ -161,6 +176,7 @@ def ensure_service_department(name: str, company: str | None = None) -> str:
 
 
 def ensure_service_project(name: str, customer: str, department: str) -> str:
+	_ensure_module_registered()
 	existing = frappe.db.get_value("Service Project", {"project_name": name}, "name")
 	if existing:
 		return existing
@@ -180,6 +196,7 @@ def ensure_service_project(name: str, customer: str, department: str) -> str:
 def create_test_service_request() -> str:
 	"""Create a minimal test Service Request using first available Company."""
 
+	_ensure_module_registered()
 	company = ensure_company()
 	doc = frappe.get_doc(
 		{

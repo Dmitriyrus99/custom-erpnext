@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from typing import Iterable
 
 import frappe
@@ -11,7 +10,7 @@ LOGGER = get_logger(__name__)
 
 
 def _normalized_number(contract_no: str, year: str | None) -> str:
-    clean = re.sub(r"[^0-9A-Za-z]", "", contract_no or "")
+    clean = "".join(ch for ch in (contract_no or "") if str(ch).isalnum())
     if year:
         clean = f"{clean}{year}"
     return clean.upper()
@@ -70,4 +69,3 @@ def normalize_contracts() -> None:
             seen[key] = c["name"]
         if c.get("contract_no_normalized") != normalized:
             frappe.db.set_value("Contract", c["name"], "contract_no_normalized", normalized)
-

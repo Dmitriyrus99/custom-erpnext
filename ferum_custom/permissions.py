@@ -132,3 +132,31 @@ def project_has_permission(doc, user: str) -> bool:
             return False
 
     return True
+
+
+# --- Timesheet permissions --------------------------------------------------
+
+
+def timesheet_get_permission_query_conditions(user: str, doctype: str | None = None) -> str | None:
+    """Limit Timesheets by Company for non-admin users (if user has explicit Company perms).
+
+    If the user has User Permission entries for Company, restrict Timesheets to those companies.
+    Otherwise, return None (no extra filter beyond role permissions).
+    """
+    if not user or user == "Administrator":
+        return None
+
+    companies = _user_companies(user)
+    if companies:
+        esc = ", ".join(frappe.db.escape(c) for c in companies)
+        return f"`tabTimesheet`.company IN ({esc})"
+    return None
+
+
+def timesheet_has_permission(doc, user: str) -> bool:
+    if not user or user == "Administrator":
+        return True
+    companies = set(_user_companies(user))
+    if companies and getattr(doc, "company", None) not in companies:
+        return False
+    return True

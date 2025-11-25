@@ -108,11 +108,15 @@ class Invoice(Document):
 
 	def after_insert(self):
 		self.notify_on_subcontractor_invoice()
-		enqueue(
-			"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets",
-			queue="short",
-			docname=self.name,
-		)
+		if frappe.flags.in_test:
+			# Avoid Redis dependency during tests; execute synchronously
+			sync_to_google_sheets(self.name)
+		else:
+			enqueue(
+				"ferum_custom.ferum_custom.doctype.invoice.invoice.sync_to_google_sheets",
+				queue="short",
+				docname=self.name,
+			)
 
 	def on_update(self):
 		pass  # Handled by hooks
