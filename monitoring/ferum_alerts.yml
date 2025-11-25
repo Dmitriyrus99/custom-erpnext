@@ -1,0 +1,38 @@
+groups:
+  - name: ferum_rules
+    rules:
+      - alert: FerumOpenServiceRequestsHigh
+        expr: ferum_open_service_requests > 120
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Open Ferum Service Requests high ({{ $value }})"
+          description: "More than 120 open service requests for 5m. Investigate queue/backlog."
+
+      - alert: FerumDriveHealthFailure
+        expr: up{job="ferum_drive_health"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Drive health endpoint unreachable"
+          description: "Drive healthcheck returned non-200 for >2m."
+
+      - alert: FerumTelegramHealthFailure
+        expr: up{job="ferum_telegram_health"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Telegram bot unreachable"
+          description: "Telegram health endpoint did not return HTTP 200."
+
+      - alert: FerumDriveBlackboxFailure
+        expr: probe_success{job="ferum_blackbox_drive"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Drive blackbox probe failed"
+          description: "External Drive health probe is failing, verify credentials."

@@ -1,12 +1,8 @@
 [tool.black]
 line-length = 100
 target-version = ["py312"]
-extend-exclude = [
-  '^env/',
-  '^\\.venv/',
-  '^node_modules/',
-  '^sites/',
-]
+include = "^apps/ferum_custom/.*\\.pyi?$"
+extend-exclude = "(apps/erpnext/|apps/frappe/|services/|docs/|monitoring/|legacy/|build/|.*/node_modules/|env/|\\.venv/|sites/)"
 
 [tool.isort]
 profile = "black"
@@ -18,7 +14,9 @@ skip = ["env", ".venv", "node_modules", "sites"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = ['env', '.venv', 'node_modules', 'sites']
+src = ["apps/ferum_custom"]
+exclude = ["apps/erpnext", "apps/frappe", "node_modules", ".git", ".bench"]
+extend-exclude = "(apps/erpnext/|apps/frappe/|services/|docs/|monitoring/|legacy/|build/|env/|\\.venv/|sites/)"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B"]
@@ -30,4 +28,5 @@ python_version = "3.12"
 ignore_missing_imports = true
 follow_imports = "silent"
 pretty = true
-exclude = ['env/', '\.venv/', 'node_modules/', 'sites/']
+files = ["apps/ferum_custom"]
+exclude = ['env/', '\.venv/', 'node_modules/', 'sites/', 'apps/(frappe|erpnext)/']

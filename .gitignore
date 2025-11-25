@@ -49,3 +49,7 @@ sites/*/private/
 sites/*/public/files/
 __pycache__/
 *.pyc
+
+# Coverage output
+htmlcov/
+coverage.xml

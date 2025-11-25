@@ -1,0 +1,55 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+rule_files:
+  - "monitoring/ferum_alerts.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  - job_name: ferum_metrics
+    metrics_path: /api/method/ferum_custom.api.metrics.prometheus
+    static_configs:
+      - targets: ["${FERUM_MONITOR_TARGET:erp.example.com:8000}"]
+
+  - job_name: ferum_drive_health
+    metrics_path: /api/method/ferum_custom.api.drive.health
+    static_configs:
+      - targets: ["${FERUM_DRIVE_TARGET:erp.example.com:8000}"]
+
+  - job_name: ferum_telegram_health
+    metrics_path: /api/method/ferum_custom.api.telegram_bot.health
+    static_configs:
+      - targets: ["${FERUM_TELEGRAM_TARGET:erp.example.com:8000}"]
+
+  - job_name: ferum_blackbox_drive
+    metrics_path: /probe
+    params:
+      module: [drive_health]
+    static_configs:
+      - targets: ["${FERUM_DRIVE_TARGET:erp.example.com:8000}"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: instance
+        replacement: "${FERUM_DRIVE_TARGET:erp.example.com:8000}"
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: ferum_blackbox_telegram
+    metrics_path: /probe
+    params:
+      module: [telegram_health]
+    static_configs:
+      - targets: ["${FERUM_TELEGRAM_TARGET:erp.example.com:8000}"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: instance
+        replacement: "${FERUM_TELEGRAM_TARGET:erp.example.com:8000}"
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

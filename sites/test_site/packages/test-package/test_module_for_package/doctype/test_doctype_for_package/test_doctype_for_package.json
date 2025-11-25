@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "Prompt",
+ "creation": "2025-09-27 13:02:01.085910",
+ "custom": 1,
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "test_field"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_field",
+   "fieldtype": "Data",
+   "label": "Test Field"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-27 13:02:01.085910",
+ "modified_by": "Administrator",
+ "module": "Test Module for Package",
+ "name": "Test DocType for Package",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

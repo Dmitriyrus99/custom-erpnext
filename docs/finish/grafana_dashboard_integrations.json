@@ -1,5 +1,5 @@
 {
-  "annotations": {"list": []},
+  "annotations": { "list": [] },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "gnetId": null,
@@ -11,65 +11,86 @@
     {
       "type": "timeseries",
       "title": "Drive Upload Rate",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
-        {"expr": "sum(rate(ferum_integration_drive_upload_total{result=\"success\"}[5m]))", "legendFormat": "success"},
-        {"expr": "sum(rate(ferum_integration_drive_upload_total{result=\"error\"}[5m]))", "legendFormat": "error"}
+        {
+          "expr": "sum(rate(ferum_integration_drive_upload_total{result=\"success\"}[5m]))",
+          "legendFormat": "success"
+        },
+        {
+          "expr": "sum(rate(ferum_integration_drive_upload_total{result=\"error\"}[5m]))",
+          "legendFormat": "error"
+        }
       ],
-      "options": {"legend": {"displayMode": "list", "placement": "bottom"}}
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } }
     },
     {
       "type": "timeseries",
       "title": "Telegram Send Rate",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "targets": [
-        {"expr": "sum(rate(ferum_integration_telegram_send_total{result=\"success\"}[5m]))", "legendFormat": "success"},
-        {"expr": "sum(rate(ferum_integration_telegram_send_total{result=\"error\"}[5m]))", "legendFormat": "error"}
+        {
+          "expr": "sum(rate(ferum_integration_telegram_send_total{result=\"success\"}[5m]))",
+          "legendFormat": "success"
+        },
+        {
+          "expr": "sum(rate(ferum_integration_telegram_send_total{result=\"error\"}[5m]))",
+          "legendFormat": "error"
+        }
       ],
-      "options": {"legend": {"displayMode": "list", "placement": "bottom"}}
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } }
     },
     {
       "type": "timeseries",
       "title": "Sheets Sync Rate",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
-        {"expr": "sum(rate(ferum_integration_sheets_sync_total{result=\"success\"}[5m]))", "legendFormat": "success"},
-        {"expr": "sum(rate(ferum_integration_sheets_sync_total{result=\"error\"}[5m]))", "legendFormat": "error"}
+        {
+          "expr": "sum(rate(ferum_integration_sheets_sync_total{result=\"success\"}[5m]))",
+          "legendFormat": "success"
+        },
+        {
+          "expr": "sum(rate(ferum_integration_sheets_sync_total{result=\"error\"}[5m]))",
+          "legendFormat": "error"
+        }
       ],
-      "options": {"legend": {"displayMode": "list", "placement": "bottom"}}
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } }
     },
     {
       "type": "bargauge",
       "title": "Drive Delete Errors (1h)",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "targets": [
-        {"expr": "sum(increase(ferum_integration_drive_delete_total{result=\"error\"}[1h])) by (category)", "legendFormat": "{{category}}"}
+        {
+          "expr": "sum(increase(ferum_integration_drive_delete_total{result=\"error\"}[1h])) by (category)",
+          "legendFormat": "{{category}}"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Open Service Requests",
-      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 16},
-      "targets": [{"expr": "ferum_open_service_requests"}]
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
+      "targets": [{ "expr": "ferum_open_service_requests" }]
     },
     {
       "type": "stat",
       "title": "Invoices Sent",
-      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 16},
-      "targets": [{"expr": "ferum_invoices_sent"}]
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
+      "targets": [{ "expr": "ferum_invoices_sent" }]
     },
     {
       "type": "stat",
       "title": "Invoices Paid",
-      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 16},
-      "targets": [{"expr": "ferum_invoices_paid"}]
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 16 },
+      "targets": [{ "expr": "ferum_invoices_paid" }]
     }
   ],
   "schemaVersion": 36,
   "style": "dark",
   "tags": ["ferum", "integrations"],
-  "templating": {"list": []},
-  "time": {"from": "now-6h", "to": "now"},
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
   "timepicker": {},
   "timezone": "",
   "title": "Ferum Integrations & KPIs",

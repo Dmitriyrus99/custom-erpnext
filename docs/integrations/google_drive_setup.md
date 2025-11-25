@@ -13,15 +13,15 @@ This guide walks through configuring the Ferum Custom Google Drive integration o
 
 1. Open [Google Cloud Console → IAM & Admin → Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts).
 2. Create a new service account (or reuse an existing one dedicated to document storage).
-3. Grant the **Drive API** role `Project → Editor` or a custom role with at least `drive.file`.
-4. Under “Keys” generate a **JSON key** and download it securely. Keep this file outside of the repository.
+3. Grant the **Drive API** role `Project → Editor` or a custom role with at least `drive.file`/`spreadsheets`.
+4. Under “Keys” generate a **JSON key**, download it, and upload it straight to Vault/SSM (or at least into ERPNext as a private File). Do not commit the JSON to git.
 
-> :lock: Rotate keys periodically. Revoke unused keys to minimise exposure.
+> :lock: Rotate keys periodically; track versioned secrets (e.g., `FERUM_GOOGLE_SERVICE_ACCOUNT_JSON_V2`) and switch over via `scripts/render_env.py`.
 
 ## 2. Prepare Google Drive
 
-1. Decide on a root folder (e.g. *Ferum Archive*). Copy its folder ID (the 33-character string in the URL).
-2. Share the folder with the service account email (e.g. `ferum-drive@project.iam.gserviceaccount.com`) with **Editor** access.
+1. Decide on a root folder (e.g. _Ferum Archive_). Copy its folder ID (the 33-character string in the URL).
+2. Share the folder with the service account email (e.g. `ferum-drive@project.iam.gserviceaccount.com`) with at least **Editor** access (can be limited to a shared drive).
 
 Ferum will create sub-folders automatically:
 
@@ -56,26 +56,37 @@ Variables follow the pattern `FERUM_<fieldname in uppercase>`. See `config/.env.
 
 ## 5. Validate the integration
 
-1. Open “Ferum Custom Settings” and click **Check Google Drive**.
-   - Success shows the folder name and owner.
-   - Failure displays the HTTP error code and guidance.
-2. Trigger a manual upload:
-   - Create or edit a “Service Report” and submit; a PDF should appear under the Drive folder.
-   - Attach a file to a Service Request and verify `drive_file_id` is populated on the File record.
-3. Optional CLI smoke test:
+1. Use the **Check Google Drive** button on “Ferum Custom Settings”. The new healthcheck:
+   - Reads the root folder metadata (`files().get`) and reports owner/link.
+   - Verifies write access by creating a tiny `healthcheck-<timestamp>.txt`, checking it exists, then deleting it.
+   - Returns structured JSON so Prometheus/Grafana can parse `status`/`message`.
+   - Mirror the same checks via `/api/method/ferum_custom.api.drive.health`, which reads credentials from `.env` and can be polled by Prometheus/CI without logging into ERPNext.
+2. Trigger a manual sync:
+   - Submit a “Service Report” and confirm the PDF appears under `/Customer/<Project>/Reports`.
+   - Attach a file to a Service Request; verify both `Custom Attachment` and the File link contain `drive_file_id`.
+3. CLI smoke test:
 
 ```bash
 bench --site <site> execute ferum_custom.ferum_custom.site_ops.backup_to_drive
 ```
 
-Check the Drive folder for a new backup `.sql.gz`.
+Check the Drive folder for a `.sql.gz` backup (deleted by background cleanup after verification).
 
 ## 6. Monitoring & troubleshooting
 
-- Upload failures create `frappe.log_error` entries and send email to **System Manager** and **Chief Accountant** roles.
-- The feature flag can be disabled temporarily to halt uploads without touching code.
-- Healthcheck output (button) lists the folder, owner, and link. Use it for on-call playbooks.
-- Retry policy: Drive uploads retry 3× on transient HTTP 429/5xx responses with exponential backoff.
+- Upload failures log errors and email **System Manager** + **Chief Accountant**.
+- Healthcheck output feeds Prometheus/Grafana; alert when `status` != `ok`.
+- Retry: 3× on HTTP 429/5xx with exponential backoff; see `drive.upload_bytes`.
+- Disable `FERUM_ENABLE_GOOGLE_DRIVE_SYNC` if the service account temporarily loses access.
+
+## 7. DocType/process dependencies
+
+- `Service Report` → PDF export and upload under `/Customer/<Project>/Reports`.
+- `Service Request` files → stored as `Custom Attachment`, `File`, and optionally synced to Drive if `enable_google_drive_sync`.
+- `Invoice` data (via `sync_to_google_sheets`) → writes rows to the configured sheet.
+- `Service Maintenance Schedule` backups → archived under `<site>/Backups/`.
+
+Drive integration only works after the service account JSON and root folder id propagate into `.env` via your Secret Manager (vault/SSM) + `scripts/render_env.py`. The runtime now favors these environment overrides for sensitive fields (`FERUM_GOOGLE_SERVICE_ACCOUNT_JSON`, etc.), so keep them out of Desk settings and supply them via Vault/SSM every deploy.
 
 ## 7. Security checklist
 
@@ -86,11 +97,11 @@ Check the Drive folder for a new backup `.sql.gz`.
 
 ## 8. Common issues
 
-| Symptom | Resolution |
-| --- | --- |
-| Healthcheck → `google-api-python-client is not installed` | `pip install google-api-python-client` in the bench environment and restart workers. |
-| Upload returns `HTTP 403` | Service account lacks permission on folder; re-share the folder or check shared drive settings. |
-| Files stuck locally (`drive_file_id` empty) | Ensure feature flag is enabled and the background worker queue `short` is running. |
-| Backups missing | Run the `backup_to_drive` command manually to obtain stack trace, verify bench user has read permissions to backup folder. |
+| Symptom                                                   | Resolution                                                                                                                 |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Healthcheck → `google-api-python-client is not installed` | `pip install google-api-python-client` in the bench environment and restart workers.                                       |
+| Upload returns `HTTP 403`                                 | Service account lacks permission on folder; re-share the folder or check shared drive settings.                            |
+| Files stuck locally (`drive_file_id` empty)               | Ensure feature flag is enabled and the background worker queue `short` is running.                                         |
+| Backups missing                                           | Run the `backup_to_drive` command manually to obtain stack trace, verify bench user has read permissions to backup folder. |
 
 With these steps complete the Drive integration is production-ready, auditable, and easy to verify through the new healthcheck button.

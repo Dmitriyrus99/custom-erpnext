@@ -4,15 +4,21 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-merge-conflict
+        files: ^apps/ferum_custom/
       - id: check-yaml
-        files: ^(apps/ferum_custom/|sites/|config/|Procfile|\.github/|.pre-commit-config.yaml)
+        files: ^apps/ferum_custom/
       - id: check-toml
-        files: ^(apps/ferum_custom/|pyproject\.toml)
+        files: ^apps/ferum_custom/
       - id: check-json
+        files: ^apps/ferum_custom/
       - id: end-of-file-fixer
+        files: ^apps/ferum_custom/
       - id: trailing-whitespace
+        files: ^apps/ferum_custom/
       - id: mixed-line-ending
+        files: ^apps/ferum_custom/
       - id: check-added-large-files
+        files: ^apps/ferum_custom/
         exclude: '^(env/|\.venv/|node_modules/|sites/|build/)'
 
 
@@ -23,28 +29,28 @@ repos:
       - id: ruff
         name: ruff (lint)
         args: ["--fix"]
-        files: ^apps/ferum_custom/ferum_custom/.*\.py$
+        files: ^apps/ferum_custom/.*\.py$
 
   # Python: Black
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
       - id: black
-        files: ^apps/ferum_custom/ferum_custom/.*\.py$
+        files: ^apps/ferum_custom/.*\.py$
 
   # Python: isort
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
-        files: ^apps/ferum_custom/ferum_custom/.*\.py$
+        files: ^apps/ferum_custom/.*\.py$
 
   # Python: mypy (lenient on imports)
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.0
     hooks:
       - id: mypy
-        files: ^apps/ferum_custom/ferum_custom/.*\.py$
+        files: ^apps/ferum_custom/.*\.py$
         additional_dependencies: ["types-requests==2.31.0.10"]
         args:
           [
@@ -57,7 +63,7 @@ repos:
     hooks:
       - id: prettier
         name: prettier
-        files: ^apps/ferum_custom/ferum_custom/.*\.(js|jsx|ts|tsx|css|scss|html|json|md|yaml|yml|jinja|j2)$
+        files: ^apps/ferum_custom/.*\.(js|jsx|ts|tsx|css|scss|html|json|md|yaml|yml|jinja|j2)$
 
   # JS: ESLint (lint)
   - repo: https://github.com/pre-commit/mirrors-eslint
@@ -65,7 +71,7 @@ repos:
     hooks:
       - id: eslint
         name: eslint
-        files: ^apps/ferum_custom/ferum_custom/.*\.(js|jsx|ts|tsx)$
+        files: ^apps/ferum_custom/.*\.(js|jsx|ts|tsx)$
         additional_dependencies:
           [
             "eslint@9.13.0",
@@ -79,6 +85,7 @@ repos:
         entry: python3 scripts/precommit/git_secrets_scan.py
         language: system
         pass_filenames: true
+        files: ^apps/ferum_custom/
       - id: frappe-migrate-dry-run
         name: Frappe migrate dry-run (all sites)
         entry: python3 scripts/precommit/frappe_migrate_dry_run.py
@@ -89,11 +96,11 @@ repos:
         name: Check __init__.py in doctype packages
         entry: python3 scripts/precommit/check_doctype_inits.py
         language: system
-        files: ^apps/ferum_custom/ferum_custom/.*
+        files: ^apps/ferum_custom/.*
         pass_filenames: false
       - id: check-forbidden-patterns
         name: Check forbidden patterns (print, unsafe frappe.db.sql)
         entry: python3 scripts/precommit/check_forbidden_patterns.py
         language: system
-        files: ^apps/ferum_custom/ferum_custom/.*\.py$
+        files: ^apps/ferum_custom/.*\.py$
         pass_filenames: true

@@ -1,0 +1,79 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "ferum-monitoring",
+    "title": "Ferum Custom Observability",
+    "timezone": "browser",
+    "schemaVersion": 36,
+    "version": 1,
+    "panels": [
+      {
+        "type": "stat",
+        "title": "Open Service Requests",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 6,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "ferum_open_service_requests",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "textMode": "value"
+        }
+      },
+      {
+        "type": "table",
+        "title": "Health endpoints",
+        "gridPos": {
+          "x": 6,
+          "y": 0,
+          "w": 12,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "up{job=~\"ferum_(drive|telegram)_health\"}",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "showHeader": true
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Drive Blackbox Probe",
+        "gridPos": {
+          "x": 0,
+          "y": 6,
+          "w": 6,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "probe_success{job=\"ferum_blackbox_drive\"}",
+            "legendFormat": "",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "textMode": "value"
+        }
+      }
+    ]
+  },
+  "overwrite": false
+}

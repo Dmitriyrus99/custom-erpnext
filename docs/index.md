@@ -1,4 +1,5 @@
 # Документация проекта (каркас)
+
 - [Аудит](./audit/current_audit.md)
 - [Архитектура](./architecture/architecture_overview.md)
 - [План поставки](./delivery_plan.md)

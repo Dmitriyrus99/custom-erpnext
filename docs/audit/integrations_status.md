@@ -28,14 +28,14 @@ This document summarises the current implementation of the two priority integrat
 
 **Checklist status**
 
-| Check | Status | Notes |
-| --- | --- | --- |
-| Credentials kept out of repo | ✅ | No service-account JSON present in git; settings expect upload via ERP `File`. |
-| Scopes minimal (least privilege) | ⚠️ | Uses full `https://www.googleapis.com/auth/drive`; consider `drive.file`. |
-| Healthcheck action in settings | ✅ | “Check Google Drive” button runs the new healthcheck helper and surfaces folder metadata. |
-| Unified mapping `fileId` ↔ ERP File/Attachment | ⚠️ | `File` has `drive_file_id` fields (patch `add_file_drive_fields.py`) and `Custom Attachment` stores IDs, but legacy rows may lack backfill. |
-| 401/403/404/429/5xx retry/backoff | ⚠️ | Retries now cover HTTP 429/5xx; 401/403/404 are surfaced as fatal errors that still require operator follow-up. |
-| Logging & audit trail | ⚠️ | Relies on `frappe.log_error`; no aggregated dashboard or success metrics. |
+| Check                                          | Status | Notes                                                                                                                                       |
+| ---------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Credentials kept out of repo                   | ✅     | No service-account JSON present in git; settings expect upload via ERP `File`.                                                              |
+| Scopes minimal (least privilege)               | ⚠️     | Uses full `https://www.googleapis.com/auth/drive`; consider `drive.file`.                                                                   |
+| Healthcheck action in settings                 | ✅     | “Check Google Drive” button runs the new healthcheck helper and surfaces folder metadata.                                                   |
+| Unified mapping `fileId` ↔ ERP File/Attachment | ⚠️     | `File` has `drive_file_id` fields (patch `add_file_drive_fields.py`) and `Custom Attachment` stores IDs, but legacy rows may lack backfill. |
+| 401/403/404/429/5xx retry/backoff              | ⚠️     | Retries now cover HTTP 429/5xx; 401/403/404 are surfaced as fatal errors that still require operator follow-up.                             |
+| Logging & audit trail                          | ⚠️     | Relies on `frappe.log_error`; no aggregated dashboard or success metrics.                                                                   |
 
 **Risks**
 
@@ -76,13 +76,13 @@ This document summarises the current implementation of the two priority integrat
 
 **Checklist status**
 
-| Check | Status | Notes |
-| --- | --- | --- |
-| Tokens & secrets in env / secret store | ⚠️ | Stored in Single DocType; environment overrides (`FERUM_*`) available but no dedicated vault yet. |
-| Webhook protected (signature / origin) | ⚠️ | Secret token header supported (Telegram `secret_token`), fallback query param remains; IP allowlist still pending. |
-| Centralised client wrapper + retry policy | ✅ | `send_message` centralises sending with retry/backoff and enforces chat allowlists. |
-| Healthcheck `/ping` (admin only) | ✅ | `/ping` command (admin) and “Check Telegram” button run the healthcheck helper. |
-| Documented scenarios & ACL | ✅ | `docs/integrations/telegram_setup.md` documents commands, allowlists, and admin usernames. |
+| Check                                     | Status | Notes                                                                                                              |
+| ----------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| Tokens & secrets in env / secret store    | ⚠️     | Stored in Single DocType; environment overrides (`FERUM_*`) available but no dedicated vault yet.                  |
+| Webhook protected (signature / origin)    | ⚠️     | Secret token header supported (Telegram `secret_token`), fallback query param remains; IP allowlist still pending. |
+| Centralised client wrapper + retry policy | ✅     | `send_message` centralises sending with retry/backoff and enforces chat allowlists.                                |
+| Healthcheck `/ping` (admin only)          | ✅     | `/ping` command (admin) and “Check Telegram” button run the healthcheck helper.                                    |
+| Documented scenarios & ACL                | ✅     | `docs/integrations/telegram_setup.md` documents commands, allowlists, and admin usernames.                         |
 
 **Risks**
 

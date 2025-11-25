@@ -6,7 +6,7 @@ Ferum Custom can send operational alerts and expose lightweight workflows over T
 
 1. Start a chat with [@BotFather](https://t.me/BotFather).
 2. Run `/newbot` and follow the prompts to choose a name and username.
-3. BotFather returns an HTTPS API token (`123456:ABC-DEF...`). Keep it secret.
+3. BotFather returns an HTTPS API token (`<bot-token>`). Keep it secret.
 4. Optional: configure the bot’s profile photo and description for your team.
 
 ## 2. Decide chat topology
@@ -18,16 +18,26 @@ Ferum Custom can send operational alerts and expose lightweight workflows over T
 
 Open Desk → **Ferum Custom Settings** and configure the Telegram section:
 
-| Field | Description |
-| --- | --- |
-| Enable Telegram Notifications | Master switch guarding webhook + outbound messages. |
-| Telegram Bot Token | Token issued by BotFather. Stored as Password. |
-| Default Chat ID | chat_id used for broadcast alerts (e.g., SLA breach). |
-| Allowed Chat IDs | One chat_id per line. When set, any update from outside this list is ignored. |
-| Admin Telegram Usernames | Comma/newline separated Telegram usernames permitted to run admin commands (`/analytics`, `/close`, `/ping`). |
-| Telegram Webhook Secret | Shared secret appended to the webhook URL (`...?secret=...`). |
+| Field                         | Description                                                                                                   |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Enable Telegram Notifications | Master switch guarding webhook + outbound messages.                                                           |
+| Telegram Bot Token            | Token issued by BotFather. Stored as Password.                                                                |
+| Default Chat ID               | chat_id used for broadcast alerts (e.g., SLA breach).                                                         |
+| Allowed Chat IDs              | One chat_id per line. When set, any update from outside this list is ignored.                                 |
+| Admin Telegram Usernames      | Comma/newline separated Telegram usernames permitted to run admin commands (`/analytics`, `/close`, `/ping`). |
+| Telegram Webhook Secret       | Shared secret appended to the webhook URL (`...?secret=...`).                                                 |
 
 Save the record. Use the new **Check Telegram** button to run an API connectivity test (`getMe`)—success will display the bot username.
+
+### Secret manager hints
+
+Store `FERUM_TELEGRAM_BOT_TOKEN` and `FERUM_TELEGRAM_WEBHOOK_SECRET` in Vault/SSM (see `docs/runbooks/secret_management.md`) and render them before deployments via `scripts/render_env_from_secrets.sh` + `scripts/render_env.py`. The runtime now prefers environment values for sensitive fields and ignores values stored in the settings document, so rotate them through Vault and never commit them to git.
+
+### Healthcheck endpoint
+
+Expose `/api/method/ferum_custom.api.telegram_bot.health` to your monitoring stack (Prometheus blackbox, Grafana, CI). The endpoint reads the bot token from `.env`, hits Telegram’s `getMe`, and returns `{"status":"ok","details":{"username":"ferum_bot","id":123}}` when healthy or `{"status":"error","message":"... "}` when misconfigured.
+
+Use this endpoint in your alerting/monitoring dashboards; it is purpose-built for CI to ensure the webhook and bot credentials work end-to-end.
 
 ### Environment overrides
 
@@ -35,10 +45,10 @@ All fields can be controlled via environment variables. The app now auto-loads k
 
 ```bash
 export FERUM_ENABLE_TELEGRAM_NOTIFICATIONS=1
-export FERUM_TELEGRAM_BOT_TOKEN=123456:ABC...
-export FERUM_TELEGRAM_ALLOWED_CHAT_IDS="-1001234567890,987654321"
+export FERUM_TELEGRAM_BOT_TOKEN=<your-bot-token>
+export FERUM_TELEGRAM_ALLOWED_CHAT_IDS="chat_id_1,chat_id_2"
 export FERUM_TELEGRAM_ADMIN_USERNAMES="ops_lead,cto"
-export FERUM_TELEGRAM_WEBHOOK_SECRET=super-secret
+export FERUM_TELEGRAM_WEBHOOK_SECRET=<your-webhook-secret>
 ```
 
 Or put the same lines into `config/.env.integrations` and restart Bench.
@@ -60,7 +70,7 @@ curl "https://api.telegram.org/bot$FERUM_TELEGRAM_BOT_TOKEN/setWebhook" \
   -d "secret_token=$FERUM_TELEGRAM_WEBHOOK_SECRET"
 ```
 
-   Fallback (supported): pass `?secret=...` in the URL if you cannot set `secret_token`:
+Fallback (supported): pass `?secret=...` in the URL if you cannot set `secret_token`:
 
 ```bash
 curl "https://api.telegram.org/bot$FERUM_TELEGRAM_BOT_TOKEN/setWebhook" \
@@ -91,11 +101,11 @@ curl "https://api.telegram.org/bot$FERUM_TELEGRAM_BOT_TOKEN/getWebhookInfo"
 
 ## 7. Troubleshooting
 
-| Issue | Resolution |
-| --- | --- |
-| `/ping` → “Telegram not ready: error” | Check the healthcheck message; missing token or network issue. Retry with curl. |
-| No notifications sent | Ensure feature flag enabled, bot token valid, and worker queue `short` is running. Check `frappe.log_error` for exceptions. |
-| “chat not in allowlist” in logs | Add the chat ID to **Allowed Chat IDs** or remove the allowlist to permit all. |
-| Admin denial | Verify the Telegram username (`@username`) matches the entry in **Admin Telegram Usernames** (case-insensitive). |
+| Issue                                 | Resolution                                                                                                                  |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `/ping` → “Telegram not ready: error” | Check the healthcheck message; missing token or network issue. Retry with curl.                                             |
+| No notifications sent                 | Ensure feature flag enabled, bot token valid, and worker queue `short` is running. Check `frappe.log_error` for exceptions. |
+| “chat not in allowlist” in logs       | Add the chat ID to **Allowed Chat IDs** or remove the allowlist to permit all.                                              |
+| Admin denial                          | Verify the Telegram username (`@username`) matches the entry in **Admin Telegram Usernames** (case-insensitive).            |
 
 The integration is now hardened: command access is scoped, outbound messages respect allowlists, and the `/ping`/healthcheck provide quick diagnostics.
