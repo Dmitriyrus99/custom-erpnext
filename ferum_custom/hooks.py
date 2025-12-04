@@ -72,11 +72,6 @@ except Exception:
     pass
 
 doc_events = {
-    "Invoice": {
-        "on_update": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
-        "on_cancel": "ferum_custom.ferum_custom.doctype.invoice.invoice.on_invoice_update",
-        "after_insert": "ferum_custom.notifications_module.on_invoice_after_insert",
-    },
     "File": {
         "on_trash": "ferum_custom.cleanup.on_file_trash",
         # Private-by-default for sensitive doctypes
