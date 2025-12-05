@@ -25,11 +25,28 @@ PHOTO_ATTACHED = Counter("ferum_tg_photos_attached", "Photos attached via bot")
 
 @asynccontextmanager
 async def lifespan(dp: Dispatcher):
+	"""
+	An asynchronous context manager for managing the lifespan of the dispatcher.
+
+	Note:
+		This is kept for compatibility, but the client is initialized explicitly in the run_* paths.
+
+	Args:
+		dp (Dispatcher): The aiogram dispatcher instance.
+	"""
 	# Kept for compatibility, but we initialise client explicitly in run_* paths
 	yield
 
 
-def _wire_dependencies(dp: Dispatcher):
+def _wire_dependencies(dp: Dispatcher) -> None:
+	"""
+	Injects the FrappeClient into the handlers via middleware.
+
+	This function sets up middleware to inject the FrappeClient into the data dictionary of message and callback query handlers.
+
+	Args:
+		dp (Dispatcher): The aiogram dispatcher instance.
+	"""
 	# Provide FrappeClient to handlers via dependency injection
 
 	@dp.message.middleware()
@@ -45,6 +62,12 @@ def _wire_dependencies(dp: Dispatcher):
 
 
 async def run_polling() -> None:
+	"""
+	Initializes and runs the bot in polling mode.
+
+	This function sets up Sentry and Prometheus if configured, initializes the bot and dispatcher,
+	and starts polling for updates. It also ensures the FrappeClient is properly closed on exit.
+	"""
 	settings = load()
 	if settings.sentry_dsn:
 		sentry_sdk.init(settings.sentry_dsn, traces_sample_rate=0.1)
@@ -74,6 +97,12 @@ async def run_polling() -> None:
 
 
 async def run_webhook() -> None:
+	"""
+	Initializes and runs the bot in webhook mode.
+
+	This function sets up Sentry and Prometheus if configured, initializes the bot and dispatcher,
+	and starts a web server to handle incoming webhooks from Telegram. It also sets up a health check endpoint.
+	"""
 	settings = load()
 	if settings.sentry_dsn:
 		sentry_sdk.init(settings.sentry_dsn, traces_sample_rate=0.1)

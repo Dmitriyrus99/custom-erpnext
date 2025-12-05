@@ -15,16 +15,41 @@ from ferum_custom.ferum_custom.utils import get_allowed_customers
 
 
 def _paginate(start: int | None = None, page_length: int | None = None) -> tuple[int, int]:
+	"""
+	Paginates the request.
+
+	Args:
+		start (int | None, optional): The starting index. Defaults to None.
+		page_length (int | None, optional): The length of the page. Defaults to None.
+
+	Returns:
+		tuple[int, int]: The start index and page length.
+	"""
 	s = int(start) if (start is not None and str(start).isdigit()) else 0
 	pl = int(page_length) if (page_length is not None and str(page_length).isdigit()) else 20
 	return s, max(1, min(pl, 200))
 
 
 def _response_ok(**payload: t.Any) -> dict[str, t.Any]:
+	"""
+	Creates a successful response.
+
+	Args:
+		**payload (t.Any): The payload to include in the response.
+
+	Returns:
+		dict[str, t.Any]: The successful response.
+	"""
 	return {"status": "ok", **payload}
 
 
 def _get_bearer_token() -> str | None:
+	"""
+	Retrieves the bearer token from the request headers.
+
+	Returns:
+		str | None: The bearer token, or None if not found.
+	"""
 	authz = frappe.get_request_header("Authorization")
 	if authz and authz.startswith("Bearer "):
 		return authz.split(" ", 1)[1]
@@ -32,6 +57,9 @@ def _get_bearer_token() -> str | None:
 
 
 def _require_jwt_authentication() -> None:
+	"""
+	Ensures that the request is authenticated with a valid JWT token.
+	"""
 	if not is_feature_enabled("enable_jwt"):
 		return
 	token = _get_bearer_token()
@@ -47,10 +75,28 @@ def _require_jwt_authentication() -> None:
 
 
 def _rate_limit_key(scope: str, identifier: str) -> str:
+	"""
+	Generates a key for rate limiting.
+
+	Args:
+		scope (str): The scope of the rate limit.
+		identifier (str): The identifier for the rate limit.
+
+	Returns:
+		str: The rate limit key.
+	"""
 	return f"ferum:rate:{scope}:{identifier}"
 
 
 def _enforce_rate_limit(scope: str, identifier: str | None, limit: int) -> None:
+	"""
+	Enforces a rate limit.
+
+	Args:
+		scope (str): The scope of the rate limit.
+		identifier (str | None): The identifier for the rate limit.
+		limit (int): The rate limit.
+	"""
 	if not identifier:
 		return
 	cache = frappe.cache()
@@ -70,11 +116,19 @@ def _enforce_rate_limit(scope: str, identifier: str | None, limit: int) -> None:
 def create_service_request(
 	title: str, description: str | None = None, service_object: str | None = None
 ) -> dict[str, t.Any]:
-	"""Create a standard ERPNext Issue (backward-compatible API name).
+	"""
+	Creates a new service request.
 
-	- Maps title → Issue.subject, description → Issue.description
-	- Tries to populate company from defaults
-	- If a Service Object is provided, appends its name to description for context
+	This function creates a standard ERPNext Issue, mapping the title and description accordingly.
+	It also tries to populate the company from defaults and link the service object if provided.
+
+	Args:
+		title (str): The title of the service request.
+		description (str | None, optional): The description of the service request. Defaults to None.
+		service_object (str | None, optional): The service object to link to the request. Defaults to None.
+
+	Returns:
+		dict[str, t.Any]: A dictionary containing the name of the created service request.
 	"""
 	_require_jwt_authentication()
 	_check_new_request_rate_limit()
@@ -118,6 +172,17 @@ def create_service_request(
 def list_service_requests(
 	status: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
+	"""
+	Lists service requests.
+
+	Args:
+		status (str | None, optional): The status to filter by. Defaults to None.
+		start (int | None, optional): The starting index for pagination. Defaults to None.
+		page_length (int | None, optional): The number of items per page. Defaults to None.
+
+	Returns:
+		dict: A dictionary containing the list of service requests.
+	"""
 	s, pl = _paginate(start, page_length)
 	filters: dict[str, t.Any] = {}
 	if status:
@@ -143,7 +208,15 @@ def list_service_requests(
 
 @frappe.whitelist(methods=["GET"])  # Read-only fetch
 def get_service_request(name: str) -> dict:
-	"""Return Issue as a dict with a title alias for portal compatibility."""
+	"""
+	Retrieves a service request by name.
+
+	Args:
+		name (str): The name of the service request to retrieve.
+
+	Returns:
+		dict: A dictionary containing the service request data.
+	"""
 	data = service_app.fetch_service_request(name)
 	try:
 		user = frappe.session.user
@@ -160,6 +233,12 @@ def get_service_request(name: str) -> dict:
 
 @frappe.whitelist()
 def portal_token() -> dict[str, t.Any]:
+	"""
+	Issues a JWT token for the currently logged-in user.
+
+	Returns:
+		dict[str, t.Any]: A dictionary containing the JWT token and the username.
+	"""
 	if not is_feature_enabled("enable_jwt"):
 		frappe.throw(_("JWT is disabled"))
 	user = frappe.session.user
@@ -171,9 +250,18 @@ def portal_token() -> dict[str, t.Any]:
 
 @frappe.whitelist(methods=["POST"])  # State change
 def update_service_request_status(name: str, status: str) -> dict:
-	"""Update Service Request status with server-side validation.
+	"""
+	Updates the status of a service request.
 
-	Requires authentication; relies on DocType validations and permission checks.
+	This function updates the status of a service request with server-side validation.
+	It requires authentication and relies on DocType validations and permission checks.
+
+	Args:
+		name (str): The name of the service request to update.
+		status (str): The new status for the service request.
+
+	Returns:
+		dict: A dictionary containing the name and updated status of the service request.
 	"""
 	_require_jwt_authentication()
 	doc = frappe.get_doc("Issue", name)
@@ -188,6 +276,17 @@ def update_service_request_status(name: str, status: str) -> dict:
 def list_service_reports(
 	project: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
+	"""
+	Lists service reports.
+
+	Args:
+		project (str | None, optional): The project to filter by. Defaults to None.
+		start (int | None, optional): The starting index for pagination. Defaults to None.
+		page_length (int | None, optional): The number of items per page. Defaults to None.
+
+	Returns:
+		dict: A dictionary containing the list of service reports.
+	"""
 	s, pl = _paginate(start, page_length)
 	filters: dict[str, t.Any] = {}
 	if project:
@@ -216,6 +315,12 @@ def list_service_reports(
 
 
 def _get_client_ip() -> str:
+	"""
+	Retrieves the client's IP address from the request headers.
+
+	Returns:
+		str: The client's IP address.
+	"""
 	try:
 		xff = frappe.get_request_header("X-Forwarded-For")
 		if xff:
@@ -232,6 +337,9 @@ def _get_client_ip() -> str:
 
 
 def _check_new_request_rate_limit() -> None:
+	"""
+	Checks and enforces the rate limit for creating new service requests.
+	"""
 	try:
 		if not is_feature_enabled("enable_rate_limit_create_request"):
 			return
@@ -254,6 +362,17 @@ def _check_new_request_rate_limit() -> None:
 def list_invoices(
 	project: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
+	"""
+	Lists invoices.
+
+	Args:
+		project (str | None, optional): The project to filter by. Defaults to None.
+		start (int | None, optional): The starting index for pagination. Defaults to None.
+		page_length (int | None, optional): The number of items per page. Defaults to None.
+
+	Returns:
+		dict: A dictionary containing the list of invoices.
+	"""
 	s, pl = _paginate(start, page_length)
 	filters: dict[str, t.Any] = {}
 	if project:

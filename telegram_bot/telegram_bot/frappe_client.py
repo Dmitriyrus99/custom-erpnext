@@ -14,16 +14,34 @@ except Exception:  # pragma: no cover
 
 @dataclass
 class FrappeAuth:
+	"""
+	Represents the authentication details for the Frappe API.
+
+	Attributes:
+		token (str): The authentication token.
+	"""
 	token: str
 
 
 def _normalize_response(payload: Any) -> dict[str, Any]:
+	"""
+	Normalizes the response from the Frappe API.
+
+	Args:
+		payload (Any): The response payload.
+
+	Returns:
+		dict[str, Any]: The normalized response.
+	"""
 	if isinstance(payload, dict):
 		return payload
 	return {"status": "ok", "value": payload}
 
 
 class FrappeClient:
+	"""
+	An asynchronous client for interacting with the Frappe API.
+	"""
 	def __init__(
 		self,
 		base_url: str,
@@ -32,6 +50,16 @@ class FrappeClient:
 		totp_secret: str | None = None,
 		verify_ssl: bool = True,
 	) -> None:
+		"""
+		Initializes the FrappeClient.
+
+		Args:
+			base_url (str): The base URL of the Frappe instance.
+			username (str): The username for authentication.
+			password (str): The password for authentication.
+			totp_secret (str | None, optional): The TOTP secret for 2FA. Defaults to None.
+			verify_ssl (bool, optional): Whether to verify SSL certificates. Defaults to True.
+		"""
 		self.base = base_url.rstrip("/")
 		self.username = username
 		self.password = password
@@ -40,9 +68,20 @@ class FrappeClient:
 		self._client = httpx.AsyncClient(base_url=self.base, timeout=20, verify=verify_ssl)
 
 	async def close(self) -> None:
+		"""
+		Closes the underlying HTTP client.
+		"""
 		await self._client.aclose()
 
 	async def _login(self) -> FrappeAuth:
+		"""
+		Logs in to the Frappe API and retrieves an authentication token.
+
+		This method first attempts a JWT login, falling back to a session-based login with 2FA if necessary.
+
+		Returns:
+			FrappeAuth: The authentication details.
+		"""
 		# Try JWT login first (preferred)
 		otp_now = None
 		if self.totp_secret and pyotp is not None:
@@ -105,6 +144,14 @@ class FrappeClient:
 		return self._auth
 
 	async def _headers(self) -> dict[str, str]:
+		"""
+		Returns the authentication headers for API requests.
+
+		If not already authenticated, this method will first call `_login`.
+
+		Returns:
+			dict[str, str]: The authentication headers.
+		"""
 		if not self._auth:
 			await self._login()
 		assert self._auth is not None
@@ -112,6 +159,16 @@ class FrappeClient:
 		return {"Authorization": f"Bearer {self._auth.token}"} if self._auth.token else {}
 
 	async def create_request(self, title: str, description: str = "") -> str:
+		"""
+		Creates a new service request.
+
+		Args:
+			title (str): The title of the service request.
+			description (str, optional): The description of the service request. Defaults to "".
+
+		Returns:
+			str: The name of the created service request.
+		"""
 		headers = await self._headers()
 		r = await self._client.post(
 			"/api/method/ferum_custom.api.service.create_service_request",
@@ -124,6 +181,15 @@ class FrappeClient:
 		return str(name)
 
 	async def list_requests(self, status: str | None = None) -> list[dict]:
+		"""
+		Lists service requests.
+
+		Args:
+			status (str | None, optional): The status to filter by. Defaults to None.
+
+		Returns:
+			list[dict]: A list of service requests.
+		"""
 		params: dict[str, Any] = {}
 		if status:
 			params["status"] = status
@@ -138,6 +204,16 @@ class FrappeClient:
 		return list(payload.get("data", []))
 
 	async def update_request_status(self, name: str, status: str) -> dict:
+		"""
+		Updates the status of a service request.
+
+		Args:
+			name (str): The name of the service request.
+			status (str): The new status.
+
+		Returns:
+			dict: The response from the API.
+		"""
 		headers = await self._headers()
 		r = await self._client.post(
 			"/api/method/ferum_custom.api.service.update_service_request_status",
@@ -149,6 +225,18 @@ class FrappeClient:
 		return dict(payload)
 
 	async def attach_to_request(self, name: str, file_name: str, content: bytes, content_type: str) -> dict:
+		"""
+		Attaches a file to a service request.
+
+		Args:
+			name (str): The name of the service request.
+			file_name (str): The name of the file.
+			content (bytes): The content of the file.
+			content_type (str): The content type of the file.
+
+		Returns:
+			dict: The response from the API.
+		"""
 		files = {"file": (file_name, content, content_type)}
 		headers = await self._headers()
 		r = await self._client.post(
@@ -162,6 +250,18 @@ class FrappeClient:
 		return dict(data)
 
 	async def attach_to_report(self, name: str, file_name: str, content: bytes, content_type: str) -> dict:
+		"""
+		Attaches a file to a service report.
+
+		Args:
+			name (str): The name of the service report.
+			file_name (str): The name of the file.
+			content (bytes): The content of the file.
+			content_type (str): The content type of the file.
+
+		Returns:
+			dict: The response from the API.
+		"""
 		files = {"file": (file_name, content, content_type)}
 		headers = await self._headers()
 		r = await self._client.post(
