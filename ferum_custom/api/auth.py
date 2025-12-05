@@ -25,6 +25,16 @@ except Exception:
 
 @frappe.whitelist(allow_guest=True)
 def _jwt_payload(username: str, expires_in: int | None = None) -> dict[str, Any]:
+	"""
+	Generates the payload for a JWT token.
+
+	Args:
+		username (str): The username to include in the token.
+		expires_in (int | None, optional): The token's expiration time in seconds. Defaults to None.
+
+	Returns:
+		dict[str, Any]: The JWT payload.
+	"""
 	now_ts = int(time.time())
 	expiry = now_ts + (expires_in or 3600)
 	return {
@@ -37,14 +47,36 @@ def _jwt_payload(username: str, expires_in: int | None = None) -> dict[str, Any]
 
 
 def _get_jwt_secret() -> str | None:
+	"""
+	Retrieves the JWT secret from the settings.
+
+	Returns:
+		str | None: The JWT secret, or None if not configured.
+	"""
 	return get_setting("jwt_secret")
 
 
 def _jwt_feature_enabled() -> bool:
+	"""
+	Checks if the JWT feature is enabled.
+
+	Returns:
+		bool: True if the JWT feature is enabled, False otherwise.
+	"""
 	return bool(is_feature_enabled("enable_jwt") or getattr(frappe.flags, "in_test", False))
 
 
 def issue_jwt_for_user(username: str, expires_in: int | None = None) -> str:
+	"""
+	Issues a JWT token for a user.
+
+	Args:
+		username (str): The user to issue the token for.
+		expires_in (int | None, optional): The token's expiration time in seconds. Defaults to None.
+
+	Returns:
+		str: The JWT token.
+	"""
 	if jwt is None:
 		frappe.throw(_("pyjwt not installed on server"))
 	if not _jwt_feature_enabled():
@@ -57,6 +89,16 @@ def issue_jwt_for_user(username: str, expires_in: int | None = None) -> str:
 
 
 def decode_jwt(token: str, verify_aud: bool = False) -> dict[str, Any]:
+	"""
+	Decodes a JWT token.
+
+	Args:
+		token (str): The JWT token to decode.
+		verify_aud (bool, optional): Whether to verify the token's audience. Defaults to False.
+
+	Returns:
+		dict[str, Any]: The decoded token payload.
+	"""
 	if jwt is None:
 		raise frappe.AuthenticationError(_("pyjwt not installed on server"))
 	if not _jwt_feature_enabled():
@@ -72,7 +114,17 @@ def decode_jwt(token: str, verify_aud: bool = False) -> dict[str, Any]:
 
 
 def login(username: str, password: str, otp: str | None = None) -> dict:
-	"""Issue JWT for API usage (optional)."""
+	"""
+	Authenticates a user and issues a JWT token for API usage.
+
+	Args:
+		username (str): The user's username.
+		password (str): The user's password.
+		otp (str | None, optional): The one-time password for 2FA. Defaults to None.
+
+	Returns:
+		dict: A dictionary containing the JWT token.
+	"""
 	_check_auth_rate_limit()
 	if jwt is None:
 		frappe.throw(_("pyjwt not installed on server"))
@@ -102,13 +154,18 @@ def login(username: str, password: str, otp: str | None = None) -> dict:
 	return {"token": issue_jwt_for_user(username)}
 
 
-def jwt_before_request():
-	"""Optional: accept Bearer JWT on Ferum API namespace only.
+def jwt_before_request() -> None:
+	"""
+	A hook to authenticate requests using a Bearer JWT token.
+
+	This function is intended to be used as a `before_request` hook. It checks for a
+	Bearer token in the Authorization header and, if present and valid, sets the user
+	for the current request.
 
 	Guards:
-	- Feature flag enabled and secret present
-	- Request targets only our namespace (`/api/method/ferum_custom.*`)
-	- If token has `aud`, require it to be `ferum.api`
+	- The JWT feature must be enabled and a secret key configured.
+	- The request path must be within the `/api/method/ferum_custom.*` namespace.
+	- If the token has an `aud` (audience) claim, it must be `ferum.api`.
 	"""
 	try:
 		if jwt is None or not is_feature_enabled("enable_jwt"):
@@ -153,7 +210,14 @@ def jwt_before_request():
 
 
 def _get_client_ip() -> str:
-	"""Best-effort client IP detection behind proxies."""
+	"""
+	Retrieves the client's IP address from the request headers.
+
+	This is a best-effort detection that checks for common proxy headers.
+
+	Returns:
+		str: The client's IP address.
+	"""
 	try:
 		# Prefer explicit proxy headers when present
 		xff = frappe.get_request_header("X-Forwarded-For")
@@ -172,7 +236,9 @@ def _get_client_ip() -> str:
 
 
 def _check_auth_rate_limit() -> None:
-	"""Simple per-IP rate limit for auth.login, configurable in settings."""
+	"""
+	Checks and enforces the rate limit for authentication requests.
+	"""
 	try:
 		if not is_feature_enabled("enable_rate_limit_auth"):
 			return

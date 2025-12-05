@@ -16,16 +16,35 @@ router = Router()
 
 
 class AttachState(StatesGroup):
+	"""
+	Defines the states for the attachment process.
+
+	Attributes:
+		waiting_request (State): The state for waiting for a request ID.
+	"""
 	waiting_request = State()
 
 
 @router.message(F.text.startswith("/start"))
 async def cmd_start(message: Message) -> None:
+	"""
+	Handles the /start command.
+
+	Args:
+		message (Message): The incoming message object.
+	"""
 	await message.answer("Hello! Use /new <title>, /my, or send a photo with caption /attach <REQ>.")
 
 
 @router.message(F.text.startswith("/new"))
 async def cmd_new(message: Message, client: FrappeClient | None) -> None:
+	"""
+	Handles the /new command to create a new service request.
+
+	Args:
+		message (Message): The incoming message object.
+		client (FrappeClient | None): The FrappeClient instance.
+	"""
 	try:
 		if client is None:
 			client = state.get_client()
@@ -42,6 +61,13 @@ async def cmd_new(message: Message, client: FrappeClient | None) -> None:
 
 @router.message(F.text.startswith("/my"))
 async def cmd_my(message: Message, client: FrappeClient | None) -> None:
+	"""
+	Handles the /my command to list the user's service requests.
+
+	Args:
+		message (Message): The incoming message object.
+		client (FrappeClient | None): The FrappeClient instance.
+	"""
 	try:
 		if client is None:
 			client = state.get_client()
@@ -65,6 +91,13 @@ async def cmd_my(message: Message, client: FrappeClient | None) -> None:
 
 @router.callback_query(F.data.startswith("req:"))
 async def on_request_action(cb: CallbackQuery, client: FrappeClient | None) -> None:
+	"""
+	Handles callback queries for request actions (e.g., start, done).
+
+	Args:
+		cb (CallbackQuery): The incoming callback query object.
+		client (FrappeClient | None): The FrappeClient instance.
+	"""
 	try:
 		if client is None:
 			client = state.get_client()
@@ -93,6 +126,13 @@ async def on_request_action(cb: CallbackQuery, client: FrappeClient | None) -> N
 
 @router.message(F.photo)
 async def on_photo(message: Message, client: FrappeClient | None) -> None:
+	"""
+	Handles incoming photos and attaches them to a service request.
+
+	Args:
+		message (Message): The incoming message object containing the photo.
+		client (FrappeClient | None): The FrappeClient instance.
+	"""
 	try:
 		if client is None:
 			client = state.get_client()
@@ -122,12 +162,24 @@ async def on_photo(message: Message, client: FrappeClient | None) -> None:
 
 @router.message(F.text.startswith("/attach"))
 async def attach_usage_text(message: Message) -> None:
+	"""
+	Handles the /attach command without a photo to provide usage instructions.
+
+	Args:
+		message (Message): The incoming message object.
+	"""
 	# Handle text-only '/attach' to guide user
 	await message.answer("Usage: send a photo with caption '/attach <REQUEST_ID>'")
 
 
 @router.message(F.text.regexp(r"^/"))
 async def unknown_command(message: Message) -> None:
+	"""
+	Handles any unrecognized commands.
+
+	Args:
+		message (Message): The incoming message object.
+	"""
 	# Fallback for any unrecognized slash command
 	await message.answer(
 		"Unknown command. Available: /start, /new <title>, /my. To attach a photo: send a photo with caption '/attach <REQUEST_ID>'."

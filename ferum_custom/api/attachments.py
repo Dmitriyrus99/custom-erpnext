@@ -18,6 +18,9 @@ from frappe.rate_limiter import rate_limit
 
 
 def _require_auth() -> None:
+	"""
+	Ensures that the user is authenticated.
+	"""
 	user = frappe.session.user
 	if not user or user == "Guest":
 		frappe.throw(_("Authentication required"))
@@ -31,6 +34,19 @@ def _store_file(
 	content: bytes,
 	content_type: str | None,
 ) -> tuple[str, str]:
+	"""
+	Stores a file in the system.
+
+	Args:
+		doctype (str): The doctype to attach the file to.
+		docname (str): The docname to attach the file to.
+		filename (str): The name of the file.
+		content (bytes): The content of the file.
+		content_type (str | None): The content type of the file.
+
+	Returns:
+		tuple[str, str]: The file URL and MIME type.
+	"""
 	# Antivirus scan (best-effort; see antivirus module for config)
 	ok, signature = scan_bytes(content, filename)
 	if not ok:
