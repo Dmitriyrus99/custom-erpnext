@@ -58,45 +58,44 @@ frappe.listview_settings["Service Project"] = {
 		listview.page.add_action_item(__("Reopen Project"), () => apply_action("Reopen"));
 
 		// Create Service Request from selected project (prompts for Service Object if available)
-		listview.page.add_action_item(__("Create Service Request"), async () => {
+		listview.page.add_action_item(__("Create Issue"), async () => {
 			const row = ensure_one();
 			if (!row) return;
 			try {
-				const project = await frappe.db.get_doc("Service Project", row.name);
+				const project = await frappe.db.get_doc("Project", row.name);
 				const objects = (project.objects || [])
 					.map((o) => o.service_object)
 					.filter(Boolean);
 				if (objects.length) {
 					const d = new frappe.ui.Dialog({
-						title: __("Create Service Request"),
+						title: __("Create Issue"),
 						fields: [
 							{
 								fieldname: "service_object",
 								fieldtype: "Select",
-								label: __("Service Object"),
-								options: [""].concat(objects),
-								reqd: 1,
+								label: __("Asset"),
+								options: [""].concat(objects.map((o) => o.asset)).filter(Boolean),
 							},
 							{
 								fieldname: "title",
 								fieldtype: "Data",
 								label: __("Title"),
-								default: project.project_name || __("Service Request"),
+								default: project.project_name || __("New Issue"),
 							},
 						],
 						primary_action_label: __("Create"),
 						primary_action: (values) => {
-							frappe.new_doc("Service Request", {
-								service_object: values.service_object,
-								title: values.title,
+							frappe.new_doc("Issue", {
+								asset: values.service_object,
+								subject: values.title,
 							});
 							d.hide();
 						},
 					});
 					d.show();
 				} else {
-					frappe.new_doc("Service Request", {
-						title: project.project_name || __("Service Request"),
+					frappe.new_doc("Issue", {
+						subject: project.project_name || __("New Issue"),
 					});
 				}
 			} catch (e) {

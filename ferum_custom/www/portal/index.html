@@ -1,5 +1,5 @@
 <div class="container">
-        <h2>{{ _("My Service Requests") }}</h2>
+        <h2>{{ _("My Issues") }}</h2>
         <ul class="nav nav-tabs mb-3">
                 <li class="nav-item"><a class="nav-link active" href="#" data-status="">{{ _("All") }}</a></li>
                 <li class="nav-item"><a class="nav-link" href="#" data-status="Open">{{ _("Open") }}</a></li>
@@ -10,7 +10,7 @@
         </ul>
         <div id="sr-list"></div>
         <p class="mt-3">
-                <a class="btn btn-sm btn-primary" href="/portal/new-request">{{ _("Create New Request") }}</a>
+                <a class="btn btn-sm btn-primary" href="/portal/new-issue">{{ _("Create New Issue") }}</a>
                 <a class="btn btn-sm btn-outline-secondary" href="/portal/closed">{{ _("My Closed Requests") }}</a>
         </p>
 </div>
@@ -28,7 +28,7 @@
                                 .then((r) => {
                                         const rows = (r.message && r.message.data) || [];
                                         if (!rows.length) {
-                                                el.innerHTML = `<p>${__("No requests yet.")}</p>`;
+                                                el.innerHTML = `<p>${__("No issues yet.")}</p>`;
                                                 return;
                                         }
                                         const now = new Date();

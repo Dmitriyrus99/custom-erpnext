@@ -21,8 +21,8 @@ scheduler_events = {
     "daily": [
         # Generate Issues from due maintenance schedules
         "ferum_custom.ferum_custom.doctype.service_maintenance_schedule.service_maintenance_schedule.generate_service_requests_from_schedule",
-        # Incremental Google Drive backfill (safe limit per run) on long queue
-        "ferum_custom.ferum_custom.automation.enqueue_daily_drive_backfill_small",
+        # Incremental Google Drive backfill (long queue)
+        "ferum_custom.ferum_custom.scheduler_wrappers.daily_drive_backfill",
         # Drive healthcheck + alert to admins
         "ferum_custom.ferum_custom.site_ops.drive_healthcheck_and_alert",
         # Daily report on overdue service requests
@@ -31,6 +31,10 @@ scheduler_events = {
         "ferum_custom.ferum_custom.data_cleanup.jobs.normalize_contracts_job",
         # Apply backup retention locally (7 daily, 4 weekly, 6 monthly)
         "ferum_custom.ferum_custom.site_ops.cleanup_backups_retention",
+        # Refresh materialized views (long queue)
+        "ferum_custom.ferum_custom.scheduler_wrappers.refresh_materialized_views",
+        # Cleanup staging raw data (long queue)
+        "ferum_custom.ferum_custom.scheduler_wrappers.cleanup_stg_raw",
     ],
     "weekly": [
         # Enforce permissions/roles and lock admin pages/reports
@@ -40,36 +44,18 @@ scheduler_events = {
         # Weekly audit of risky permissions
         "ferum_custom.ferum_custom.automation.run_permission_audit",
         # Weekly test restore on staging (if configured)
-        "ferum_custom.ferum_custom.site_ops.test_restore_latest_backup",
+        "ferum_custom.ferum_custom.scheduler_wrappers.test_restore_latest_backup",
         # Weekly full backup (DB+files) to long queue
-        "ferum_custom.ferum_custom.automation.enqueue_weekly_full_backup",
+        "ferum_custom.ferum_custom.scheduler_wrappers.weekly_full_backup",
     ],
     "hourly": [
-        # SLA checks (legacy; safe to keep for now)
-        "ferum_custom.ferum_custom.doctype.service_request.service_request.check_all_slas",
+
     ],
     "cron": {
         # Nightly backup to Google Drive at 2 AM
-        "0 2 * * *": [
-            "ferum_custom.ferum_custom.automation.run_nightly_backup_to_gdrive"
-        ],
+        "0 2 * * *": ["ferum_custom.ferum_custom.scheduler_wrappers.nightly_backup_to_gdrive"],
     },
 }
-
-# Append MV refresh to daily schedule (idempotent)
-try:
-    _se = globals().get("scheduler_events") or {}
-    daily = _se.setdefault("daily", [])
-    additional_jobs = [
-        "ferum_custom.analytics.refresh.refresh_all_materialized_views",
-        "ferum_custom.ferum_custom.data_cleanup.jobs.cleanup_stg_raw_job",
-    ]
-    for job in additional_jobs:
-        if job not in daily:
-            daily.append(job)
-    scheduler_events = _se
-except Exception:
-    pass
 
 doc_events = {
     "File": {
@@ -132,9 +118,7 @@ fixtures = [
                 "name",
                 "in",
                 [
-                    "Service Request Workflow",
-                    "Service Report Workflow",
-                    "Service Project Workflow",
+
                     "Invoice Workflow",
                 ],
             ]
@@ -269,7 +253,7 @@ role_home_page = {
 permission_query_conditions = {
     "Project": "ferum_custom.ferum_custom.permissions.project_get_permission_query_conditions",
     "Timesheet": "ferum_custom.ferum_custom.permissions.timesheet_get_permission_query_conditions",
-        "Service Request": "ferum_custom.security_pqc_rules.service_request_pqc",
+
     "Invoice": "ferum_custom.security_pqc_rules.invoice_pqc",
     "Payment": "ferum_custom.security_pqc_rules.payment_pqc",
     "Counterparty": "ferum_custom.security_pqc_rules.counterparty_pqc",
@@ -283,7 +267,7 @@ permission_query_conditions = {
 has_permission = {
     "Project": "ferum_custom.ferum_custom.permissions.project_has_permission",
     "Timesheet": "ferum_custom.ferum_custom.permissions.timesheet_has_permission",
-        "Service Request": "ferum_custom.security_pqc_rules.service_request_has_permission",
+
     "Invoice": "ferum_custom.security_pqc_rules.default_has_permission",
     "Payment": "ferum_custom.security_pqc_rules.default_has_permission",
     "Counterparty": "ferum_custom.security_pqc_rules.default_has_permission",

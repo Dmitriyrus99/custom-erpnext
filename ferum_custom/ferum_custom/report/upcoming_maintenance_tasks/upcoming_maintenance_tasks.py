@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from typing import Any
 
 import frappe
+from frappe.query_builder import DocType, functions as fn
 
 
 def _date_range_from_filters(filters: dict[str, Any]) -> tuple[str, str]:
@@ -28,39 +29,46 @@ def execute(filters: dict[str, Any] | None = None) -> tuple[list[dict], list[dic
     project = filters.get("project")
     customer = filters.get("customer")
 
-    # Build SQL with robust left join on new custom fields; include fallback by subject match
-    sql = """
-        SELECT
-            sms.name AS schedule,
-            sms.schedule_name AS schedule_title,
-            sms.service_project AS project,
-            COALESCE(so.customer, sms.customer) AS customer,
-            sms.next_due_date AS due_date,
-            smsi.service_object AS service_object,
-            COALESCE(smsi.description, sms.description) AS task_description,
-            i.name AS issue,
-            i.subject AS issue_subject,
-            i.status AS issue_status,
-            i.assigned_engineer AS assigned_engineer,
-            i.asset AS asset
-        FROM `tabService Maintenance Schedule` sms
-        JOIN `tabService Maintenance Schedule Item` smsi ON smsi.parent = sms.name
-        LEFT JOIN `tabService Object` so ON so.name = smsi.service_object
-        LEFT JOIN `tabIssue` i ON (
-            (i.service_maintenance_schedule = sms.name AND i.service_object = smsi.service_object)
-            OR (
-                i.subject LIKE CONCAT('Scheduled Maintenance: ', smsi.service_object, ' (', sms.schedule_name, '%')
-            )
-        )
-        WHERE sms.docstatus < 2
-          AND sms.next_due_date BETWEEN %(from_date)s AND %(to_date)s
-          AND (%(project)s IS NULL OR sms.service_project = %(project)s OR so.project = %(project)s)
-          AND (%(customer)s IS NULL OR sms.customer = %(customer)s OR so.customer = %(customer)s)
-        ORDER BY sms.next_due_date, sms.name, smsi.service_object
-    """
+    SMS = DocType("Service Maintenance Schedule")
+    SMSI = DocType("Service Maintenance Schedule Item")
+    SO = DocType("Service Object")
+    Issue = DocType("Issue")
 
-    params = {"from_date": from_date, "to_date": to_date, "project": project, "customer": customer}
-    data = frappe.db.sql(sql, params, as_dict=True)
+    query = (
+        frappe.qb.from_(SMS)
+        .join(SMSI)
+        .on(SMSI.parent == SMS.name)
+        .left_join(SO)
+        .on(SO.name == SMSI.service_object)
+        .left_join(Issue)
+        .on(
+            (Issue.service_maintenance_schedule == SMS.name)
+            & (Issue.service_object == SMSI.service_object)
+        )
+        .select(
+            SMS.name.as_("schedule"),
+            SMS.schedule_name.as_("schedule_title"),
+            SMS.service_project.as_("project"),
+            fn.Coalesce(SO.customer, SMS.customer).as_("customer"),
+            SMS.next_due_date.as_("due_date"),
+            SMSI.service_object.as_("service_object"),
+            fn.Coalesce(SMSI.description, SMS.description).as_("task_description"),
+            Issue.name.as_("issue"),
+            Issue.subject.as_("issue_subject"),
+            Issue.status.as_("issue_status"),
+            Issue.assigned_engineer.as_("assigned_engineer"),
+            Issue.asset.as_("asset"),
+        )
+        .where(SMS.docstatus < 2)
+        .where(SMS.next_due_date.between(from_date, to_date))
+    )
+
+    if project:
+        query = query.where((SMS.service_project == project) | (SO.project == project))
+    if customer:
+        query = query.where((SMS.customer == customer) | (SO.customer == customer))
+
+    data = query.orderby(SMS.next_due_date, SMS.name, SMSI.service_object).run(as_dict=True)
 
     columns = [
         {"label": "Schedule", "fieldname": "schedule", "fieldtype": "Link", "options": "Service Maintenance Schedule", "width": 160},

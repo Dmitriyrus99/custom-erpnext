@@ -6,7 +6,7 @@ from frappe import _
 from ferum_custom.notifications.dispatcher import notify
 
 
-def on_issue_after_insert(doc, method=None):  # Service Request proxy (Issue)
+def on_issue_after_insert(doc, method=None):  # New Issue created
     try:
         ctx = {
             "name": doc.name,
@@ -44,4 +44,4 @@ def on_invoice_after_insert(doc, method=None):
 @frappe.whitelist()
 def test_notify(kind: str = "ping") -> dict:
     ctx = {"name": kind, "title": kind, "priority": "Low", "project": ""}
-    return notify("new_service_request", recipients=[frappe.session.user], context=ctx)
+    return notify("new_issue", recipients=[frappe.session.user], context=ctx)

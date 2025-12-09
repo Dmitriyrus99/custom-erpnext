@@ -50,16 +50,7 @@ def _company_condition(tab: str, field: str, user: str) -> str | None:
     return f"`{tab}`.{field} in ({esc})"
 
 
-def _customers_condition(user: str) -> str | None:
-    customers = get_allowed_customers(user)
-    if not customers:
-        return None
-    esc = ", ".join(frappe.db.escape(x) for x in customers)
-    return f"`tabService Request`.customer IN ({esc})"
 
-
-def _engineer_condition(user: str) -> str:
-    return f"`tabService Request`.assigned_to = {frappe.db.escape(user)}"
 
 
 def invoice_pqc(user: str | None = None) -> str | None:
@@ -90,29 +81,7 @@ def contract_pqc(user: str | None = None) -> str | None:
     return _company_condition("tabContract", "company", user)
 
 
-def service_request_pqc(user: str | None = None) -> str | None:
-    user = user or frappe.session.user
-    roles = _roles(user)
-    if SYSTEM_ROLE in roles:
-        return None
-    conds: list[str] = []
-    company_cond = _company_condition("tabService Request", "company", user)
-    if company_cond:
-        conds.append(company_cond)
-    departments = _departments(user)
-    if departments:
-        esc = ", ".join(frappe.db.escape(x) for x in departments)
-        conds.append(f"`tabService Request`.service_department IN ({esc})")
-    if departments or "Department Head" in roles:
-        conds.append("coalesce(`tabService Request`.service_department, '') != ''")
-    if "Service Engineer" in roles:
-        conds.append(_engineer_condition(user))
-    customer_cond = _customers_condition(user)
-    if customer_cond:
-        conds.append(customer_cond)
-    if "Department Head" in roles and not conds:
-        return "FALSE"
-    return " and ".join(f"({c})" for c in conds) if conds else None
+
 
 
 def service_report_pqc(user: str | None = None) -> str | None:
@@ -155,16 +124,7 @@ def data_issue_pqc(user: str | None = None) -> str | None:
     return "FALSE"
 
 
-def service_request_has_permission(doc, user: str | None = None) -> bool:
-    user = user or frappe.session.user
-    if _is_admin(user):
-        return True
-    if getattr(doc, "assigned_to", None) == user:
-        return True
-    allowed_customers = set(get_allowed_customers(user))
-    if allowed_customers and getattr(doc, "customer", None) in allowed_customers:
-        return True
-    return False
+
 
 
 def default_has_permission(doc, user: str | None = None) -> bool:

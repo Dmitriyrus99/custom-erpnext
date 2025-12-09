@@ -1,5 +1,5 @@
 <div class="container">
-        <h2>{{ _("Create Service Request") }}</h2>
+        <h2>{{ _("Create New Issue") }}</h2>
         <div>
                 <div class="mb-2">
                         <label class="form-label">{{ _("Title") }}</label>
@@ -11,9 +11,9 @@
                         <textarea id="description" class="form-control" rows="4" placeholder="{{ _('Describe the problem, steps to reproduce, expected result') }}"></textarea>
                 </div>
                 <div class="mb-2">
-                        <label class="form-label">{{ _("Service Object (optional)") }}</label>
-                        <input id="service_object" class="form-control" placeholder="{{ _('Service Object name') }}" />
-                        <small class="text-muted">{{ _("If the request is related to a specific object/equipment") }}</small>
+                        <label class="form-label">{{ _("Asset (optional)") }}</label>
+                        <input id="service_object" class="form-control" placeholder="{{ _('Asset name') }}" />
+                        <small class="text-muted">{{ _("If the issue is related to a specific asset or equipment") }}</small>
                 </div>
                 <div class="mb-2">
                         <label class="form-label">{{ _("Attach File (optional)") }}</label>
@@ -111,7 +111,7 @@
                                                         console.warn("File upload failed", err);
                                                 }
                                         }
-                                        msgEl.innerHTML = `${__("Created:")} <a href="/portal/service-request?name=${name}">${name}</a>`;
+                                        msgEl.innerHTML = `${__("Created:")} <a href="/portal/issue?name=${name}">${name}</a>`;
                                 })
                                 .catch((e) => {
                                         let msg = e && (e.message || e._server_messages);

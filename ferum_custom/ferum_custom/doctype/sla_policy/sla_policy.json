@@ -23,7 +23,7 @@
         {
             "fieldname": "type",
             "fieldtype": "Select",
-            "label": "Service Request Type",
+            "label": "Issue Type",
             "options": "Routine Maintenance\nEmergency",
             "reqd": 1
         },
@@ -32,7 +32,7 @@
             "fieldtype": "Float",
             "label": "SLA (Hours)",
             "reqd": 1,
-            "description": "Time in hours to resolve the service request."
+            "description": "Time in hours to resolve the issue."
         },
         {
             "fieldname": "enabled",

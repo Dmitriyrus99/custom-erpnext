@@ -14,7 +14,7 @@ def prometheus() -> None:
 	Exposes a few business and system metrics without external deps.
 	"""
 
-	open_requests = frappe.db.count("Service Request", {"status": ["not in", ["Completed", "Closed"]]})
+	open_requests = frappe.db.count("Issue", {"status": ["not in", ["Resolved", "Closed"]]})
 	sent_invoices = frappe.db.count("Invoice", {"status": "Sent"})
 	paid_invoices = frappe.db.count("Invoice", {"status": "Paid"})
 

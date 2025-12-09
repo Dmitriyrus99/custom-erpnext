@@ -37,8 +37,8 @@
    "custom": 0,
    "docstatus": 0,
    "doctype": "Module Def",
-   "module_name": "Service Request Management",
-   "name": "Service Request Management",
+   "module_name": "Issue Management",
+   "name": "Issue Management",
    "package": null,
    "restrict_to_domain": null
  },

@@ -23,10 +23,10 @@
  "sequence_id": 0.0,
  "shortcuts": [
   {"label": "Проекты", "type": "DocType", "link_to": "Project"},
-  {"label": "Заявки (Issues)", "type": "URL", "url": "/app/issue"},
+  {"label": "Заявки (Issues)", "type": "DocType", "link_to": "Issue"},
   {"label": "Сервисные отчеты (Timesheets)", "type": "DocType", "link_to": "Timesheet"},
   {"label": "Счета (клиент)", "type": "URL", "url": "/app/sales-invoice"},
-  {"label": "Заявки по проектам", "type": "Report", "link_to": "Service Requests by Project", "report_ref_doctype": "Service Request"},
+  {"label": "Заявки по проектам", "type": "Report", "link_to": "Issues by Project", "report_ref_doctype": "Issue"},
   {"label": "Счета по проектам", "type": "Report", "link_to": "Invoices by Project", "report_ref_doctype": "Invoice"},
   {"label": "Upcoming Maintenance Tasks", "type": "Report", "link_to": "Upcoming Maintenance Tasks", "report_ref_doctype": "Service Maintenance Schedule"}
 ],

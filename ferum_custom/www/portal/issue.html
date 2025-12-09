@@ -5,7 +5,7 @@
                 <button id="confirm-btn" class="btn btn-sm btn-success">{{ _("Confirm Completion") }}</button>
         </p>
         <p id="report-wrapper" style="display:none;">
-                <a id="report-link" target="_blank">{{ _("Download Service Report") }}</a>
+                <a id="report-link" target="_blank">{{ _("Download Timesheet") }}</a>
                 <button id="confirm-report-btn" class="btn btn-sm btn-outline-primary" style="display:none;">{{ _("Confirm Report") }}</button>
         </p>
         <p><a href="/portal">{{ _("Back to list") }}</a></p>
@@ -16,7 +16,7 @@
                 const name = params.get("name");
                 const detailsEl = document.getElementById("sr-details");
                 if (!name) {
-                        detailsEl.innerHTML = `<p>${__("Missing Service Request ID.")}</p>`;
+                        detailsEl.innerHTML = `<p>${__("Missing Issue ID.")}</p>`;
                         return;
                 }
 
@@ -48,10 +48,10 @@
                                 );
                         }
                         detailsEl.innerHTML = pieces.join("\n");
-                        if (safe.status === 'Completed') {
+                        if (safe.status === 'Resolved') {
                                 document.getElementById("confirm-wrapper").style.display = "";
                                 document.getElementById("confirm-btn").onclick = () => {
-                                        frappe.call({ method: 'ferum_custom.api.service.confirm_service_request', args: { name } }).then(() => {
+                                        frappe.call({ method: 'ferum_custom.api.service.confirm_issue_completion', args: { name } }).then(() => {
                                                 frappe.show_alert({ message: __('Confirmed'), indicator: 'green' });
                                         });
                                 };
@@ -60,13 +60,13 @@
                                 const reportLink = document.getElementById("report-link");
                                 reportLink.href =
                                         "/api/method/frappe.utils.print_format.download_pdf?doctype=" +
-                                        encodeURIComponent("Service Report") +
+                                        encodeURIComponent("Timesheet") +
                                         "&name=" +
                                         encodeURIComponent(safe.linked_report);
                                 document.getElementById("report-wrapper").style.display = "";
                                 document.getElementById("confirm-report-btn").style.display = "inline-block";
                                 document.getElementById("confirm-report-btn").onclick = () => {
-                                        frappe.call({ method: 'ferum_custom.api.service.confirm_service_report', args: { name: safe.linked_report } }).then(() => {
+                                        frappe.call({ method: 'ferum_custom.api.service.confirm_timesheet_report', args: { name: safe.linked_report } }).then(() => {
                                                 frappe.show_alert({ message: __('Report confirmed'), indicator: 'green' });
                                         });
                                 };

@@ -57,31 +57,31 @@ def _path_for_custom_attachment(att_doc) -> list[str]:
 	parts: list[str] = ["Attachments"]
 	try:
 		if att_doc.linked_doctype and att_doc.linked_docname:
-			if att_doc.linked_doctype == "Service Report":
-				sr = frappe.db.get_value(
-					"Service Report",
+		if att_doc.linked_doctype == "Timesheet":
+			ts = frappe.db.get_value(
+					"Timesheet",
 					att_doc.linked_docname,
-					["service_request"],
+					["issue"],
 					as_dict=True,
 				)
-				if sr and sr.get("service_request"):
-					req = frappe.db.get_value(
-						"Service Request",
-						sr["service_request"],
+				if ts and ts.get("issue"):
+					issue_doc = frappe.db.get_value(
+						"Issue",
+						ts["issue"],
 						["customer", "project"],
 						as_dict=True,
 					)
-					if req:
+					if issue_doc:
 						parts = [
 							p
 							for p in [
-								req.get("customer") or "Customer",
-								req.get("project") or "Project",
+								issue_doc.get("customer") or "Customer",
+								issue_doc.get("project") or "Project",
 								"Attachments",
 							]
 						]
-			elif att_doc.linked_doctype == "Service Project":
-				cust = frappe.db.get_value("Service Project", att_doc.linked_docname, "customer")
+			elif att_doc.linked_doctype == "Project":
+				cust = frappe.db.get_value("Project", att_doc.linked_docname, "customer")
 				parts = [p for p in [cust or "Customer", att_doc.linked_docname, "Attachments"]]
 			elif att_doc.linked_doctype == "Invoice":
 				proj = frappe.db.get_value("Invoice", att_doc.linked_docname, "project")

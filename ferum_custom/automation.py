@@ -12,14 +12,14 @@ def send_daily_overdue_report():
     to Project Managers and Department Heads.
     """
     overdue_requests = frappe.get_list(
-        "Service Request",
-        filters={"status": ["not in", ["Closed", "Cancelled"]], "sla_deadline": ["<", now()]},
-        fields=["name", "title", "project", "assigned_to", "sla_deadline", "customer"],
+        "Issue",
+        filters={"status": ["not in", ["Resolved", "Closed"]], "sla_deadline": ["<", now()]},
+        fields=["name", "subject as title", "project", "assigned_to", "sla_deadline", "customer"],
         order_by="sla_deadline asc",
     )
 
     if not overdue_requests:
-        frappe.log_info("No overdue service requests found.", "Daily Overdue Report")
+        frappe.log_info("No overdue issues found.", "Daily Overdue Report")
         return
 
     recipients = get_report_recipients(["Project Manager", "Department Head"])
@@ -27,14 +27,14 @@ def send_daily_overdue_report():
         frappe.log_error("No recipients found for Overdue Report (Roles: Project Manager, Department Head).", "Daily Overdue Report")
         return
 
-    subject = "Ежедневный отчёт: Просроченные заявки на обслуживание"
-    message = build_report_html("Просроченные заявки на обслуживание", overdue_requests)
+    subject = "Ежедневный отчёт: Просроченные заявки"
+    message = build_report_html("Просроченные заявки", overdue_requests)
 
     frappe.sendmail(
         recipients=recipients,
         subject=subject,
         message=message,
-        doctype="Service Request",
+        doctype="Issue",
     )
     frappe.log_info(f"Sent daily overdue report to {len(recipients)} recipients.", "Daily Overdue Report")
 
@@ -45,18 +45,18 @@ def send_weekly_overdue_maintenance_report():
     to relevant managers.
     """
     overdue_maintenance = frappe.get_list(
-        "Service Request",
+        "Issue",
         filters={
-            "status": ["not in", ["Closed", "Cancelled"]],
+            "status": ["not in", ["Resolved", "Closed"]],
             "sla_deadline": ["<", now()],
-            "type": "Routine Maintenance",
+            "issue_type": "Routine Maintenance",
         },
-        fields=["name", "title", "project", "assigned_to", "sla_deadline", "customer"],
+        fields=["name", "subject as title", "project", "assigned_to", "sla_deadline", "customer"],
         order_by="sla_deadline asc",
     )
 
     if not overdue_maintenance:
-        frappe.log_info("No overdue routine maintenance tasks found.", "Weekly Maintenance Report")
+        frappe.log_info("No overdue routine maintenance issues found.", "Weekly Maintenance Report")
         return
 
     recipients = get_report_recipients(["Project Manager", "Department Head"])
@@ -64,14 +64,14 @@ def send_weekly_overdue_maintenance_report():
         frappe.log_error("No recipients found for Weekly Maintenance Report (Roles: Project Manager, Department Head).", "Weekly Maintenance Report")
         return
 
-    subject = "Еженедельный отчёт: Просроченное плановое обслуживание"
-    message = build_report_html("Просроченное плановое обслуживание", overdue_maintenance)
+    subject = "Еженедельный отчёт: Просроченные плановые задачи"
+    message = build_report_html("Просроченные плановые задачи", overdue_maintenance)
 
     frappe.sendmail(
         recipients=recipients,
         subject=subject,
         message=message,
-        doctype="Service Request",
+        doctype="Issue",
     )
     frappe.log_info(f"Sent weekly overdue maintenance report to {len(recipients)} recipients.", "Weekly Maintenance Report")
 
@@ -251,7 +251,7 @@ def build_report_html(title: str, items: list) -> str:
         for key, value in item.items():
             if key == "name":
                 # Link to the document in the desk
-                url = get_url_to_form(item.doctype or "Service Request", item.name)
+                url = get_url_to_form(item.doctype or "Issue", item.name)
                 row_html += f'<td><a href="{url}">{value}</a></td>'
             else:
                 row_html += f"<td>{frappe.utils.escape_html(str(value or ''))}</td>"

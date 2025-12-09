@@ -53,30 +53,26 @@ def _get_or_create_customer(name: str) -> str:
 	return doc.name
 
 
-def _get_or_create_service_object(name: str, customer: str, project: str | None = None) -> str:
-	if frappe.db.exists("Service Object", {"object_name": name}):
-		return frappe.db.get_value("Service Object", {"object_name": name}, "name")
-	doc = frappe.new_doc("Service Object")
-	doc.object_name = name
+def _get_or_create_asset(name: str, customer: str, project: str | None = None) -> str:
+	if frappe.db.exists("Asset", {"asset_name": name}):
+		return frappe.db.get_value("Asset", {"asset_name": name}, "name")
+	doc = frappe.new_doc("Asset")
+	doc.asset_name = name
 	doc.customer = customer
-	if project:
-		doc.project = project
 	doc.address = "Demo Address"
 	doc.insert(ignore_permissions=True)
 	return doc.name
 
 
-def _get_or_create_project(customer: str, project_name: str, objects: list[str]) -> str:
+def _get_or_create_project_doc(customer: str, project_name: str) -> str:
 	# Use project_name as the unique key
-	exists = frappe.db.exists("Service Project", {"project_name": project_name})
+	exists = frappe.db.exists("Project", {"project_name": project_name})
 	if exists:
 		return exists
-	proj = frappe.new_doc("Service Project")
+	proj = frappe.new_doc("Project")
 	proj.customer = customer
 	proj.project_name = project_name
 	proj.status = "Active"
-	for so in objects:
-		proj.append("objects", {"service_object": so})
 	proj.insert(ignore_permissions=True)
 	return proj.name
 
@@ -98,39 +94,38 @@ def _get_or_create_custom_attachment(file_name: str, url: str) -> str:
 	return att.name
 
 
-def _get_or_create_service_request(title: str, service_object: str) -> str:
-	exists = frappe.db.exists("Service Request", {"title": title})
+def _get_or_create_issue(title: str, asset_name: str) -> str:
+	exists = frappe.db.exists("Issue", {"subject": title})
 	if exists:
 		return exists
-	so = frappe.get_doc("Service Object", service_object)
-	req = frappe.new_doc("Service Request")
-	req.title = title
-	req.type = "Routine Maintenance"
-	req.priority = "High"
-	req.service_object = service_object
-	req.customer = so.customer
-	req.project = so.project
-	req.status = "Open"
-	req.reported_datetime = frappe.utils.now()
-	req.insert(ignore_permissions=True)
-	return req.name
+	asset_doc = frappe.get_doc("Asset", asset_name)
+	issue_doc = frappe.new_doc("Issue")
+	issue_doc.subject = title
+	issue_doc.issue_type = "Routine Maintenance"
+	issue_doc.priority = "High"
+	issue_doc.asset = asset_name
+	issue_doc.customer = asset_doc.customer
+	issue_doc.project = asset_doc.project # Project link is via asset's project if available
+	issue_doc.status = "Open"
+	issue_doc.creation = frappe.utils.now_datetime()
+	issue_doc.insert(ignore_permissions=True)
+	return issue_doc.name
 
 
-def _get_or_create_service_report(request_name: str, attachment_name: str) -> str:
-	exists = frappe.db.exists("Service Report", {"service_request": request_name})
+def _get_or_create_timesheet(issue_name: str, attachment_name: str) -> str:
+	exists = frappe.db.exists("Timesheet", {"issue": issue_name})
 	if exists:
 		return exists
-	rep = frappe.new_doc("Service Report")
-	rep.service_request = request_name
-	rep.report_date = nowdate()
-	rep.status = "Draft"
-	rep.append("work_items", {"description": "Inspection", "hours": 1.0, "rate": 100})
-	rep.append("documents", {"custom_attachment": attachment_name})
-	rep.insert(ignore_permissions=True)
-	return rep.name
+	timesheet_doc = frappe.new_doc("Timesheet")
+	timesheet_doc.issue = issue_name
+	timesheet_doc.start_date = nowdate()
+	timesheet_doc.status = "Draft"
+	timesheet_doc.append("time_logs", {"activity_type": "Maintenance", "hours": 1.0, "description": "Inspection"})
+	timesheet_doc.insert(ignore_permissions=True)
+	return timesheet_doc.name
 
 
-def _get_or_create_maintenance_schedule(customer: str, project: str, service_object: str) -> str:
+def _get_or_create_maintenance_schedule(customer: str, project: str, asset_name: str) -> str:
 	key = f"MS-{project}"
 	exists = frappe.db.exists("Service Maintenance Schedule", {"schedule_name": key})
 	if exists:
@@ -138,11 +133,11 @@ def _get_or_create_maintenance_schedule(customer: str, project: str, service_obj
 	ms = frappe.new_doc("Service Maintenance Schedule")
 	ms.schedule_name = key
 	ms.customer = customer
-	ms.service_project = project
+	ms.project = project
 	ms.frequency = "Daily"
 	ms.start_date = nowdate()
 	ms.next_due_date = nowdate()
-	ms.append("items", {"service_object": service_object, "description": "Daily health check"})
+	ms.append("items", {"asset": asset_name, "description": "Daily health check"})
 	ms.insert(ignore_permissions=True)
 	return ms.name
 
@@ -170,30 +165,21 @@ def create_demo_data() -> dict:
 	frappe.only_for("Administrator")
 
 	customer = _get_or_create_customer("Ferum LLC")
-	project = _get_or_create_project(customer, "Maintenance Contract 2025", [])
-	service_object = _get_or_create_service_object("Pump-1001", customer, project)
-
-	# Ensure object listed in project child table
-	if not any(
-		so.service_object == service_object for so in frappe.get_doc("Service Project", project).objects
-	):
-		proj = frappe.get_doc("Service Project", project)
-		proj.append("objects", {"service_object": service_object})
-		proj.save(ignore_permissions=True)
+	project = _get_or_create_project_doc(customer, "Maintenance Contract 2025")
+	asset = _get_or_create_asset("Pump-1001", customer, None)
 
 	attachment = _get_or_create_custom_attachment("demo_doc.pdf", "https://example.com/demo_doc.pdf")
-	request = _get_or_create_service_request("Replace filter", service_object)
-	report = _get_or_create_service_report(request, attachment)
-	# Skip creating Maintenance Schedule to avoid conflicts with similarly named ERPNext DocType
-	ms = None
+	issue = _get_or_create_issue("Replace filter", asset)
+	timesheet = _get_or_create_timesheet(issue, attachment)
+	ms = _get_or_create_maintenance_schedule(customer, project, asset)
 	invoice = _get_or_create_invoice(project, "Ferum LLC", 1000)
 
 	return {
 		"customer": customer,
 		"project": project,
-		"service_object": service_object,
-		"service_request": request,
-		"service_report": report,
+		"asset": asset,
+		"issue": issue,
+		"timesheet": timesheet,
 		"maintenance_schedule": ms,
 		"invoice": invoice,
 	}

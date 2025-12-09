@@ -1,162 +1,175 @@
 
+from __future__ import annotations
+
 import frappe
-from frappe import _
 
-def get_company_conditions(user: str) -> str | None:
-    """Returns SQL conditions for company restrictions."""
-    allowed_companies = frappe.get_all(
-        "User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
-    )
-    if allowed_companies:
-        company_list = ", ".join(frappe.db.escape(c) for c in allowed_companies)
-        return f"`tabService Request`.company IN ({company_list})"
+
+# -------------------------- Helpers --------------------------
+
+
+def _company_cond(user: str) -> str | None:
+    try:
+        user_type = frappe.get_cached_value("User", user, "user_type")
+        if user_type == "Website User":
+            return None
+        companies = frappe.get_all(
+            "User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
+        )
+        if companies:
+            vals = ", ".join(frappe.db.escape(x) for x in companies)
+            return f"company in ({vals})"
+    except Exception:
+        return None
     return None
 
-def get_department_conditions(user: str) -> str | None:
-    """Returns SQL conditions for service department restrictions."""
-    allowed_depts = frappe.get_all(
-        "User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
-    )
-    if allowed_depts:
-        dept_list = ", ".join(frappe.db.escape(d) for d in allowed_depts)
-        return f"`tabService Request`.service_department IN ({dept_list})"
-    return None
 
-def get_project_manager_conditions(user: str) -> str:
-    """Returns SQL conditions for Project Managers."""
-    return f"`tabService Request`.project IN (SELECT name FROM `tabService Project` WHERE project_manager = {frappe.db.escape(user)})"
-
-def get_service_engineer_conditions(user: str) -> str:
-    """Returns SQL conditions for Service Engineers."""
-    return f"`tabService Request`.assigned_to = {frappe.db.escape(user)}"
-
-def get_client_conditions(user: str) -> str:
-    """Returns SQL conditions for Clients."""
-    from ferum_custom.ferum_custom.utils import get_allowed_customers
-
-    allowed_customers = get_allowed_customers(user)
-    if allowed_customers:
-        customer_list = ", ".join(frappe.db.escape(c) for c in allowed_customers)
-        return f"`tabService Request`.customer IN ({customer_list})"
-    return f"`tabService Request`.owner = {frappe.db.escape(user)}"
-
-def has_company_permission(doc, user: str) -> bool:
-    """Checks if the user has permission for the document's company."""
-    allowed_companies = set(frappe.get_all("User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"))
-    if allowed_companies and doc.company not in allowed_companies:
-        return False
-    return True
-
-def has_department_permission(doc, user: str) -> bool:
-    """Checks if the user has permission for the document's service department."""
-    allowed_depts = set(frappe.get_all("User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"))
-    if not allowed_depts or doc.service_department in allowed_depts:
-        return True
-    return False
-
-def has_project_manager_permission(doc, user: str) -> bool:
-    """Checks if the user is the project manager for the document's project."""
-    if doc.project and frappe.db.get_value("Service Project", doc.project, "project_manager") == user:
-        return True
-    return False
-
-def has_service_engineer_permission(doc, user: str) -> bool:
-    """Checks if the user is the assigned engineer for the document."""
-    if doc.assigned_to == user:
-        return True
-    return False
-
-def has_client_permission(doc, user: str) -> bool:
-    """Checks if the user is the client for the document."""
-    from ferum_custom.ferum_custom.utils import get_allowed_customers
-
-    allowed_customers = set(get_allowed_customers(user))
-    if allowed_customers and doc.customer in allowed_customers:
-        return True
-    if doc.owner == user:
-        return True
-    return False
+# -------------------------- Project --------------------------
 
 
-# --- Project permissions ----------------------------------------------------
-
-
-def _user_companies(user: str) -> list[str]:
-    return frappe.get_all(
-        "User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
-    )
-
-
-def _user_departments(user: str) -> list[str]:
-    return frappe.get_all(
-        "User Permission", filters={"user": user, "allow": "Service Department"}, pluck="for_value"
-    )
-
-
-def project_get_permission_query_conditions(user: str, doctype: str | None = None) -> str | None:
-    if not user or user == "Administrator":
+def project_get_permission_query_conditions(user: str | None = None) -> str | None:
+    user = user or frappe.session.user
+    roles = set(frappe.get_roles(user))
+    if "System Manager" in roles:
         return None
 
-    clauses: list[str] = []
-    companies = _user_companies(user)
-    if companies:
-        esc = ", ".join(frappe.db.escape(c) for c in companies)
-        clauses.append(f"`tabProject`.company IN ({esc})")
+    conds: list[str] = []
+    comp = _company_cond(user)
+    if comp:
+        conds.append(f"`tabProject`.{comp}")
 
-    departments = _user_departments(user)
-    if departments:
-        esc = ", ".join(frappe.db.escape(d) for d in departments)
-        clauses.append(
-            "`tabProject`.name in (select name from `tabService Project` where service_department in ({0}))".format(
-                esc
+    # Project Manager: own projects
+    if "Project Manager" in roles:
+        conds.append("`tabProject`.project_manager=%(user)s")
+
+    # Client / Website User: projects for allowed customers
+    try:
+        user_type = frappe.get_cached_value("User", user, "user_type")
+        if user_type == "Website User" or "Client" in roles:
+            customers = frappe.get_all(
+                "User Permission", filters={"user": user, "allow": "Customer"}, pluck="for_value"
             )
+            if customers:
+                vals = ", ".join(frappe.db.escape(x) for x in customers)
+                conds.append(f"`tabProject`.customer in ({vals})")
+            else:
+                conds.append("`tabProject`.owner=%(user)s")
+    except Exception:
+        pass
+
+    return " and ".join(f"({c})" for c in conds) if conds else None
+
+
+def project_has_permission(doc, user: str | None = None) -> bool:
+    user = user or frappe.session.user
+    roles = set(frappe.get_roles(user))
+    if "System Manager" in roles:
+        return True
+    # PM: owns the project
+    if getattr(doc, "project_manager", None) == user:
+        return True
+    # Office/Dept Head: within allowed companies
+    if "Office Manager" in roles or "Department Head" in roles:
+        try:
+            companies = set(
+                frappe.get_all(
+                    "User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
+                )
+            )
+            return not companies or getattr(doc, "company", None) in companies
+        except Exception:
+            return True
+    # Client: by allowed customers (requires Project.customer)
+    if "Client" in roles:
+        try:
+            customers = set(
+                frappe.get_all(
+                    "User Permission", filters={"user": user, "allow": "Customer"}, pluck="for_value"
+                )
+            )
+            cust = getattr(doc, "customer", None)
+            if customers and cust in customers:
+                return True
+        except Exception:
+            pass
+    # Owner fallback
+    return getattr(doc, "owner", None) == user
+
+
+# -------------------------- Timesheet --------------------------
+
+
+def timesheet_get_permission_query_conditions(user: str | None = None) -> str | None:
+    user = user or frappe.session.user
+    roles = set(frappe.get_roles(user))
+    if "System Manager" in roles:
+        return None
+
+    conds: list[str] = []
+    comp = _company_cond(user)
+    if comp:
+        conds.append(f"`tabTimesheet`.{comp}")
+
+    # Owner can see own timesheets
+    conds.append("`tabTimesheet`.owner=%(user)s")
+
+    # Project Manager: by project
+    if "Project Manager" in roles:
+        conds.append(
+            "exists(select 1 from `tabProject` p where p.name=`tabTimesheet`.project and p.project_manager=%(user)s)"
         )
 
-    return " and ".join(f"({clause})" for clause in clauses) if clauses else None
+    # Client / Website User: typically no access to Timesheets; keep strict
+    try:
+        user_type = frappe.get_cached_value("User", user, "user_type")
+        if user_type == "Website User" or "Client" in roles:
+            # no additional allowances; rely on None/owner fallback
+            pass
+    except Exception:
+        pass
+
+    return " or ".join(f"({c})" for c in conds) if conds else None
 
 
-def project_has_permission(doc, user: str) -> bool:
-    if not user or user == "Administrator":
+def timesheet_has_permission(doc, user: str | None = None) -> bool:
+    user = user or frappe.session.user
+    roles = set(frappe.get_roles(user))
+    if "System Manager" in roles:
         return True
-
-    companies = set(_user_companies(user))
-    if companies and getattr(doc, "company", None) not in companies:
-        return False
-
-    departments = set(_user_departments(user))
-    if departments:
-        department = getattr(doc, "service_department", None)
-        if not department:
-            department = frappe.db.get_value("Service Project", doc.name, "service_department")
-        if department and department not in departments:
-            return False
-
-    return True
-
-
-# --- Timesheet permissions --------------------------------------------------
-
-
-def timesheet_get_permission_query_conditions(user: str, doctype: str | None = None) -> str | None:
-    """Limit Timesheets by Company for non-admin users (if user has explicit Company perms).
-
-    If the user has User Permission entries for Company, restrict Timesheets to those companies.
-    Otherwise, return None (no extra filter beyond role permissions).
-    """
-    if not user or user == "Administrator":
-        return None
-
-    companies = _user_companies(user)
-    if companies:
-        esc = ", ".join(frappe.db.escape(c) for c in companies)
-        return f"`tabTimesheet`.company IN ({esc})"
-    return None
-
-
-def timesheet_has_permission(doc, user: str) -> bool:
-    if not user or user == "Administrator":
+    # Owner
+    if getattr(doc, "owner", None) == user:
         return True
-    companies = set(_user_companies(user))
-    if companies and getattr(doc, "company", None) not in companies:
-        return False
-    return True
+    # PM: by project
+    try:
+        if getattr(doc, "project", None):
+            pm = frappe.db.get_value("Project", doc.project, "project_manager")
+            if pm == user:
+                return True
+    except Exception:
+        pass
+    # Office Manager / Dept Head: company scope
+    if "Office Manager" in roles or "Department Head" in roles:
+        try:
+            companies = set(
+                frappe.get_all(
+                    "User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value"
+                )
+            )
+            return not companies or getattr(doc, "company", None) in companies
+        except Exception:
+            return True
+    # Client: deny unless the project's customer matches allowed (optional)
+    if "Client" in roles:
+        try:
+            if getattr(doc, "project", None):
+                cust = frappe.db.get_value("Project", doc.project, "customer")
+                allowed = set(
+                    frappe.get_all(
+                        "User Permission", filters={"user": user, "allow": "Customer"}, pluck="for_value"
+                    )
+                )
+                if allowed and cust in allowed:
+                    return True
+        except Exception:
+            pass
+    return False
+

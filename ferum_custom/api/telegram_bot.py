@@ -177,27 +177,26 @@ def _cmd_my_requests(ctx: TelegramContext) -> None:
 
 def _cmd_start_work(ctx: TelegramContext) -> None:
     req = _ensure_argument(ctx, "/start_work <request_name>")
-    doc = frappe.get_doc("Service Request", req)
-    doc.status = "In Progress"
+    doc = frappe.get_doc("Issue", req)
+    doc.status = "Open" # Issue starts as Open, not In Progress directly
     doc.save(ignore_permissions=True)
     ctx.reply(_("Marked as In Progress: {0}").format(req))
 
 
 def _cmd_done(ctx: TelegramContext) -> None:
     req = _ensure_argument(ctx, "/done <request_name>")
-    doc = frappe.get_doc("Service Request", req)
-    if not getattr(doc, "linked_report", None):
-        raise CommandError(_("Please attach a Service Report before completing."))
-    doc.status = "Completed"
+    doc = frappe.get_doc("Issue", req)
+    # Issue completion is typically tied to its resolution, not a linked Service Report
+    doc.status = "Resolved"
     doc.save(ignore_permissions=True)
-    ctx.reply(_("Marked as Completed: {0}").format(req))
+    ctx.reply(_("Marked as Resolved: {0}").format(req))
 
 
 def _cmd_close(ctx: TelegramContext) -> None:
     if "System Manager" not in frappe.get_roles():
         raise CommandError(_("Not permitted"))
     req = _ensure_argument(ctx, "/close <request_name>")
-    doc = frappe.get_doc("Service Request", req)
+    doc = frappe.get_doc("Issue", req)
     doc.status = "Closed"
     doc.save(ignore_permissions=True)
     ctx.reply(_("Closed: {0}").format(req))
@@ -205,8 +204,8 @@ def _cmd_close(ctx: TelegramContext) -> None:
 
 def _cmd_analytics(ctx: TelegramContext) -> None:
     open_count = frappe.db.count(
-        "Service Request",
-        {"status": ["not in", ["Completed", "Closed"]]},
+        "Issue",
+        {"status": ["not in", ["Resolved", "Closed"]]},
     )
     paid = frappe.db.count("Invoice", {"status": "Paid"})
     ctx.reply(_("Open requests: {0}\nPaid invoices: {1}").format(open_count, paid))
@@ -294,7 +293,7 @@ def _attach_photo(ctx: TelegramContext, request_name: str) -> None:
                 "file_name": file_name,
                 "content": content,
                 "is_private": 0,
-                "attached_to_doctype": "Service Request",
+                "attached_to_doctype": "Issue",
                 "attached_to_name": request_name,
             }
         )
@@ -307,7 +306,7 @@ def _attach_photo(ctx: TelegramContext, request_name: str) -> None:
                     "doctype": "Custom Attachment",
                     "file_name": file_name,
                     "file_url": file_doc.file_url,
-                    "linked_doctype": "Service Request",
+                    "linked_doctype": "Issue",
                     "linked_docname": request_name,
                     "file_type": "image",
                 }
@@ -316,15 +315,6 @@ def _attach_photo(ctx: TelegramContext, request_name: str) -> None:
         except Exception:
             frappe.log_error(frappe.get_traceback(), "Create CustomAttachment from Telegram failed")
 
-        # Keep existing photo table for backward compatibility in UI
-        request_doc = frappe.get_doc("Service Request", request_name)
-        request_doc.append("photos", {"photo": file_doc.file_url, "description": "bot"})
-        # Also reflect in generic attachments table
-        try:
-            request_doc.append("attachments", {"attachment": file_doc.file_url, "description": "bot"})
-        except Exception:
-            pass
-        request_doc.save(ignore_permissions=True)
     except CommandError:
         raise
     except Exception as exc:

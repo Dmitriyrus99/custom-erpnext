@@ -4,8 +4,8 @@ import frappe
 
 
 SENSITIVE_ATTACH_DOCTYPES = {
-    "Service Request",
-    "Service Report",
+    "Issue",
+    "Timesheet",
     "Project",
     "Invoice",
 }

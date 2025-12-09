@@ -1,15 +1,15 @@
 [
   {
     "doctype": "Print Format",
-    "name": "Service Report (Detailed)",
+    "name": "Timesheet (Detailed)",
     "module": "Ferum Custom",
-    "doc_type": "Service Report",
+    "doc_type": "Timesheet",
     "print_format_type": "Jinja",
     "disabled": 0,
     "raw_printing": 0,
     "custom_format": 1,
     "format_data": null,
-    "html": "<div class=\"print-format\">\n  <h2>Service Report {{ doc.name }}</h2>\n  <p><strong>Date:</strong> {{ doc.report_date }}<br>\n     <strong>Service Request:</strong> {{ doc.service_request }}<br>\n     {% set req = frappe.get_doc('Service Request', doc.service_request) if doc.service_request else None %}\n     {% if req %}<strong>Customer:</strong> {{ req.customer }} &nbsp; <strong>Project:</strong> {{ req.project }}{% endif %}</p>\n\n  <h4>Work Items</h4>\n  <table class=\"table table-bordered\">\n    <thead><tr><th>#</th><th>Description</th><th>Hours</th><th>Rate</th><th>Total</th></tr></thead>\n    <tbody>\n      {% for i, row in enumerate(doc.work_items, start=1) %}\n      <tr>\n        <td>{{ i }}</td>\n        <td>{{ row.description }}</td>\n        <td style=\"text-align:right\">{{ row.hours }}</td>\n        <td style=\"text-align:right\">{{ row.rate }}</td>\n        <td style=\"text-align:right\">{{ row.total }}</td>\n      </tr>\n      {% endfor %}\n    </tbody>\n    <tfoot>\n      <tr><td colspan=\"4\" style=\"text-align:right\"><strong>Total</strong></td><td style=\"text-align:right\">{{ doc.total_amount }}</td></tr>\n    </tfoot>\n  </table>\n\n  {% if doc.documents %}\n  <h4>Documents</h4>\n  <ul>\n    {% for row in doc.documents %}\n    <li>{{ row.custom_attachment }}</li>\n    {% endfor %}\n  </ul>\n  {% endif %}\n</div>",
+    "html": "<div class=\"print-format\">\n  <h2>Timesheet {{ doc.name }}</h2>\n  <p><strong>Date:</strong> {{ doc.report_date }}<br>\n     <strong>Issue:</strong> {{ doc.service_request }}<br>\n     {% set req = frappe.get_doc('Issue', doc.service_request) if doc.service_request else None %}\n     {% if req %}<strong>Customer:</strong> {{ req.customer }} &nbsp; <strong>Project:</strong> {{ req.project }}{% endif %}</p>\n\n  <h4>Work Items</h4>\n  <table class=\"table table-bordered\">\n    <thead><tr><th>#</th><th>Description</th><th>Hours</th><th>Rate</th><th>Total</th></tr></thead>\n    <tbody>\n      {% for i, row in enumerate(doc.work_items, start=1) %}\n      <tr>\n        <td>{{ i }}</td>\n        <td>{{ row.description }}</td>\n        <td style=\"text-align:right\">{{ row.hours }}</td>\n        <td style=\"text-align:right\">{{ row.rate }}</td>\n        <td style=\"text-align:right\">{{ row.total }}</td>\n      </tr>\n      {% endfor %}\n    </tbody>\n    <tfoot>\n      <tr><td colspan=\"4\" style=\"text-align:right\"><strong>Total</strong></td><td style=\"text-align:right\">{{ doc.total_amount }}</td></tr>\n    </tfoot>\n  </table>\n\n  {% if doc.documents %}\n  <h4>Documents</h4>\n  <ul>\n    {% for row in doc.documents %}\n    <li>{{ row.custom_attachment }}</li>\n    {% endfor %}\n  </ul>\n  {% endif %}\n</div>",
     "css": "",
     "standard": "Yes"
   }

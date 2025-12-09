@@ -429,32 +429,14 @@ def drive_healthcheck_and_alert(days: int = 1, threshold: int = 5) -> dict:
 
 @frappe.whitelist()
 def daily_overdue_summary_email(issue_fallback_days: int = 7) -> dict:
-    """Scan for overdue Service Requests (SLA) and Issues (due date) and email a summary.
+    """Scan for overdue Issues (SLA/due date) and email a summary.
 
-    - Service Requests: status not in (Completed, Closed) AND sla_deadline < today
-    - Issues: status open AND (resolution_by|due_date|expected_resolution) < today;
-      if no due field exists, fallback to issues older than `issue_fallback_days` days
     Sent to Office Manager and Project Manager roles (email only).
     """
     from datetime import date, timedelta
 
     today = date.today().isoformat()
-    rows_sr: list[dict] = []
     rows_issue: list[dict] = []
-
-    # Service Requests overdue by SLA
-    try:
-        rows_sr = frappe.get_all(
-            "Service Request",
-            filters={
-                "status": ["not in", ["Completed", "Closed"]],
-                "sla_deadline": ["<", today],
-            },
-            fields=["name", "title", "priority", "project", "assigned_to", "sla_deadline", "status"],
-            order_by="sla_deadline asc",
-        )
-    except Exception:
-        rows_sr = []
 
     # Issues overdue by due date field where available
     due_field = None
@@ -490,14 +472,8 @@ def daily_overdue_summary_email(issue_fallback_days: int = 7) -> dict:
     except Exception:
         rows_issue = []
 
-    if not rows_sr and not rows_issue:
+    if not rows_issue:
         return {"status": "ok", "sent": False, "reason": "no-overdue"}
-
-    def fmt_sr(r: dict) -> str:
-        return (
-            f"- {r.get('name')} | {r.get('title')} | {r.get('priority')} | "
-            f"{r.get('project') or '-'} | {r.get('assigned_to') or '-'} | SLA: {r.get('sla_deadline')} | {r.get('status')}"
-        )
 
     def fmt_issue(r: dict) -> str:
         due_val = r.get(due_field or "creation")
@@ -507,10 +483,6 @@ def daily_overdue_summary_email(issue_fallback_days: int = 7) -> dict:
         )
 
     lines: list[str] = []
-    if rows_sr:
-        lines.append("Service Requests overdue (SLA):")
-        lines.extend(fmt_sr(r) for r in rows_sr)
-        lines.append("")
     if rows_issue:
         lines.append("Issues overdue:")
         lines.extend(fmt_issue(r) for r in rows_issue)
@@ -525,10 +497,10 @@ def daily_overdue_summary_email(issue_fallback_days: int = 7) -> dict:
         if recipients:
             frappe.sendmail(
                 recipients=recipients,
-                subject="Daily Overdue Summary (Service Requests / Issues)",
+                subject="Daily Overdue Summary (Issues)",
                 message=body,
             )
-            return {"status": "ok", "sent": True, "count_sr": len(rows_sr), "count_issue": len(rows_issue)}
+            return {"status": "ok", "sent": True, "count_issue": len(rows_issue)}
     except Exception:
         frappe.log_error(frappe.get_traceback(), "daily_overdue_summary_email failed")
     return {"status": "error", "sent": False}
@@ -847,29 +819,29 @@ def test_restore_latest_backup() -> dict:
 
 @frappe.whitelist()
 def audit_fix_tasks() -> dict:
-    """End-to-end smoke: ensure schedule item exists, run generator, create portal SR.
+    """End-to-end smoke: ensure schedule item exists, run generator, create portal Issue.
 
-    Returns summary with keys: service_object, schedule, issues_created, issues_today, portal_sr.
+    Returns summary with keys: asset, schedule, issues_created, issues_today, portal_issue.
     """
     out: dict[str, object] = {}
     from frappe.utils import nowdate
 
-    # Ensure there is a Service Object to use
-    so = frappe.get_all("Service Object", pluck="name", limit=1)
-    if not so:
+    # Ensure there is an Asset to use
+    asset_name = frappe.get_all("Asset", pluck="name", limit=1)
+    if not asset_name:
         cust = frappe.get_all("Customer", pluck="name", limit=1)
         if not cust:
             c = frappe.new_doc("Customer")
             c.customer_name = "Portal Client"
             c.insert(ignore_permissions=True)
             cust = [c.name]
-        so_doc = frappe.new_doc("Service Object")
-        so_doc.company = frappe.get_all("Company", pluck="name", limit=1)[0]
-        so_doc.customer = cust[0]
-        so_doc.object_name = "SO-AUDIT-1"
-        so_doc.insert(ignore_permissions=True)
-        so = [so_doc.name]
-    out["service_object"] = so[0]
+        asset_doc = frappe.new_doc("Asset")
+        asset_doc.company = frappe.get_all("Company", pluck="name", limit=1)[0]
+        asset_doc.customer = cust[0]
+        asset_doc.asset_name = "ASSET-AUDIT-1"
+        asset_doc.insert(ignore_permissions=True)
+        asset_name = [asset_doc.name]
+    out["asset"] = asset_name[0]
 
     # Ensure schedule exists and has an item
     sch = frappe.db.get_value("Service Maintenance Schedule", {"schedule_name": ["like", "Smoke %"]}, "name")
@@ -885,7 +857,7 @@ def audit_fix_tasks() -> dict:
         sch = ms.name
     doc = frappe.get_doc("Service Maintenance Schedule", sch)
     if not doc.items:
-        doc.append("items", {"service_object": so[0], "description": "Routine check (audit)"})
+        doc.append("items", {"service_object": asset_name[0], "description": "Routine check (audit)"})
         doc.save(ignore_permissions=True)
     out["schedule"] = doc.name
 
@@ -903,7 +875,7 @@ def audit_fix_tasks() -> dict:
     out["issues_created"] = after - before
     out["issues_today"] = issues
 
-    # Create a test portal client and create SR
+    # Create a test portal client and create Issue
     uname = "portal.client@example.com"
     if not frappe.db.exists("User", uname):
         u = frappe.new_doc("User")
@@ -926,13 +898,13 @@ def audit_fix_tasks() -> dict:
             up.for_value = cust
             up.insert(ignore_permissions=True)
         # Create via API under Administrator context (portal UI проверяется отдельно)
-        from ferum_custom.ferum_custom.api.service import create_service_request
+        from ferum_custom.ferum_custom.api.service import create_service_request as create_issue
 
-        resp = create_service_request(
+        resp = create_issue(
             title="Portal API Audit", description="from audit", service_object=None
         )
-        sr_name = resp.get("name") if isinstance(resp, dict) else resp
-        out["portal_sr"] = sr_name
+        issue_name = resp.get("name") if isinstance(resp, dict) else resp
+        out["portal_issue"] = issue_name
         return out
 
 
@@ -962,17 +934,17 @@ def setup_demo_assigned_schedule(
         u.add_roles("Service Engineer")
     res["user"] = email
 
-    # Resolve Service Object
-    so = service_object
-    if so and not frappe.db.exists("Service Object", so):
-        so = None
-    if not so:
-        so = frappe.get_all("Service Object", pluck="name", limit=1)[0]
-    res["service_object"] = so
+    # Resolve Asset
+    asset_name = service_object
+    if asset_name and not frappe.db.exists("Asset", asset_name):
+        asset_name = None
+    if not asset_name:
+        asset_name = frappe.get_all("Asset", pluck="name", limit=1)[0]
+    res["service_object"] = asset_name
 
-    # Set default engineer on Service Object
+    # Set default engineer on Asset
     try:
-        frappe.db.set_value("Service Object", so, "default_engineer", email)
+        frappe.db.set_value("Asset", asset_name, "default_engineer", email)
     except Exception:
         pass
 
@@ -990,7 +962,7 @@ def setup_demo_assigned_schedule(
             "next_due_date": nowdate(),
         }
     )
-    sch.append("items", {"service_object": so, "description": "Demo assigned task"})
+    sch.append("items", {"service_object": asset_name, "description": "Demo assigned task"})
     sch.insert(ignore_permissions=True)
     res["schedule"] = sch.name
 
@@ -1113,12 +1085,12 @@ def purge_user(email: str) -> dict:
     if not frappe.db.exists("User", email):
         return {"status": "skipped", **res}
 
-    # Clear default_engineer on Service Object
+    # Clear default_engineer on Asset
     try:
-        objs = frappe.get_all("Service Object", filters={"default_engineer": email}, pluck="name")
+        objs = frappe.get_all("Asset", filters={"default_engineer": email}, pluck="name")
         for name in objs or []:
             try:
-                frappe.db.set_value("Service Object", name, "default_engineer", None)
+                frappe.db.set_value("Asset", name, "default_engineer", None)
                 res["cleared_service_objects"] += 1
             except Exception:
                 pass
@@ -1221,7 +1193,7 @@ def create_test_schedule(
 ) -> str:
     """Create a simple Service Maintenance Schedule for smoke testing.
 
-    If parameters are omitted, picks the first available Company/Customer/Service Object.
+    If parameters are omitted, picks the first available Company/Customer/Asset.
     Returns the created document name.
     """
     # Resolve defaults
@@ -1232,7 +1204,7 @@ def create_test_schedule(
         customers = frappe.get_all("Customer", pluck="name", limit=1)
         customer = customers[0] if customers else None
     if not service_object:
-        objs = frappe.get_all("Service Object", pluck="name", limit=1)
+        objs = frappe.get_all("Asset", pluck="name", limit=1)
         service_object = objs[0] if objs else None
 
     if not (company and customer):
@@ -1253,6 +1225,6 @@ def create_test_schedule(
         }
     )
     if service_object:
-        doc.append("items", {"service_object": service_object, "description": "Routine check"})
+        doc.append("items", {"asset": service_object, "description": "Routine check"})
     doc.insert(ignore_permissions=True)
     return doc.name

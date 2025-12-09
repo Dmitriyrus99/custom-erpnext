@@ -1,6 +1,6 @@
 Ferum Custom
 Project & Contract Management
-Service Request Management
+Issue Management
 Work Reporting
 Invoicing
 HR & Payroll

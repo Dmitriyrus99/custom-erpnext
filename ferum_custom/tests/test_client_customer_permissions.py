@@ -24,7 +24,7 @@ class TestClientCustomerPermissions(FrappeTestCase):
 			smoke_tools.ensure_customer(customer, company=self.company)
 			self.customers[customer] = frappe.db.get_value("Customer", {"customer_name": customer}, "name")
 		for obj_name, customer in (("Obj-A", "Cust A"), ("Obj-B", "Cust B")):
-			smoke_tools.ensure_service_object(obj_name, customer=self.customers[customer], company=self.company)
+			smoke_tools.ensure_asset(obj_name, customer=self.customers[customer], company=self.company)
 
 		# User Permissions
 		if not frappe.db.exists(
@@ -50,28 +50,32 @@ class TestClientCustomerPermissions(FrappeTestCase):
 
 	def test_client_sees_requests_by_customer(self):
 		frappe.set_user("Administrator")
-		# Create two SRs under different customers; owners set to Administrator
+		# Create two Issues under different customers; owners set to Administrator
 		for title, so_obj in (("SR-A", "Obj-A"), ("SR-B", "Obj-B")):
-			doc = frappe.new_doc("Service Request")
-			doc.title = title
-			doc.company = self.company
-			doc.customer = self.customers["Cust A"] if so_obj == "Obj-A" else self.customers["Cust B"]
-			doc.service_object = frappe.db.get_value("Service Object", {"object_name": so_obj})
-			doc.owner = "cust1@example.com"
-			doc.insert()
-		sr_a = frappe.db.get_value("Service Request", {"title": "SR-A"})
-		sr_b = frappe.db.get_value("Service Request", {"title": "SR-B"})
+			issue_doc = frappe.new_doc("Issue")
+			issue_doc.subject = title
+			issue_doc.company = self.company
+			issue_doc.customer = self.customers["Cust A"] if so_obj == "Obj-A" else self.customers["Cust B"]
+			issue_doc.asset = frappe.db.get_value("Asset", {"asset_name": so_obj})
+			issue_doc.owner = "cust1@example.com"
+			issue_doc.insert()
+		issue_a = frappe.db.get_value("Issue", {"subject": "SR-A"})
+		issue_b = frappe.db.get_value("Issue", {"subject": "SR-B"})
 
 		# As client, only SR-A (Cust A) should be visible
 		frappe.set_user("cust1@example.com")
-		from ferum_custom.ferum_custom import security_pqc_rules as pqc
 
-		doc_a = frappe.get_doc("Service Request", sr_a)
-		doc_b = frappe.get_doc("Service Request", sr_b)
+		doc_a = frappe.get_doc("Issue", issue_a)
+		doc_b = frappe.get_doc("Issue", issue_b)
 		allowed = set(get_allowed_customers("cust1@example.com"))
 		assert self.customers["Cust A"] in allowed
 		doc_a.customer = self.customers["Cust A"]
 		doc_b.customer = self.customers["Cust B"]
-		assert pqc.service_request_has_permission(doc_a, "cust1@example.com")
-		assert not pqc.service_request_has_permission(doc_b, "cust1@example.com")
+		# Permissions are now implicitly handled by the framework based on User Permissions
+		# and standard Issue DocType behavior, so explicit security_pqc_rules checks are removed.
+		# You would typically rely on frappe.get_list or frappe.get_doc to test permissions
+		# which automatically apply the relevant PQC rules for the current user.
+		# For direct testing, you might use frappe.has_permission(Issue, "read", doc_a) if needed.
+		assert frappe.has_permission("Issue", ptype="read", doc=doc_a)
+		assert not frappe.has_permission("Issue", ptype="read", doc=doc_b)
 		frappe.set_user("Administrator")

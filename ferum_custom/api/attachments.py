@@ -84,16 +84,16 @@ def _store_file(
 
 @frappe.whitelist(methods=["POST"])  # multipart upload
 @rate_limit(limit=30, seconds=60, methods=["POST"])  # 30 uploads/min per IP
-def attach_to_service_request(name: str) -> dict:
-	"""Attach an uploaded file to a Service Request.
+def attach_to_issue(name: str) -> dict:
+	"""Attach an uploaded file to an Issue.
 
 	Expects a multipart/form-data request with 'file' field.
 	"""
 	_require_auth()
-	if not frappe.db.exists("Service Request", name):
-		frappe.throw(_("Service Request not found"))
-	if not frappe.has_permission("Service Request", ptype="write", doc=name):
-		frappe.throw(_("Not permitted to modify this Service Request"))
+	if not frappe.db.exists("Issue", name):
+		frappe.throw(_("Issue not found"))
+	if not frappe.has_permission("Issue", ptype="write", doc=name):
+		frappe.throw(_("Not permitted to modify this Issue"))
 
 	f = None
 	try:
@@ -107,38 +107,23 @@ def attach_to_service_request(name: str) -> dict:
 	content = f.read()
 	content_type = getattr(f, "content_type", None)
 	url, mime = _store_file(
-		doctype="Service Request",
+		doctype="Issue",
 		docname=name,
 		filename=filename,
 		content=content,
 		content_type=content_type,
 	)
-
-	# Back-compat: append to child tables if they exist
-	try:
-		req = frappe.get_doc("Service Request", name)
-		req.append("photos", {"photo": url, "description": "bot"})
-		req.append("attachments", {"attachment": url, "description": "bot"})
-		req.save(ignore_permissions=True)
-	except Exception:
-		pass
-
 	return {"ok": True, "file_url": url, "mime": mime}
-
 
 @frappe.whitelist(methods=["POST"])  # multipart upload
 @rate_limit(limit=30, seconds=60, methods=["POST"])  # 30 uploads/min per IP
-def attach_to_service_report(name: str) -> dict:
-	"""Attach an uploaded file to a Service Report (documents table).
-
-	Expects a multipart/form-data request with 'file' field.
-	Registers a Custom Attachment and adds a row to Service Report Document Item.
-	"""
+def attach_to_timesheet(name: str) -> dict:
+	"""Attach an uploaded file to a Timesheet (documents table)."""
 	_require_auth()
-	if not frappe.db.exists("Service Report", name):
-		frappe.throw(_("Service Report not found"))
-	if not frappe.has_permission("Service Report", ptype="write", doc=name):
-		frappe.throw(_("Not permitted to modify this Service Report"))
+	if not frappe.db.exists("Timesheet", name):
+		frappe.throw(_("Timesheet not found"))
+	if not frappe.has_permission("Timesheet", ptype="write", doc=name):
+		frappe.throw(_("Not permitted to modify this Timesheet"))
 
 	f = None
 	try:
@@ -152,26 +137,11 @@ def attach_to_service_report(name: str) -> dict:
 	content = f.read()
 	content_type = getattr(f, "content_type", None)
 	url, mime = _store_file(
-		doctype="Service Report",
+		doctype="Timesheet",
 		docname=name,
 		filename=filename,
 		content=content,
 		content_type=content_type,
 	)
-
-	# Add to documents child table
-	try:
-		# Find the Custom Attachment we just inserted by file_url
-		att_name = frappe.db.get_value(
-			"Custom Attachment",
-			{"linked_doctype": "Service Report", "linked_docname": name, "file_url": url},
-			"name",
-		)
-		if att_name:
-			sr = frappe.get_doc("Service Report", name)
-			sr.append("documents", {"custom_attachment": att_name})
-			sr.save(ignore_permissions=True)
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Attach to Service Report child table failed")
 
 	return {"ok": True, "file_url": url, "mime": mime}

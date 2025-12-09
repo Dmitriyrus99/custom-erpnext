@@ -55,9 +55,11 @@ def execute():
 					doc.project = project
 				# Status
 				doc.status = STATUS_MAP.get(sr.status, "Open")
+				if getattr(sr, "service_object", None):
+					with contextlib.suppress(Exception):
+						doc.service_object = sr.service_object
 				doc.insert(ignore_permissions=True)
 				issue_name = doc.name
-
 			o, s = migrate_attachments("Service Request", sr.name, "Issue", issue_name)
 			att_ok += o
 			att_skip += s

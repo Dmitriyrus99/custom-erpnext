@@ -149,10 +149,10 @@ def create_service_request(
 
 	if service_object:
 		obj_name = service_object
-		if not frappe.db.exists("Service Object", obj_name):
-			obj_name = frappe.db.get_value("Service Object", {"object_name": obj_name}, "name") or service_object
-		if frappe.db.exists("Service Object", obj_name):
-			so = frappe.get_doc("Service Object", obj_name)
+		if not frappe.db.exists("Asset", obj_name):
+			obj_name = frappe.db.get_value("Asset", {"asset_name": obj_name}, "name") or service_object
+		if frappe.db.exists("Asset", obj_name):
+			so = frappe.get_doc("Asset", obj_name)
 			customer = getattr(so, "customer", None)
 			project = getattr(so, "project", None)
 			company = company or getattr(so, "company", None)
@@ -249,19 +249,19 @@ def portal_token() -> dict[str, t.Any]:
 
 
 @frappe.whitelist(methods=["POST"])  # State change
-def update_service_request_status(name: str, status: str) -> dict:
+def update_issue_status(name: str, status: str) -> dict:
 	"""
-	Updates the status of a service request.
+	Updates the status of an issue.
 
-	This function updates the status of a service request with server-side validation.
+	This function updates the status of an issue with server-side validation.
 	It requires authentication and relies on DocType validations and permission checks.
 
 	Args:
-		name (str): The name of the service request to update.
-		status (str): The new status for the service request.
+		name (str): The name of the issue to update.
+		status (str): The new status for the issue.
 
 	Returns:
-		dict: A dictionary containing the name and updated status of the service request.
+		dict: A dictionary containing the name and updated status of the issue.
 	"""
 	_require_jwt_authentication()
 	doc = frappe.get_doc("Issue", name)
@@ -411,12 +411,12 @@ def list_invoices(
 
 
 @frappe.whitelist()
-def confirm_service_request(name: str) -> None:
-	"""Allow a Client to confirm completion of a Service Request by adding a comment."""
+def confirm_issue_completion(name: str) -> None:
+	"""Allow a Client to confirm completion of an Issue by adding a comment."""
 	service_app.confirm_service_request(name)
 
 
 @frappe.whitelist()
-def confirm_service_report(name: str) -> None:
-	"""Allow a Client to confirm a Service Report via a comment."""
-	service_app.confirm_service_report(name)
+def confirm_timesheet_report(name: str) -> None:
+	"""Allow a Client to confirm a Timesheet Report via a comment."""
+	service_app.confirm_timesheet_report(name)

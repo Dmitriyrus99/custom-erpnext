@@ -16,7 +16,7 @@ class DummyDoc:
         return self.data
 
 
-def test_create_service_request_sets_fields(monkeypatch):
+def test_create_issue_sets_fields(monkeypatch):
     captured = {}
 
     def fake_new_doc(doctype: str):
@@ -29,36 +29,36 @@ def test_create_service_request_sets_fields(monkeypatch):
     name = service_app.create_service_request(
         title="Test",
         description="desc",
-        service_object="SO-1",
+        service_object="ASSET-1",
         company="Ferum",
         project="Proj-1",
         customer="Customer A",
         priority="High",
-        request_type="Issue",
+        request_type="Routine Maintenance",
     )
 
     doc = captured["doc"]
-    assert doc.doctype == "Service Request"
-    assert doc.service_object == "SO-1"
+    assert doc.doctype == "Issue"
+    assert doc.service_object == "ASSET-1"
     assert doc.company == "Ferum"
     assert doc.customer == "Customer A"
     assert doc.priority == "High"
-    assert doc.type == "Issue"
+    assert doc.issue_type == "Routine Maintenance"
     assert name == doc.name
 
 
-def test_list_service_requests_passes_filters(monkeypatch):
+def test_list_issues_passes_filters(monkeypatch):
     recorded = {}
 
     def fake_get_list(doctype, **kwargs):
         recorded["doctype"] = doctype
         recorded["filters"] = kwargs.get("filters")
-        return [{"name": "SR-1"}]
+        return [{"name": "ISS-1"}]
 
     monkeypatch.setattr("frappe.get_list", fake_get_list)
 
     data = service_app.list_service_requests(filters={"status": "Open"}, start=0, page_length=5)
 
-    assert recorded["doctype"] == "Service Request"
+    assert recorded["doctype"] == "Issue"
     assert recorded["filters"] == {"status": "Open"}
-    assert data == [{"name": "SR-1"}]
+    assert data == [{"name": "ISS-1"}]

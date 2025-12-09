@@ -135,9 +135,9 @@ def ensure_customer(name: str = "Perm Customer", company: str | None = None) -> 
 	return doc.name
 
 
-def ensure_service_object(object_name: str, customer: str | None = None, company: str | None = None) -> str:
+def ensure_asset(object_name: str, customer: str | None = None, company: str | None = None) -> str:
 	_ensure_module_registered()
-	existing = frappe.db.get_value("Service Object", {"object_name": object_name})
+	existing = frappe.db.get_value("Asset", {"asset_name": object_name})
 	if existing:
 		return existing
 
@@ -149,8 +149,8 @@ def ensure_service_object(object_name: str, customer: str | None = None, company
 		customer_name = ensure_customer(customer or "Portal Customer", company=company)
 	doc = frappe.get_doc(
 		{
-			"doctype": "Service Object",
-			"object_name": object_name,
+			"doctype": "Asset",
+			"asset_name": object_name,
 			"customer": customer_name,
 			"company": company,
 		}
@@ -159,50 +159,36 @@ def ensure_service_object(object_name: str, customer: str | None = None, company
 	return doc.name
 
 
-def ensure_service_department(name: str, company: str | None = None) -> str:
+
+
+
+def ensure_project_doc(name: str, customer: str) -> str:
 	_ensure_module_registered()
-	existing = frappe.db.exists("Service Department", name)
+	existing = frappe.db.get_value("Project", {"project_name": name}, "name")
 	if existing:
 		return existing
 	doc = frappe.get_doc(
 		{
-			"doctype": "Service Department",
-			"department_name": name,
-			"company": company or ensure_company(),
-		}
-	)
-	doc.insert(ignore_permissions=True)
-	return doc.name
-
-
-def ensure_service_project(name: str, customer: str, department: str) -> str:
-	_ensure_module_registered()
-	existing = frappe.db.get_value("Service Project", {"project_name": name}, "name")
-	if existing:
-		return existing
-	doc = frappe.get_doc(
-		{
-			"doctype": "Service Project",
+			"doctype": "Project",
 			"company": ensure_company(),
 			"customer": customer,
 			"project_name": name,
-			"service_department": department,
 		}
 	)
 	doc.insert(ignore_permissions=True)
 	return doc.name
 
 
-def create_test_service_request() -> str:
-	"""Create a minimal test Service Request using first available Company."""
+def create_test_issue() -> str:
+	"""Create a minimal test Issue using first available Company."""
 
 	_ensure_module_registered()
 	company = ensure_company()
 	doc = frappe.get_doc(
 		{
-			"doctype": "Service Request",
+			"doctype": "Issue",
 			"company": company,
-			"title": "Smoke Test Request",
+			"subject": "Smoke Test Issue",
 			"status": "Open",
 		}
 	)
@@ -210,16 +196,16 @@ def create_test_service_request() -> str:
 	return doc.name
 
 
-def assign_request(name: str, user: str = "Administrator") -> None:
-	doc = frappe.get_doc("Service Request", name)
+def assign_issue(name: str, user: str = "Administrator") -> None:
+	doc = frappe.get_doc("Issue", name)
 	doc.assigned_to = user
 	doc.save(ignore_permissions=True)
 
 
-def update_request_status_via_api(name: str, status: str) -> dict[str, Any]:
-	from ferum_custom.ferum_custom.api.service import update_service_request_status
+def update_issue_status_via_api(name: str, status: str) -> dict[str, Any]:
+	from ferum_custom.ferum_custom.api.service import update_issue_status
 
-	return update_service_request_status(name=name, status=status)
+	return update_issue_status(name=name, status=status)
 
 
 def get_telegram_secret() -> str:

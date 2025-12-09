@@ -7,7 +7,7 @@ def get_data():
 		"transactions": [
 			{
 				"label": _("Related"),
-				"items": ["Service Request"],
+				"items": ["Issue"],
 			}
 		],
 	}

@@ -23,10 +23,10 @@ class PayrollEntryCustom(Document):
 			self.total_payroll_amount += item.net_salary
 
 	def apply_service_report_earnings(self):
-		"""Augment/initialize base salaries from Service Report Work Items within period.
+		"""Augment/initialize base salaries from Timesheet Detail within period.
 
-		For each employee row, sum hours*rate from Service Reports with status in
-		(Submitted, Approved) and report_date within [period_start, period_end].
+		For each employee row, sum hours from Timesheets with status in
+		(Submitted, Approved) and start_date/end_date within [period_start, period_end].
 		If base_salary is zero, set it from this sum. Recompute net_salary.
 		"""
 		try:
@@ -38,14 +38,14 @@ class PayrollEntryCustom(Document):
 			if not rows:
 				return
 			employees = list(rows.keys())
-			# Sum totals from work items joined via parent Service Report
+			# Sum totals from time logs joined via parent Timesheet
 			data = frappe.db.sql(
 				"""
-                select w.employee, sum(w.hours * w.rate) as amount
-                from `tabService Report Work Item` w
-                join `tabService Report` r on r.name = w.parent
+                select w.employee, sum(w.hours) as amount
+                from `tabTimesheet Detail` w
+                join `tabTimesheet` r on r.name = w.parent
                 where w.employee in %(emps)s
-                  and r.report_date >= %(start)s and r.report_date <= %(end)s
+                  and r.start_date >= %(start)s and r.end_date <= %(end)s
                   and r.status in ('Submitted','Approved')
                 group by w.employee
                 """,

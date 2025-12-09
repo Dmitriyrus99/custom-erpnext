@@ -3,11 +3,11 @@
     "doctype": "Report",
     "name": "Service Requests by Project",
     "report_name": "Заявки по проектам",
-    "ref_doctype": "Service Request",
+    "ref_doctype": "Issue",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-    "query": "SELECT name AS \"Заявка:Link/Service Request:150\", project AS \"Проект:Link/Service Project:180\", status AS \"Статус:Data:120\", priority AS \"Приоритет:Data:120\", assigned_to AS \"Назначено:Link/User:180\", modified AS \"Изменен:Datetime:160\" FROM `tabService Request` WHERE (%(project)s IS NULL OR project = %(project)s) ORDER BY modified DESC",
+    "query": "SELECT name AS \"Заявка:Link/Issue:150\", project AS \"Проект:Link/Project:180\", status AS \"Статус:Data:120\", priority AS \"Приоритет:Data:120\", assigned_to AS \"Назначено:Link/User:180\", modified AS \"Изменен:Datetime:160\" FROM `tabIssue` WHERE (%(project)s IS NULL OR project = %(project)s) ORDER BY modified DESC",
     "roles": [
       {
         "doctype": "Report Perm",
@@ -90,11 +90,11 @@
     "doctype": "Report",
     "name": "Unassigned Service Requests",
     "report_name": "Нераспределенные заявки",
-    "ref_doctype": "Service Request",
+    "ref_doctype": "Issue",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-      "query": "SELECT name AS \"Заявка:Link/Service Request:150\", status AS \"Статус:Data:120\", priority AS \"Приоритет:Data:120\", modified AS \"Изменен:Datetime:160\" FROM `tabService Request` WHERE assigned_to IS NULL AND status != 'Closed' ORDER BY modified DESC",
+      "query": "SELECT name AS \"Заявка:Link/Issue:150\", status AS \"Статус:Data:120\", priority AS \"Приоритет:Data:120\", modified AS \"Изменен:Datetime:160\" FROM `tabIssue` WHERE assigned_to IS NULL AND status != 'Closed' ORDER BY modified DESC",
     "roles": [
       { "doctype": "Report Perm", "role": "System Manager" },
       { "doctype": "Report Perm", "role": "Office Manager" }
@@ -104,11 +104,11 @@
     "doctype": "Report",
     "name": "Open Service Requests by Engineer",
     "report_name": "Открытые заявки по инженерам",
-    "ref_doctype": "Service Request",
+    "ref_doctype": "Issue",
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-    "query": "SELECT COALESCE(assigned_to, 'Не назначено') AS \"Инженер:Data:200\", COUNT(*) AS \"Открытых заявок:Int:100\" FROM `tabService Request` WHERE status != 'Closed' GROUP BY assigned_to ORDER BY COUNT(*) DESC",
+    "query": "SELECT COALESCE(assigned_to, 'Не назначено') AS \"Инженер:Data:200\", COUNT(*) AS \"Открытых заявок:Int:100\" FROM `tabIssue` WHERE status != 'Closed' GROUP BY assigned_to ORDER BY COUNT(*) DESC",
     "roles": [
       { "doctype": "Report Perm", "role": "System Manager" },
       { "doctype": "Report Perm", "role": "Office Manager" }
