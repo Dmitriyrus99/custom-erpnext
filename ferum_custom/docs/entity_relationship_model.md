@@ -9,81 +9,59 @@ Each box represents a DocType (or key model), with primary fields, and lines ind
 ### Customer
 
 - Standard ERPNext doctype representing a client (organization or individual) who receives services.
-- Each Customer can have multiple Service Projects and Service Requests associated with it.
-- Customers also have related Service Objects (assets at the customer’s site).
-- In the ERD, Customer is linked one-to-many with ServiceProject and ServiceObject.
+- Each Customer can have multiple Projects and Issues associated with it.
+- Customers also have related Assets (assets at the customer’s site).
+- In the ERD, Customer is linked one-to-many with Project and Asset.
 
-### ServiceProject
+### Project
 
-- A custom DocType for maintenance contracts/projects.
+- A standard DocType for maintenance contracts/projects.
 - It represents an ongoing service agreement with a customer.
 - Fields include project name, start/end dates, status (e.g.
 - Active, Completed), contract amount, and a link to the Customer.
-- A ServiceProject may cover multiple ServiceObjects – those are listed via a child table ProjectObjectItem.
-- In the ERD, ServiceProject is one-to-many with ProjectObjectItem, and also one-to-many with ServiceRequest (since many requests can happen under one project).
+- A Project may cover multiple Assets – those can be linked directly or managed separately.
+- In the ERD, Project is one-to-many with Issue (since many issues can happen under one project).
 
-### ServiceObject
+### Asset
 
-- A custom DocType representing a specific asset or location that requires service.
+- A standard DocType representing a specific asset or location that requires service.
 - For example, a building’s fire alarm panel, sprinkler system, etc.
 - Fields include object name, location/address, type of equipment, and a link to the Customer (who owns it).
-- In implementation, ServiceObject also may have a field linking to the current ServiceProject (if under contract) – ensuring an object is tied to at most one active project at a time.
-- ServiceObject is connected to ServiceRequest (one object can have many requests over time) and to ProjectObjectItem (if listed under a project).
+- In implementation, Asset also may have a field linking to the current Project (if under contract) – ensuring an asset is tied to at most one active project at a time.
+- Asset is connected to Issue (one asset can have many issues over time).
 
-### ProjectObjectItem
 
-- A child table DocType used within ServiceProject to enumerate the Service Objects included.
-- Each ProjectObjectItem links one ServiceObject to the parent ServiceProject.
-- This effectively creates a many-to-many relationship between ServiceProject and ServiceObject (over time an object might appear in different projects, but not concurrently due to validation).
-- In the ERD, ProjectObjectItem has foreign keys to ServiceProject (its parent) and ServiceObject.
+### Issue
 
-### ServiceRequest
+- The DocType for service tickets or maintenance issues.
+- Fields include a subject/description of the issue, type (routine or emergency), links to Customer, Project, and/or Asset (so the issue is tied to a specific contract and asset), priority level, status, assignment (engineer), and timestamps (creation time, resolution time).
+- Issue has a one-to-many relationship with attachments (photos/docs) and a one-to-one (or one-to-many, but practically one) relationship with Timesheet (each issue can have at most one Timesheet for work done).
+- In the ERD, Issue is linked to Custom Attachment (for general attachments) and to Timesheet.
 
-- The DocType for service tickets or maintenance requests.
-- Fields include a title/description of the issue, type (routine or emergency), links to Customer, ServiceProject, and/or ServiceObject (so the request is tied to a specific contract and asset), priority level, status, assignment (engineer), and timestamps (reported time, start time, completion time).
-- ServiceRequest has a one-to-many relationship with attachments (photos/docs) and a one-to-one (or one-to-many, but practically one) relationship with ServiceReport (each request will produce at most one ServiceReport).
-- In the ERD, ServiceRequest is linked to RequestPhotoAttachmentItem (child table of attachments) and to ServiceReport.
-
-### RequestPhotoAttachmentItem
-
-- A child table DocType for storing multiple attachments (photos or documents) related to a ServiceRequest.
-- Each item typically references a file (via CustomAttachment).
-- In the diagram, it’s shown linking ServiceRequest to CustomAttachment (many attachments per request).
 
 ### CustomAttachment
 
 - A unified doctype for any file stored (could cover what was “PhotoAttachment” and “DocumentAttachment”).
 - Fields include an ID, file URL or Drive ID, file type, and metadata.
-- CustomAttachment records are linked to parent documents via the child tables (like RequestPhotoAttachmentItem or ServiceReportDocumentItem).
-- In the ERD, CustomAttachment is the central file reference, with lines from it to those child tables (meaning one attachment can potentially be referenced in multiple contexts if needed).
+- CustomAttachment records are linked to parent documents directly (e.g., File DocType) or via child tables in some cases.
+- In the ERD, CustomAttachment is the central file reference.
 
-### ServiceReport
+### Timesheet
 
-- The DocType for work completion reports/acts.
-- Fields include a link to the related ServiceRequest, date of report, status (Draft/Submitted), and a total amount.
-- ServiceReport has two child tables: ServiceReportWorkItem and ServiceReportDocumentItem.
-- It is typically one per ServiceRequest (1:1 relationship in logic, enforced by linking fields and validation).
-- In the ERD, ServiceReport links back to ServiceRequest (one report per request).
+- The DocType for work time logging.
+- Fields include a link to the related Issue, start/end dates, status (Draft/Submitted), and total hours.
+- Timesheet has one child table: Time Log.
+- It is typically linked to one Issue (1:1 relationship in logic).
+- In the ERD, Timesheet links back to Issue (one timesheet per issue).
 
-### ServiceReportWorkItem
 
-- A child table under ServiceReport to list detailed tasks or items in the report.
-- Fields include description of work, quantity, unit, and cost.
-- Many work items belong to one ServiceReport.
-
-### ServiceReportDocumentItem
-
-- Another child table under ServiceReport for attachments.
-- Each entry links to a CustomAttachment (file) that is attached to the report (e.g.
-- a scan of signed document).
-- Many documents can be attached to one ServiceReport.
 
 ### Invoice
 
 - A custom model (could be a DocType in ERPNext or an external entity) representing an invoice for either client billing or subcontractor payment.
 - Fields include an ID, linked Project (if applicable), the month/period or date, amount, currency, counterparty (Customer or subcontractor), status (e.g.
 - New, Sent, Paid), and references to attachments (like PDF of the invoice or acts).
-- In the ERD, Invoice is linked many-to-one with ServiceProject (a project can have multiple invoices over time).
+- In the ERD, Invoice is linked many-to-one with Project (a project can have multiple invoices over time).
 - It also implicitly links to Customer or subcontractor, though in the model that may just be a text field or a link to Customer/Supplier.
 
 ### PayrollEntryCustom
@@ -99,7 +77,7 @@ Each box represents a DocType (or key model), with primary fields, and lines ind
 
 - Standard doctype for company staff.
 - Each Employee can have entries in PayrollEntryCustom.
-- (Also employees can be linked as the “assigned engineer” in ServiceRequest – though in ERPNext that assignment might use the User or Employee record.)
+- (Also employees can be linked as the “assigned engineer” in Issue – though in ERPNext that assignment might use the User or Employee record.)
 
 ### User
 
@@ -108,4 +86,4 @@ Each box represents a DocType (or key model), with primary fields, and lines ind
 - Permissions are handled at user/role level rather than as relational links in data.
 
 - This ERD and description cover the primary data structure of the system.
-- It is designed to maintain referential integrity (e.g., cannot delete a Service Object if linked to active requests) and to efficiently fetch related information (for instance, from a ServiceRequest you can navigate to its Project, Customer, Object, attachments, and work report).
+- It is designed to maintain referential integrity (e.g., cannot delete an Asset if linked to active issues) and to efficiently fetch related information (for instance, from an Issue you can navigate to its Project, Customer, Asset, attachments, and timesheet).

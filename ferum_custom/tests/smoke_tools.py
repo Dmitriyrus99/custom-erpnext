@@ -135,6 +135,42 @@ def ensure_customer(name: str = "Perm Customer", company: str | None = None) -> 
 	return doc.name
 
 
+def _ensure_asset_category(name: str = "Test Category") -> str:
+	existing = frappe.get_all("Asset Category", limit=1, pluck="name")
+	if existing:
+		return existing[0]
+
+	doc = frappe.new_doc("Asset Category")
+	doc.asset_category_name = name
+	doc.flags.ignore_mandatory = True
+	doc.insert(ignore_permissions=True)
+	return name
+
+
+def _ensure_item(name: str = "Test Asset Item") -> str:
+	if frappe.db.exists("Item", name):
+		return name
+	cat = _ensure_asset_category()
+	item = frappe.new_doc("Item")
+	item.item_code = name
+	item.item_group = "All Item Groups"
+	item.stock_uom = "Nos"
+	item.is_stock_item = 0
+	item.is_fixed_asset = 1
+	item.asset_category = cat
+	item.insert(ignore_permissions=True)
+	return name
+
+
+def _ensure_location(name: str = "Test Location") -> str:
+	if frappe.db.exists("Location", name):
+		return name
+	doc = frappe.new_doc("Location")
+	doc.location_name = name
+	doc.insert(ignore_permissions=True)
+	return name
+
+
 def ensure_asset(object_name: str, customer: str | None = None, company: str | None = None) -> str:
 	_ensure_module_registered()
 	existing = frappe.db.get_value("Asset", {"asset_name": object_name})
@@ -147,12 +183,20 @@ def ensure_asset(object_name: str, customer: str | None = None, company: str | N
 	)
 	if not customer_name:
 		customer_name = ensure_customer(customer or "Portal Customer", company=company)
+	
+	item_code = _ensure_item()
+	location = _ensure_location()
 	doc = frappe.get_doc(
 		{
 			"doctype": "Asset",
 			"asset_name": object_name,
+			"item_code": item_code,
+			"location": location,
 			"customer": customer_name,
 			"company": company,
+			"gross_purchase_amount": 1000,
+			"purchase_date": frappe.utils.today(),
+			"calculate_depreciation": 0,
 		}
 	)
 	doc.insert(ignore_permissions=True)
@@ -206,6 +250,30 @@ def update_issue_status_via_api(name: str, status: str) -> dict[str, Any]:
 	from ferum_custom.ferum_custom.api.service import update_issue_status
 
 	return update_issue_status(name=name, status=status)
+
+
+def _ensure_activity_type(name: str = "Maintenance") -> str:
+	if frappe.db.exists("Activity Type", name):
+		return name
+	doc = frappe.new_doc("Activity Type")
+	doc.activity_type = name
+	doc.insert(ignore_permissions=True)
+	return name
+
+
+def _get_or_create_timesheet(issue_name: str, attachment_name: str) -> str:
+	exists = frappe.db.exists("Timesheet", {"issue": issue_name})
+	if exists:
+		return exists
+	
+	activity_type = _ensure_activity_type()
+	timesheet_doc = frappe.new_doc("Timesheet")
+	timesheet_doc.issue = issue_name
+	timesheet_doc.start_date = frappe.utils.nowdate()
+	timesheet_doc.status = "Draft"
+	timesheet_doc.append("time_logs", {"activity_type": activity_type, "hours": 1.0, "description": "Inspection"})
+	timesheet_doc.insert(ignore_permissions=True)
+	return timesheet_doc.name
 
 
 def get_telegram_secret() -> str:

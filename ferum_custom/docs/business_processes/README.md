@@ -5,7 +5,7 @@
 
 - ```mermaid
   flowchart LR
-      A[Project & Contract] --> B[Service Request] --> C[Work Reporting] --> D[Invoicing & Payments] --> E[HR & Payroll]
+      A[Project & Contract] --> B[Issue] --> C[Timesheet] --> D[Invoicing & Payments] --> E[HR & Payroll]
   ```
 
 ```
@@ -15,8 +15,8 @@ Document & Attachment Management along with Monitoring, Analytics & Security sup
 ## Process Guides
 
 - [Project & Contract Management](project_contract_management.md)
-- [Service Request Management](service_request_management.md)
-- [Work Reporting](work_reporting.md)
+- [Issue Management](issue_management.md)
+- [Timesheet and Work Reporting](timesheet_work_reporting.md)
 - [Invoicing & Payments](invoicing_payments.md)
 - [HR & Payroll Management](hr_payroll_management.md)
 - [Document & Attachment Management](document_attachment_management.md)

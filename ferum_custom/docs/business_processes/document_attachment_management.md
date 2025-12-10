@@ -10,11 +10,11 @@ Throughout all the above processes, a lot of files and documents are generated �
 
 ### Uploading & Linking
 
-- Users in all roles upload documents to the system at various stages: a contract PDF attached to a Service Project, photos attached to a Service Request, signed acts attached to a Service Report, invoices attached to Invoice records, and so on.
+- Users in all roles upload documents to the system at various stages: a contract PDF attached to a Project, photos attached to an Issue, signed acts attached to a Timesheet, invoices attached to Invoice records, and so on.
 - In ERPNext, attachments can be handled using the built-in file manager, but to add more structure, Ferum Customizations defines custom DocTypes: originally PhotoAttachment and DocumentAttachment were considered, but the design is to unify these into a single CustomAttachment doctype for simplicity.
 - A CustomAttachment record might store metadata about the file (filename, type, linked document type and ID, uploader, timestamp) and either the file content or a link to it.
 
-- When a user attaches a file through a form (say, adds a PDF to a ServiceProject), the system creates a CustomAttachment entry and links it to that project.
+- When a user attaches a file through a form (say, adds a PDF to a Project), the system creates a CustomAttachment entry and links it to that project.
 - The file itself is immediately uploaded to the server (and subsequently will be synced to Google Drive).
 - Each business document (Project, Request, Report, etc.) can thus have a list of related attachments in ERPNext, visible on the form for easy reference.
 
@@ -23,7 +23,7 @@ Throughout all the above processes, a lot of files and documents are generated �
 - Many documents go through approval workflows outside the system.
 - For instance, a draft contract might be edited and then approved by the director before signing, or a work act might need signatures from the client.
 - Ferum Customizations doesn’t fully automate content editing or digital signatures (unless integrated with an e-sign service), but it tracks the status by the presence of attachments and status fields.
-- For example, a ServiceReport might have a field “Client Signed” or an attachment of the client-signed scan.
+- For example, a Timesheet might have a field “Client Signed” or an attachment of the client-signed scan.
 - The system relies on users uploading the final signed versions.
 
 - Approval steps (like the director approving a contract) are typically done via a combination of communication (perhaps the director gets notified to review the contract PDF attached to the project) and setting a status field or checkmark once approved.

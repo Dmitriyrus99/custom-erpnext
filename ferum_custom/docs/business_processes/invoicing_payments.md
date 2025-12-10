@@ -11,7 +11,7 @@ This module automates financial document handling: issuing invoices to clients a
 ### Client Invoicing
 
 - Towards the end of a service period (e.g., monthly for ongoing contracts, or upon work completion for one-off jobs), the Project Manager prepares the billing for the client.
-- According to the business process, around the 20th–23rd of the month when work began, the PM will generate the necessary financial documents: the client’s invoice, a VAT invoice (if applicable), and two copies of the act of completed work (ServiceReport) for signing.
+- According to the business process, around the 20th–23rd of the month when work began, the PM will generate the necessary financial documents: the client’s invoice, a VAT invoice (if applicable), and two copies of the act of completed work (Timesheet) for signing.
 - Some of these documents come from Ferum Customizations (the invoice data), while others might be standard accounting forms.
 - The PM might also need to ensure the client exists in the company’s accounting system (if they use an external system like 1C).
 - If not already present, the PM or accountant registers the new client in that system (step outside of ERPNext).
@@ -42,7 +42,7 @@ This module automates financial document handling: issuing invoices to clients a
 ### Subcontractor Payments
 
 - In parallel, the system handles the company’s payables to subcontractors.
-- When subcontractors complete work (often the same work that was documented in the ServiceReport), they will send their own invoice and supporting documents to the company.
+- When subcontractors complete work (often the same work that was documented in the Timesheet), they will send their own invoice and supporting documents to the company.
 - The Project Manager collects the subcontractor’s packet which typically includes: copies of work logs (with client’s signature, if they maintain a logbook on-site), a signed act of completed work between the contractor and the company, the subcontractor’s invoice for their services, and any applicable tax documents (like a VAT invoice or, for self-employed individuals, a receipt).
 - The PM ensures they have all needed paperwork in physical form.
 

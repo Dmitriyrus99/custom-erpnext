@@ -20,7 +20,7 @@ Key Functions:
 - possibly using an official API or a bot that relays messages.
 - If implemented, commands might be simple or only notifications (the spec highlights Telegram more).
 
-- Email notifications use either ERPNext’s built-in notification engine (configured via Notification doctype or via hooks) for things like “on new request, email X”.
+- Email notifications use either ERPNext’s built-in notification engine (configured via Notification doctype or via hooks) for things like “on new issue, email X”.
 - Some custom ones like the subcontractor invoice alert might be done via custom code for more flexibility (including Telegram message).
 
 ### Ensure that each notification type is used appropriately
@@ -33,11 +33,11 @@ Integration with Roles:
 
 Administrator receives certain notifications (e.g., new invoice).
 
-Project Manager receives notifications about requests and report submissions in their projects.
+Project Manager receives notifications about issues and timesheet submissions in their projects.
 
 Engineer receives assignment and status change notices.
 
-Client receives updates on request status and possibly invoice dispatch.
+Client receives updates on issue status and possibly invoice dispatch.
 
 These rules are implemented through a combination of Notification settings and code logic.
 

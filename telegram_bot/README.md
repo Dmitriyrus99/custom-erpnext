@@ -4,8 +4,8 @@ This is a separate bot service using Aiogram 3.x that integrates with Frappe/ERP
 
 Features:
 - JWT-authenticated calls to Frappe custom API
-- Create Service Requests, list own/assigned, change status via inline buttons
-- Attach photos/documents to Service Request and Service Report (multipart upload)
+- Create Issues, list own/assigned, change status via inline buttons
+- Attach photos/documents to Issue and Timesheet (multipart upload)
 - Optional Sentry error reporting and Prometheus metrics
 - Webhook or polling mode (recommended: webhook behind Traefik HTTPS)
 

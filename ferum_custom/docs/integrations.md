@@ -11,9 +11,9 @@
   - Files: `ferum_custom/ferum_custom/ferum_custom/doctype/invoice/invoice.py`
   - Settings: `enable_google_sheets_sync`, `google_service_account_json` (File), `google_sheet_name`
 
-- Google Drive (Service Report PDFs)
+- Google Drive (Timesheet PDFs)
   - Libraries: `googleapiclient`
-  - Files: `ferum_custom/ferum_custom/ferum_custom/integrations/google.py`, `.../integrations/drive.py`, `.../doctype/service_report/service_report.py`
+  - Files: `ferum_custom/ferum_custom/ferum_custom/integrations/google.py`, `.../integrations/drive.py`
   - Settings: `google_service_account_json` (File), `google_drive_root_folder_id`
 
 - Telegram (notifications)
@@ -61,7 +61,7 @@ Some logic is implemented in the sheet itself:
 - The integration strategy:
 
 - A dedicated Google Drive folder (or a set of folders) is used as the root for Ferum files.
-- For instance, a main folder "FerumFiles" with subfolders for Projects, Service Requests, or just a single bucket if decided so.
+- For instance, a main folder "FerumFiles" with subfolders for Projects, Issues, or just a single bucket if decided so.
 
 - When a user attaches a file in ERPNext (or via the API), the file is first saved to ERPNext (either temporarily or as a File doc).
 - Then, in the background, an upload to Drive is initiated.
@@ -105,19 +105,18 @@ When the bot is launched, it connects to Telegram’s servers and listens for co
 - The system uses the bot to send messages to users or group chats for certain events.
 - For example:
 
-### New Service Request
+### New Issue
 
-- send a message to a Telegram group “Service Team” with summary (“New Request #123 from Client X: [issue]”).
+- send a message to a Telegram group “Service Team” with summary (“New Issue #123 from Client X: [issue]”).
 - Or directly message the assigned engineer if assignment is immediate.
 
 Emergency Request: send high-priority alert to perhaps a pinned message or special group of on-call engineers.
 
 New Invoice: send a message to Admin (“Invoice #INV-0005 uploaded by PM John for Project ACME, amount $5000.”).
 
-### Report submitted
+### Timesheet submitted
 
-- notify admin/PM (“Engineer Mark submitted Service Report SR-00010 for Request #123.
-- Please review.”).
+- notify admin/PM (“Engineer Mark submitted Timesheet TS-00010 for Issue #123. Please review.”).
 
 - These are done by the backend when those events happen, using the Telegram API (Aiogram provides methods like bot.send_message(chat_id, text)).
 - The challenge is knowing chat IDs: for individual notifications, the user’s Telegram ID must be known (the system might store a mapping in a doctype or a simple database linking ERPNext user to Telegram user ID).
@@ -132,28 +131,26 @@ Commands (Inbound): The bot supports various commands as earlier noted:
 - possibly /login or a /start that initiates linking.
 - But since the environment is internal, they might pre-provision or manually link.
 
-- /new_request – likely for clients.
+- /new_issue – likely for clients.
 - The bot will collect needed info (maybe through a guided conversation: "Which project or object is this for?" "Describe the issue:" etc.).
-- Then it calls the API to create the request.
+- Then it calls the API to create the issue.
 
-- /my_requests – for engineers to retrieve a summary of their open tasks.
-- The bot calls GET /requests?assigned_to=me and formats a list in the chat.
+- /my_issues – for engineers to retrieve a summary of their open tasks.
+- The bot calls GET /issues?assigned_to=me and formats a list in the chat.
 
-- /request_status <ID> or clicking a button – to get status of a given request, though an engineer likely knows their tasks; a client might query status by ID if they have multiple.
+- /issue_status <ID> or clicking a button – to get status of a given issue, though an engineer likely knows their tasks; a client might query status by ID if they have multiple.
 
 - /set_status <ID> <Status> – for engineers or PMs to update a request’s status (start work or complete).
 - The bot verifies the command format and calls the API.
 - The response is then relayed (success or error).
 
-- /upload_photo <ID> – the bot will prompt user to send a photo, then attach it to the given request.
+- /upload_photo <ID> – the bot will prompt user to send a photo, then attach it to the given issue.
 - Behind scenes, the bot receives the photo file, possibly resizes if needed, then calls the attachments API as described.
 - It might confirm "Photo attached."
 
 /help – lists available commands and their syntax.
 
-### Perhaps specialized ones like /analytics for Admin to get KPI summary (the bot then calls an analytics routine to gather key metrics and replies with something like “Open Requests
-
-- 5, Avg Close Time: 2d, This Month Revenue: $X”).
+Perhaps specialized ones like /analytics for Admin to get KPI summary (the bot then calls an analytics routine to gather key metrics and replies with something like “Open Issues - 5, Avg Close Time: 2d, This Month Revenue: $X”).
 
 ### WhatsApp Integration
 
@@ -172,10 +169,10 @@ Commands (Inbound): The bot supports various commands as earlier noted:
 ### Implementation could mirror Telegram
 
 - define certain keywords or commands via WhatsApp messages.
-- E.g., a client could send "STATUS <request_id>" and the system replies with status.
-- Or simply allow free text creation of requests: e.g., client WhatsApps "Having an issue at site X: the alarm is beeping", the system might interpret that as a new request (this requires natural language or at least a known format).
+- E.g., a client could send "STATUS <issue_id>" and the system replies with status.
+- Or simply allow free text creation of requests: e.g., client WhatsApps "Having an issue at site X: the alarm is beeping", the system might interpret that as a new issue (this requires natural language or at least a known format).
 
-- Given complexity, they might limit WhatsApp integration to notifications only in phase 1 (e.g., client gets a WhatsApp message "Your request has been completed").
+- Given complexity, they might limit WhatsApp integration to notifications only in phase 1 (e.g., client gets a WhatsApp message "Your issue has been resolved").
 - This is easier: using Twilio API to send outbound template messages.
 
 - In any case, the integration will involve the backend hitting an external API similar to how email is done or receiving webhook calls for incoming messages.
@@ -244,7 +241,7 @@ These emails can include attachments (like PDFs of reports) as needed.
 - The spec mentioned as a potential idea integrating with Google Calendar for scheduling visits.
 - If implemented:
 
-- When a ServiceRequest gets scheduled (perhaps they set planned start/end times in the request), the system could create a Google Calendar event on a shared calendar (like "Maintenance Schedule") for that time, with the engineer as attendee.
+- When an Issue gets scheduled (perhaps they set planned start/end times in the issue), the system could create a Google Calendar event on a shared calendar (like "Maintenance Schedule") for that time, with the engineer as attendee.
 
 - Use Google Calendar API to create events.
 - Or simpler, an iCal file could be generated and emailed.

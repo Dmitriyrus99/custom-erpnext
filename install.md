@@ -22,7 +22,7 @@ This guide helps you configure roles, user permissions, and integrations for a p
 
 ### Client access by Customer
 
-Clients see all their Service Requests, Service Reports and Invoices by Customer, not by owner.
+Clients see all their Issues, Timesheets and Invoices by Customer, not by owner.
 
 1. Create or select a `Customer` (from Ferum Custom minimal Customer doctype or ERPNext’s Customer if used).
 2. Link Client users to their Customer via a `User Permission`:
@@ -35,7 +35,7 @@ With this in place, portal pages and desk queries will only return records for t
 
 ### Office Manager and Department Head
 
-- Office Manager has full desk access to Service Requests, Service Reports, Projects and Invoices.
+- Office Manager has full desk access to Issues, Timesheets, Projects and Invoices.
 - Department Head has broad access across these doctypes (coarse‑grained until a department field is introduced in the schema).
 
 ## Integrations
@@ -45,7 +45,7 @@ Open Settings: `Ferum Custom Settings`.
 ### Google Drive
 
 - Set `Drive Root Folder ID` to the folder under which project and document subfolders are created.
-- Custom Attachment uploads and Service Report PDFs sync to Drive. Errors will also notify System Manager/Chief Accountant.
+- Custom Attachment uploads and Timesheet PDFs sync to Drive. Errors will also notify System Manager/Chief Accountant.
 
 ### Google Sheets (Invoices)
 
@@ -57,7 +57,7 @@ Open Settings: `Ferum Custom Settings`.
 
 - Set `Telegram Bot Token` and `Telegram Webhook Secret`.
 - Optionally set `Default Chat ID` for broadcast alerts.
-- Clients and engineers can use bot commands; sending a photo with caption `/attach SR-NAME` attaches it to the Service Request and creates a `Custom Attachment`.
+- Clients and engineers can use bot commands; sending a photo with caption `/attach ISSUE-NAME` attaches it to the Issue and creates a `Custom Attachment`.
 
 ### API & JWT
 
@@ -68,8 +68,8 @@ Open Settings: `Ferum Custom Settings`.
 ## Portal
 
 - Client portal pages are available under `/portal`:
-  - List of Service Requests with SLA overdue highlight
-  - Request details with “Download Service Report” and confirmation buttons
+  - List of Issues with SLA overdue highlight
+  - Issue details with “Download Timesheet” and confirmation buttons
 
 ## CI / Tests
 

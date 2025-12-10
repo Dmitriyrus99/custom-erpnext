@@ -29,6 +29,8 @@ This process deals with tracking employee work and calculating salaries, handled
 - It might also aggregate totals for the whole payroll run.
 - If any required info is missing (like an employee’s hours or rate), validation will prompt the user to fill it.
 
+- Подтягивание начислений из Timesheet Detail за период.
+
 - Once verified, the payroll entry can be submitted, and the system might generate pay slips for each employee (if following ERPNext’s standard approach, though with a small team, the accountant might simply use the payroll entry as the record and not individual payslips).
 
 ### Payment Execution

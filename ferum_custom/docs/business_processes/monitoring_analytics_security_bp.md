@@ -22,7 +22,7 @@ This final process area covers how the system is monitored and how it provides a
 - A Prometheus agent scrapes metrics exposed by the system – such as request response times, error rates, resource usage, number of open requests, etc.
 - – and stores them for visualization.
 - The custom backend might expose an HTTP /metrics endpoint providing metrics in Prometheus format.
-- Coupled with Grafana (if set up), this allows dashboards like “Number of open service tickets over time” or server CPU/memory graphs.
+- Coupled with Grafana (if set up), this allows dashboards like “Number of open issues over time” or server CPU/memory graphs.
 
 - For error tracking, Sentry is used.
 - The backend and possibly client code are configured with a Sentry DSN, so that any unhandled exception or error is reported to Sentry’s cloud dashboard.
@@ -31,15 +31,15 @@ This final process area covers how the system is monitored and how it provides a
 ### Analytics & Reporting
 
 - The system generates analytics on operations and finances for decision-makers.
-- For example, it computes the average time to close service requests, the on-time completion rate (what percentage of requests are closed before their SLA due date), engineer utilization (how many requests each engineer handles, or hours worked vs capacity), project profitability (invoices vs costs per project), etc..
-- Many of these metrics are derived from the transactional data: resolution times from ServiceRequests, financials from Invoices, etc.
+- For example, it computes the average time to close issues, the on-time completion rate (what percentage of issues are closed before their SLA due date), engineer utilization (how many issues each engineer handles, or hours worked vs capacity), project profitability (invoices vs costs per project), etc..
+- Many of these metrics are derived from the transactional data: resolution times from Issues, financials from Invoices, etc.
 
 - The custom backend includes an Analytics module that can aggregate this data on demand.
 - When, say, the General Director wants to see KPIs, they might use the Telegram bot command (e.g., /analytics or specific queries like /project_stats <ProjectID>).
 - The backend will query the ERPNext database for relevant data and compute the metrics.
 - To optimize performance, the system might cache these analytics results in memory or Redis for a short period (e.g., refresh every few hours), so that repeated requests (like daily KPI checks) are fast.
 - The analytics are delivered via the Telegram bot as formatted messages or simple charts.
-- For instance, the Director can get a message: “Open Requests: 5 (Avg age 2.3 days); Month’s Revenue: $50k; Overdue Invoices: 2 clients...” and so forth.
+- For instance, the Director can get a message: “Open Issues: 5 (Avg age 2.3 days); Month’s Revenue: $50k; Overdue Invoices: 2 clients...” and so forth.
 - This gives leadership quick insight without needing to run reports in the ERP UI.
 
 ### Security Measures
@@ -53,7 +53,7 @@ This final process area covers how the system is monitored and how it provides a
 
 - API endpoints check the user’s role and permissions before allowing access (for example, an engineer trying to call an admin-only endpoint will get a 403 Forbidden).
 - In the backend, this is implemented with middleware/guards that verify JWT claims (like role = Admin).
-- In ERPNext, role permissions are configured for each DocType: e.g., Clients can only read ServiceRequest and ServiceProject where they are the customer, Engineers can read those where they are assigned, etc.
+- In ERPNext, role permissions are configured for each DocType: e.g., Clients can only read Issue and Project where they are the customer, Engineers can read those where they are assigned, etc.
 - Complex permission rules like “Customer can only see their own data” are enforced via permission query conditions in ERPNext, ensuring even if a savvy user tried to access others’ data, the system filters it out at the database query level.
 
 - Sensitive data in the database, such as personal identifiable information (phone numbers, emails of clients) or any confidential notes, are encrypted or hashed when possible.

@@ -14,34 +14,34 @@ Glossary of Terms & Acronyms:
 ### DocType
 
 - In Frappe/ERPNext, a DocType is essentially a data model (like a table) plus form definition.
-- We created custom DocTypes such as ServiceProject, ServiceRequest, etc., each with fields and logic.
+- We created custom DocTypes (and extended standard ones) such as Project, Issue, etc., each with fields and logic.
 
-ServiceProject: A maintenance contract or project record, grouping service requests under a particular client contract.
+### Project
 
-### ServiceObject
+- A standard DocType for maintenance contracts or projects, grouping issues under a particular client contract.
 
-- A piece of equipment or a site location that is serviced.
+### Asset
+
+- A piece of equipment or a site location that is serviced (standard ERPNext DocType).
 - E.g., a fire alarm control panel, a sprinkler system, etc., belonging to a customer.
 
-### ProjectObjectItem
 
-- A child record linking a ServiceObject to a ServiceProject, used to list all objects under a contract.
+### Issue
 
-### ServiceRequest
-
-- A ticket representing a maintenance issue or service call.
+- A ticket representing a maintenance issue or service call (standard ERPNext DocType).
 - Contains issue details, status, etc., similar to a work order.
 
-### ServiceReport
+### Timesheet
 
-- Also called an Act of Completed Work, this is the report/document that details what work was done for a service request.
-- Usually corresponds 1:1 with a completed ServiceRequest.
+- This is a report/document that details work time for an issue (standard ERPNext DocType).
+- Usually corresponds 1:1 with a resolved Issue.
 
-Work Item (ServiceReportWorkItem): An entry in a ServiceReport listing a specific task or part, quantity, and cost.
+### Time Log (Timesheet Detail)
 
+- An entry in a Timesheet listing specific activities, hours, and descriptions.
 ### Attachment (CustomAttachment)
 
-- A file (image, PDF, etc.) uploaded to the system and linked to other records (requests, reports, invoices).
+CustomAttachment records are linked to parent documents directly (e.g., File DocType) or via child tables in some cases.
 - We unified attachments under this doctype for easier management.
 
 ### Invoice
@@ -60,7 +60,7 @@ PayrollEntryCustom: Custom payroll document aggregating payroll info for employe
 ### SLA
 
 - Service Level Agreement.
-- A defined expected time frame for response or resolution of a service request (e.g., 4 hours response for emergencies).
+- A defined expected time frame for response or resolution of an issue (e.g., 4 hours response for emergencies).
 
 ### Telegram Bot
 
@@ -155,10 +155,10 @@ Appendix: Document Templates and Workflows
 
 (This appendix can list any standard templates or workflows if they exist outside the above narrative.)
 
-### Service Report Print Format
+### Timesheet Print Format
 
-- A standardized PDF layout including company header, client name, reference to ServiceRequest, table of work items, total amount, space for client and engineer signatures.
-- This template is used when printing or emailing a ServiceReport.
+- A standardized PDF layout including company header, client name, reference to Issue, table of time logs, total hours/amount, space for client and engineer signatures.
+- This template is used when printing or emailing a Timesheet.
 
 ### Invoice Template
 
@@ -171,9 +171,9 @@ Appendix: Document Templates and Workflows
 
 Notification Matrix: (Could be a table showing which events trigger notifications to whom, as partially described.)
 
-E.g., New Request: notify Assigned Engineer (bot + email), PM (email), Client (acknowledgment if entered by staff).
+E.g., New Issue: notify Assigned Engineer (bot + email), PM (email), Client (acknowledgment if entered by staff).
 
-Request status to Completed: notify client (email "Your issue resolved, please verify").
+Issue status to Resolved: notify client (email "Your issue resolved, please verify").
 
 Invoice uploaded: notify Admin (bot/email).
 
@@ -182,7 +182,7 @@ And so on.
 Business Process Diagrams:
 
 - [Figure 1: Project & Contract Management BPMN](images/project_contract_management_process.svg)
-- [Figure 2: Service Request Management BPMN](images/service_request_management_process.svg)
+- [Figure 2: Issue Management BPMN](images/issue_management_process.svg)
 - [Figure 3: Work Reporting BPMN](images/work_reporting_process.svg)
 - [Figure 4: Invoicing & Payments BPMN](images/invoicing_payments_process.svg)
 - [Figure 5: HR & Payroll BPMN](images/hr_payroll_management_process.svg)
@@ -193,11 +193,9 @@ These diagrams illustrate step-by-step flows and decision gateways for each proc
 
 Standard Operating Procedures: Some processes might have slight manual steps beyond the system:
 
-- E.g., after closing a request, the PM is supposed to call the client to ensure satisfaction within 1 day.
-- (If such a thing, not enforced by system but could be note in SOP).
-
-- Or monthly, Office Manager should check that all open requests are followed up.
-- They could use an ERPNext report "Open Requests > 7 days" to do this.
+- E.g., after closing an issue, the PM is supposed to call the client to ensure satisfaction within 1 day.
+- Or monthly, Office Manager should check that all open issues are followed up.
+- They could use an ERPNext report "Open Issues > 7 days" to do this.
 
 Change Log: A running list of changes per release (for project management transparency).
 
@@ -205,4 +203,4 @@ Attachment: Roles & Permissions Matrix: (If needed as a table to recap, which we
 
 - By defining these terms and providing supporting details, we ensure all stakeholders (developers, users, etc.) share a common understanding of the system.
 - This completes the technical specification, offering a comprehensive blueprint for implementation and future reference.
-- All requirements from the business process model have been traced into this design, providing a solid foundation for development and deployment of Ferum Customizations.
+It is designed to maintain referential integrity (e.g., cannot delete an Asset if linked to active issues) and to efficiently fetch related information (for instance, from an Issue you can navigate to its Project, Customer, Asset, attachments, and timesheet).

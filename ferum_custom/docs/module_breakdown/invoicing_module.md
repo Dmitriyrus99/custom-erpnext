@@ -13,7 +13,7 @@ Key Fields:
 
 ### Invoice
 
-- project (Link to ServiceProject, nullable if an invoice isn’t tied to a project, but in this domain usually it is), period or invoice_date, amount, currency, counterparty_name (the client or subcontractor name, could be Link to Customer or a separate field), counterparty_type (maybe values “Customer” or “Subcontractor”), description (text like billing description or payment basis), status (Draft, Sent, Paid, etc.), attachments (could be a table of CustomAttachment or just file links).
+- project (Link to Project, nullable if an invoice isn’t tied to a project, but in this domain usually it is), period or invoice_date, amount, currency, counterparty_name (the client or subcontractor name, could be Link to Customer or a separate field), counterparty_type (maybe values “Customer” or “Subcontractor”), description (text like billing description or payment basis), status (Draft, Sent, Paid, etc.), attachments (could be a table of CustomAttachment or just file links).
 
 - Additionally, fields like tax_applicable (checkbox if VAT invoice), paid_date, etc.
 - can be present for tracking.

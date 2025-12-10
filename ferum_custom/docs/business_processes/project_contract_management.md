@@ -4,7 +4,7 @@
 
 ![Project & Contract Management BPMN](../images/project_contract_management_process.svg)
 
-This process begins when a new service project/contract is won or approved, and it covers all steps to set up the project in the system and align all parties.
+This process begins when a new project/contract is won or approved, and it covers all steps to set up the project in the system and align all parties.
 
 - The Project Manager (PM) receives information about a new contract (e.g.
 - after winning a tender) and gathers the contract documentation and technical scope.
@@ -12,22 +12,21 @@ This process begins when a new service project/contract is won or approved, and 
 - If subcontractors will be involved, the PM determines the approach: in cases where subcontracting is allowed by the contract, the PM arranges a subcontract (mirroring the client contract terms) and gets it signed; if subcontracting is not permitted, the PM plans internal execution with the department head; if no suitable subcontractor is readily available, the PM will find and onboard a new contractor (signing an agreement).
 - The PM also ensures any required certifications for subcontractor personnel (electrical safety, etc.) are obtained before work starts.
 
-- Once preliminary coordination is done, the PM creates a new Service Project record in ERPNext to formally register the project/contract.
+- Once preliminary coordination is done, the PM creates a new Project record in ERPNext to formally register the project/contract.
 - Key details entered include the project name, contract period (start and end dates), the service location or site, the client (linked Customer record), assigned personnel (Project Manager, etc.), the contract value, and contract status (e.g.
 - “Active”).
-- The PM then links the specific Service Objects (equipment or sites under maintenance) to the project.
-- Each Service Object (e.g.
-- a building’s fire alarm system) is either selected from the existing registry or created if new.
-- These objects are attached to the project via a child table (ProjectObjectItem), effectively listing all assets covered by the contract.
+- The PM then links the specific Assets (equipment or sites under maintenance) to the project.
+- Each Asset (e.g., a building’s fire alarm system) is either selected from the existing registry or created if new.
+- These assets are linked to the project directly or managed separately, effectively listing all assets covered by the contract.
 
 ### System Automation
 
 - The system enforces data integrity during project setup.
-- A validation hook on ServiceProject ensures that the same Service Object is not added twice to a single project.
-- Additionally, a cross-project uniqueness check prevents linking an object that is already associated with another active project – attempting to do so will raise an error indicating that object is “already linked to project X”.
-- This guarantees one contract owns a given service object at a time, aligning with contract exclusivity.
+- A validation hook on Project ensures that the same Asset is not added twice to a single project.
+- Additionally, a cross-project uniqueness check prevents linking an asset that is already associated with another active project – attempting to do so will raise an error indicating that asset is “already linked to project X”.
+- This guarantees one contract owns a given asset at a time, aligning with contract exclusivity.
 - The system also validates date fields (the end date cannot be before the start date) and that the contract amount is non-negative.
-- Furthermore, a hook on the Service Object DocType prevents deletion of any service object that has active (not Closed) service requests linked, preserving historical data.
+- Furthermore, a hook on the Asset DocType prevents deletion of any asset that has active (not Closed) issues linked, preserving historical data.
 
 ### Communications & Notifications
 
@@ -46,10 +45,9 @@ This process begins when a new service project/contract is won or approved, and 
 
 ### User Interface
 
-- Project records are managed through ERPNext’s standard form interface, customized for ServiceProject.
-- The form includes fields for all contract info and a table for service objects.
-- The PM uses this form to add objects and set details.
-- A custom dashboard or summary view for projects is provided, showing linked Service Requests, total invoices issued, and other KPIs per project (e.g.
-- number of open requests).
-- In the custom React frontend, a Project Management module offers list and detail views for projects – allowing quick search/filter (by client or status) and viewing all related entities (objects, requests, reports, invoices) in one place.
+Project records are managed through ERPNext’s standard form interface, customized for Project.
+- The form includes fields for all contract info and a table for assets.
+- The PM uses this form to add assets and set details.
+- A custom dashboard or summary view for projects is provided, showing linked Issues, total invoices issued, and other KPIs per project (e.g., number of open issues).
+- In the custom React frontend, a Project Management module offers list and detail views for projects – allowing quick search/filter (by client or status) and viewing all related entities (assets, issues, timesheets, invoices) in one place.
 - This gives project managers a one-stop view of contract performance.

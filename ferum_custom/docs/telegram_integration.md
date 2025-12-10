@@ -1,6 +1,6 @@
 # Telegram Integration (Ferum)
 
-Objective: reliable two-way Telegram integration for Service Requests and Service Reports across ERPNext v15 / Frappe and an Aiogram 3 bot.
+Objective: reliable two-way Telegram integration for Issues and Timesheets across ERPNext v15 / Frappe and an Aiogram 3 bot.
 
 Contents:
 - Architecture and security
@@ -23,9 +23,9 @@ Contents:
 ## Issues Found & Fixes
 
 - Photo attach path only via Telegram webhook; no generic API for external clients.
-  - Added: `ferum_custom.api.attachments.attach_to_service_request` and `attach_to_service_report` (JWT-protected, multipart upload).
+  - Added: `ferum_custom.api.attachments.attach_to_issue` and `attach_to_timesheet` (JWT-protected, multipart upload).
 - Weak inline UX in chat.
-  - Added: Aiogram inline buttons for Start Work / Done with callbacks mapped to `update_service_request_status`.
+  - Added: Aiogram inline buttons for Start Work / Done with callbacks mapped to `update_issue_status`.
 - Secret validation for webhook.
   - Implemented header-based secret (official Telegram) with fallback to query; returns 403 if mismatched.
 - Serialization/timeouts
@@ -37,14 +37,14 @@ Contents:
 ## REST API (JWT)
 
 - Auth: POST `/api/method/ferum_custom.api.auth.login` → `{ token }` (2FA supported for TOTP).
-- Create/list Service Requests:
-  - POST `/api/method/ferum_custom.api.service.create_service_request`
-  - GET  `/api/method/ferum_custom.api.service.list_service_requests`
+- Create/list Issues:
+  - POST `/api/method/ferum_custom.api.service.create_issue`
+  - GET  `/api/method/ferum_custom.api.service.list_issues`
 - Update status:
-  - POST `/api/method/ferum_custom.api.service.update_service_request_status` (server validations enforced).
+  - POST `/api/method/ferum_custom.api.service.update_issue_status` (server validations enforced).
 - Uploads (multipart/form-data `file`):
-  - POST `/api/method/ferum_custom.api.attachments.attach_to_service_request?name=REQ-...`
-  - POST `/api/method/ferum_custom.api.attachments.attach_to_service_report?name=SRPT-...`
+  - POST `/api/method/ferum_custom.api.attachments.attach_to_issue?name=ISS-...`
+  - POST `/api/method/ferum_custom.api.attachments.attach_to_timesheet?name=TS-...`
 
 Security notes:
 - Use HTTPS only; JWT feature flag `enable_jwt` and secret `jwt_secret` must be set.
@@ -58,11 +58,11 @@ Location: `apps/ferum_custom/telegram_bot/`
 - `main.py` — polling or webhook server (`MODE=polling|webhook`), `/healthz` route in webhook mode.
 - `config.py` — loads `.env`.
 - `frappe_client.py` — async JWT client (httpx) for Frappe API and multipart uploads.
-- `handlers/requests.py` — commands:
+- `handlers/issues.py` — commands:
   - `/start` — help
-  - `/new <title>` — create Service Request
-  - `/my` — list recent requests with inline buttons [Start Work, Done]
-  - Photo with caption `/attach <REQ-NAME>` — attaches image to Service Request
+  - `/new <title>` — create Issue
+  - `/my` — list recent issues with inline buttons [Start Work, Done]
+  - Photo with caption `/attach <ISSUE-NAME>` — attaches image to Issue
 - `keyboards.py` — inline keyboards.
 - `.env.example`, `Dockerfile`, `docker-compose.example.yml`, `systemd/ferum-telegram-bot.service`.
 
@@ -106,14 +106,14 @@ FSM: kept light; caption-based attach avoids multi-step flows. Can extend with s
 
 - Telegram
   - `/start` replies
-  - `/new` creates request in ERPNext
+  - `/new` creates issue in ERPNext
   - `/my` shows list with inline buttons; buttons update statuses
-  - Send photo with `/attach REQ-XXXX` → attaches to request
+  - Send photo with `/attach ISS-XXXX` → attaches to issue
 - Security
   - JWT login works only over HTTPS; invalid JWT → 403
   - Webhook rejects wrong `X-Telegram-Bot-Api-Secret-Token`
-- Service Report
-  - Upload PDF via `attach_to_service_report` and ensure validation passes at submit (requires image + PDF)
+- Timesheet
+  - Upload PDF via `attach_to_timesheet` and ensure validation passes at submit (requires image + PDF)
 - Resilience
   - Bot restarts on crash (Docker/systemd) and responds to `/healthz`
 

@@ -2,56 +2,52 @@
 
 ### Responsibilities
 
-- Manage service contracts (projects) and the inventory of service objects under those contracts.
-- This module ensures that new projects are properly configured and that service objects are tracked against their contracts without conflicts.
+- Manage contracts (projects) and the inventory of assets under those contracts.
+- This module ensures that new projects are properly configured and that assets are tracked against their contracts without conflicts.
 
 ### DocTypes
 
-- ServiceProject, ServiceObject, ProjectObjectItem.
-- The ServiceProject DocType holds project details (name, client, start/end dates, contract amount, status, etc.).
-- ServiceObject holds info on each maintenance object (name, location, customer, etc.).
-- ProjectObjectItem is a child table on ServiceProject listing linked ServiceObjects.
+- Project, Asset.
+- The Project DocType holds project details (name, client, start/end dates, contract amount, status, etc.).
+- Asset holds info on each maintenance asset (name, location, customer, etc.).
 
 ### Data Relationships
 
-- ServiceProject has a child table objects (ProjectObjectItem) linking to ServiceObject.
-- Also, ServiceObject may have a direct link to its current project (the field project), allowing quick lookup of which project an object is under.
+- Project is linked to Asset directly or via a linking mechanism.
+- Also, Asset may have a direct link to its current project (the field project), allowing quick lookup of which project an asset is under.
 
 Key Fields:
 
-### ServiceProject
+### Project
 
 - customer (Link to Customer), project_name, start_date, end_date, status (Select: e.g.
 - Planned, Active, Completed), total_amount (contract value), project_manager (Link to User/Employee).
 
-### ServiceObject
+### Asset
 
 - object_name, address/location, customer, type (e.g.
-- fire alarm panel, sprinkler, etc.), project (Link to ServiceProject, optional).
-
-ProjectObjectItem: service_object (Link to ServiceObject) + maybe remarks or included scope.
-
+- fire alarm panel, sprinkler, etc.), project (Link to Project, optional).
 Automation & Hooks:
 
-### On ServiceProject validate
+### On Project validate
 
-- ensure date consistency and unique objects.
+- ensure date consistency and unique assets.
 - A method check_dates_and_amount validates dates and that total_amount is not negative.
-- \_validate_unique_objects checks the objects table: no duplicate entries and that none of those objects are already linked to another project.
-- If a duplicate or conflict is found, it throws a clear error (e.g., “Service Object X is already linked to project Y”).
+- \_validate_unique_assets checks for unique assets and that none are already linked to another active project.
+- If a duplicate or conflict is found, it throws a clear error (e.g., “Asset X is already linked to project Y”).
 
-### On ServiceObject validate
+### On Asset validate
 
-- ensure uniqueness of object name within a project.
-- The code \_ensure_unique_per_project queries if another ServiceObject with the same name exists for the same project.
-- This prevents creating two ServiceObject records that refer to essentially the same asset under one project.
+- ensure uniqueness of asset name within a project.
+- The code \_ensure_unique_per_project queries if another Asset with the same name exists for the same project.
+- This prevents creating two Asset records that refer to essentially the same asset under one project.
 
-### On ServiceObject on_trash
+### On Asset on_trash
 
-- prevent deletion if any active ServiceRequest references this object.
-- It checks for Service Request where status is not Closed for this object; if found, deletion is blocked with an error “Cannot delete object linked to active service requests.”.
+- prevent deletion of any active Issue references this asset.
+- It checks for Issue where status is not Closed for this asset; if found, deletion is blocked with an error “Cannot delete asset linked to active issues.”.
 
-### Possibly on ServiceProject on_update
+### Possibly on Project on_update
 
 - could trigger notifications (e.g., when status changes to Active, send welcome email as described earlier).
 - This might be done via an ERPNext Notification rule rather than code.
@@ -68,19 +64,19 @@ Drive: Optionally, create a folder in Google Drive for the project (if the desig
 
 Bot Notification: Inform relevant team chats about new project (enhancement).
 
-UI Components:
+### UI Components
 
-- ERPNext Form for ServiceProject (with a section for contract info and a child table for objects).
-- A custom script on this form might filter the ServiceObject list to only those belonging to the same customer to avoid mix-ups.
+- ERPNext Form for Project (with a section for contract info and a table for assets).
+- A custom script on this form might filter the Asset list to only those belonging to the same customer to avoid mix-ups.
 
 ERPNext List/Report: a list of projects with color indicators (e.g., Active vs Completed).
 
 ### React Frontend
 
-- a project list view and detail page showing all related info (requests, invoices, etc.) for that project.
+- a project list view and detail page showing all related info (issues, invoices, etc.) for that project.
 
 ### Dashboard
 
-- possibly a custom Project Dashboard showing metrics like “# of open requests” or total billed amount, using ERPNext’s dashboard framework.
+- possibly a custom Project Dashboard showing metrics like “# of open issues” or total billed amount, using ERPNext’s dashboard framework.
 
-- By enforcing consistent project setup and linking all downstream data (requests, reports, invoices) to the project, this module provides the foundation for contract-based tracking of work and finances.
+- By enforcing consistent project setup and linking all downstream data (issues, timesheets, invoices) to the project, this module provides the foundation for contract-based tracking of work and finances.

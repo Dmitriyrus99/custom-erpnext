@@ -11,7 +11,7 @@ System Overview
 
 ### Architecture
 
-- Core: a single ERPNext site with the "Ferum Custom" app (Frappe v15), custom DocTypes (Service Project, Service Request, Service Report, Invoice), server logic and integrations.
+- Core: a single ERPNext site with the "Ferum Custom" app (Frappe v15), custom DocTypes (Project, Issue, Timesheet, Invoice), server logic and integrations.
 - API: Frappe whitelisted methods under `ferum_custom.api.*` with optional JWT (Bearer) auth handled by a `before_request` hook.
 - UI: ERPNext Desk for internal users; lightweight portal pages for clients live under `ferum_custom/ferum_custom/www/portal/`.
 - Integrations: in-app Python modules for Telegram and Google (Drive/Sheets); external microservices are optional and not required for current functionality.

@@ -5,7 +5,7 @@ Telegram
 - Настройки: `Ferum Custom Settings` → `telegram_bot_token`, `telegram_default_chat_id`.
 
 Google Drive
-- Загрузка PDF отчетов: ferum_custom/ferum_custom/ferum_custom/integrations/drive.py
+- Загрузка PDF табелей учета рабочего времени: ferum_custom/ferum_custom/ferum_custom/integrations/drive.py
 - Требуется сервисный аккаунт (JSON) и корневая папка: `google_service_account_json`, `google_drive_root_folder_id`.
 
 Google Sheets

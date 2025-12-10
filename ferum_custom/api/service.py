@@ -113,22 +113,22 @@ def _enforce_rate_limit(scope: str, identifier: str | None, limit: int) -> None:
 
 
 @frappe.whitelist(methods=["POST"])  # API used by bot/portal: POST only
-def create_service_request(
-	title: str, description: str | None = None, service_object: str | None = None
+def create_issue(
+	title: str, description: str | None = None, asset: str | None = None
 ) -> dict[str, t.Any]:
 	"""
-	Creates a new service request.
+	Creates a new issue.
 
 	This function creates a standard ERPNext Issue, mapping the title and description accordingly.
-	It also tries to populate the company from defaults and link the service object if provided.
+	It also tries to populate the company from defaults and link the asset if provided.
 
 	Args:
-		title (str): The title of the service request.
-		description (str | None, optional): The description of the service request. Defaults to None.
-		service_object (str | None, optional): The service object to link to the request. Defaults to None.
+		title (str): The subject of the issue.
+		description (str | None, optional): The description of the issue. Defaults to None.
+		asset (str | None, optional): The asset to link to the issue. Defaults to None.
 
 	Returns:
-		dict[str, t.Any]: A dictionary containing the name of the created service request.
+		dict[str, t.Any]: A dictionary containing the name of the created issue.
 	"""
 	_require_jwt_authentication()
 	_check_new_request_rate_limit()
@@ -147,20 +147,20 @@ def create_service_request(
 	except Exception:
 		pass
 
-	if service_object:
-		obj_name = service_object
+	if asset:
+		obj_name = asset
 		if not frappe.db.exists("Asset", obj_name):
-			obj_name = frappe.db.get_value("Asset", {"asset_name": obj_name}, "name") or service_object
+			obj_name = frappe.db.get_value("Asset", {"asset_name": obj_name}, "name") or asset
 		if frappe.db.exists("Asset", obj_name):
 			so = frappe.get_doc("Asset", obj_name)
 			customer = getattr(so, "customer", None)
 			project = getattr(so, "project", None)
 			company = company or getattr(so, "company", None)
 
-	name = service_app.create_service_request(
+	name = service_app.create_issue(
 		title=title,
 		description=description,
-		service_object=service_object,
+		service_object=asset,
 		company=company,
 		project=project,
 		customer=customer,
@@ -169,11 +169,11 @@ def create_service_request(
 
 
 @frappe.whitelist(methods=["GET"])  # Listing is idempotent
-def list_service_requests(
+def list_issues(
 	status: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
 	"""
-	Lists service requests.
+	Lists issues.
 
 	Args:
 		status (str | None, optional): The status to filter by. Defaults to None.
@@ -181,7 +181,7 @@ def list_service_requests(
 		page_length (int | None, optional): The number of items per page. Defaults to None.
 
 	Returns:
-		dict: A dictionary containing the list of service requests.
+		dict: A dictionary containing the list of issues.
 	"""
 	s, pl = _paginate(start, page_length)
 	filters: dict[str, t.Any] = {}
@@ -202,22 +202,22 @@ def list_service_requests(
 	except Exception:
 		pass
 
-	data = service_app.list_service_requests(filters=filters, start=s, page_length=pl)
+	data = service_app.list_issues(filters=filters, start=s, page_length=pl)
 	return _response_ok(data=data, start=s, page_length=pl)
 
 
 @frappe.whitelist(methods=["GET"])  # Read-only fetch
-def get_service_request(name: str) -> dict:
+def get_issue(name: str) -> dict:
 	"""
-	Retrieves a service request by name.
+	Retrieves an issue by name.
 
 	Args:
-		name (str): The name of the service request to retrieve.
+		name (str): The name of the issue to retrieve.
 
 	Returns:
-		dict: A dictionary containing the service request data.
+		dict: A dictionary containing the issue data.
 	"""
-	data = service_app.fetch_service_request(name)
+	data = service_app.fetch_issue(name)
 	try:
 		user = frappe.session.user
 		user_type = frappe.get_cached_value("User", user, "user_type")
@@ -225,7 +225,9 @@ def get_service_request(name: str) -> dict:
 		if user_type == "Website User" or "Client" in roles:
 			allowed = get_allowed_customers(user)
 			if allowed and data.get("customer") not in allowed:
-				frappe.throw(_("Not permitted"))
+				frappe.throw(_("Not permitted"), frappe.PermissionError)
+	except frappe.PermissionError:
+		raise
 	except Exception:
 		pass
 	return _response_ok(data=data)
@@ -273,11 +275,11 @@ def update_issue_status(name: str, status: str) -> dict:
 
 
 @frappe.whitelist()
-def list_service_reports(
+def list_timesheets(
 	project: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
 	"""
-	Lists service reports.
+	Lists timesheets.
 
 	Args:
 		project (str | None, optional): The project to filter by. Defaults to None.
@@ -285,7 +287,7 @@ def list_service_reports(
 		page_length (int | None, optional): The number of items per page. Defaults to None.
 
 	Returns:
-		dict: A dictionary containing the list of service reports.
+		dict: A dictionary containing the list of timesheets.
 	"""
 	s, pl = _paginate(start, page_length)
 	filters: dict[str, t.Any] = {}
@@ -413,7 +415,7 @@ def list_invoices(
 @frappe.whitelist()
 def confirm_issue_completion(name: str) -> None:
 	"""Allow a Client to confirm completion of an Issue by adding a comment."""
-	service_app.confirm_service_request(name)
+	service_app.confirm_issue_completion(name)
 
 
 @frappe.whitelist()

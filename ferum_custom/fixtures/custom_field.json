@@ -73,8 +73,8 @@
     "dt": "Issue",
     "fieldname": "service_object",
     "fieldtype": "Link",
-    "label": "Service Object",
-    "options": "Service Object",
+    "label": "Asset",
+    "options": "Asset",
     "insert_after": "service_maintenance_schedule",
     "translatable": 0
   }

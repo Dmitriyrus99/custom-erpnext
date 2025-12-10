@@ -7,7 +7,7 @@
 ### DocTypes
 
 - CustomAttachment (and potentially File if using ERPNext’s built-in, but likely not needed since CustomAttachment can reference the ERPNext File or external link).
-- Also child tables like RequestPhotoAttachmentItem and ServiceReportDocumentItem which act as linking tables.
+- Also, standard child tables from ERPNext or custom ones as needed.
 
 Key Fields:
 
@@ -36,7 +36,7 @@ Creates a CustomAttachment record with metadata.
 - If upload is via the backend (like through the bot), the file might be directly streamed to Drive and not even stored on ERPNext server to save space.
 - In that case, a CustomAttachment is created with file_id or Drive link.
 
-Adds a child table entry linking CustomAttachment to the parent doc.
+Links CustomAttachment to the parent doc (directly or via child table if applicable).
 
 ### On CustomAttachment on_trash
 
@@ -62,7 +62,7 @@ Integrations:
 - central to this module.
 - They would have a Google API setup with credentials (service account or OAuth token).
 - The integration might define a base folder (like a Drive folder ID under which all files go).
-- If not separating by project, maybe a naming scheme e.g., Project123-ServiceRequest456-BeforePhoto1.jpg as the file name.
+- If not separating by project, maybe a naming scheme e.g., Project123-Issue456-BeforePhoto1.jpg as the file name.
 - If separating, then folder per project or per doc type.
 
 - They might implement the Drive integration in the custom backend (with a Python Google client) or use a Google Drive Frappe integration if one exists.
@@ -72,13 +72,12 @@ Integrations:
 UI Components:
 
 - In ERPNext forms, instead of the standard attachment sidebar, they might have custom sections for attachments.
-- For example, ServiceRequest form could have a table “Photos” which lists attachments, and a button “Attach Photo” that opens file dialog.
-
-They likely disabled or bypassed the default attachment sidebar to streamline things.
+- For example, Issue form could have a table “Photos” which lists attachments, and a button “Attach Photo” that opens file dialog.
+- They likely disabled or bypassed the default attachment sidebar to streamline things.
 
 - For large files (photos), maybe they only store a thumbnail or link in ERPNext and the actual file is only in Drive to save database space.
 
-- Users will mostly interact with attachments as part of the relevant form (Project, Request, Report).
+- Users will mostly interact with attachments as part of the relevant form (Project, Issue, Timesheet).
 - Admins could have an Attachment List (all CustomAttachment entries) for housekeeping.
 
 - This module ensures files are not siloed on one user’s computer or lost in emails – they’re systematically stored and linked to context.

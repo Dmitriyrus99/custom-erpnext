@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 
 
-def create_service_request(
+def create_issue(
     *,
     title: str,
     description: str | None = None,
@@ -34,7 +34,7 @@ def create_service_request(
     return issue.name
 
 
-def confirm_service_request(name: str) -> None:
+def confirm_issue_completion(name: str) -> None:
     doc = frappe.get_doc("Issue", name)
     doc.add_comment("Comment", _("Client confirmed completion via portal (domain)"))
 
@@ -44,7 +44,7 @@ def confirm_timesheet_report(name: str) -> None:
     doc.add_comment("Comment", _("Client confirmed Timesheet Report via portal (domain)"))
 
 
-def fetch_service_request(name: str) -> dict:
+def fetch_issue(name: str) -> dict:
     doc = frappe.get_doc("Issue", name)
     data = doc.as_dict()
     # Map 'subject' to 'title' for API compatibility
@@ -64,7 +64,7 @@ def fetch_service_request(name: str) -> dict:
     return safe_fields
 
 
-def list_service_requests(
+def list_issues(
     *,
     filters: dict[str, t.Any],
     start: int = 0,

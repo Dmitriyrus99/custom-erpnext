@@ -1,15 +1,15 @@
 ### Ferum Custom
 
-Ferum Custom is an ERPNext-based system designed to manage and streamline operations for Ferum. It includes custom modules for service request management, invoicing, and integrations with external services like Google Drive, Google Sheets, and Telegram.
+Ferum Custom is an ERPNext-based system designed to manage and streamline operations for Ferum. It includes custom modules for issue management, invoicing, and integrations with external services like Google Drive, Google Sheets, and Telegram.
 
 ### Telegram Bot Integration
 
 This repository includes a Telegram bot that integrates with the Ferum Custom ERP system. The bot allows users to perform the following actions:
 
--   **Create Service Requests**: Quickly create new service requests directly from Telegram.
--   **List Service Requests**: View a list of your own or assigned service requests.
--   **Update Service Request Status**: Change the status of a service request using inline buttons.
--   **Attach Files**: Attach photos and documents to service requests and reports.
+-   **Create Issues**: Quickly create new issues directly from Telegram.
+-   **List Issues**: View a list of your own or assigned issues.
+-   **Update Issue Status**: Change the status of an issue using inline buttons.
+-   **Attach Files**: Attach photos and documents to issues and timesheets.
 
 For detailed setup and deployment instructions, see the `telegram_bot/README.md` file.
 

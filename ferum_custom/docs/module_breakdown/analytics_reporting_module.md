@@ -10,17 +10,17 @@ Key Reports/Metrics:
 
 ### Projects
 
-- profitability (sum of client invoices minus subcontractor invoices per project), number of open requests per project, etc.
+- profitability (sum of client invoices minus subcontractor invoices per project), number of open issues per project, etc.
 
-### Requests
+### Issues
 
-- average resolution time, number of requests per month, breakdown by type (routine vs emergency), engineer performance (how many each closed).
+- average resolution time, number of issues per month, breakdown by type (routine vs emergency), engineer performance (how many each closed).
 
 Financial: total receivables, payables, aging of invoices (how long unpaid).
 
 ### HR
 
-- maybe staff utilization, but with 20 employees likely simple, though they might track how many requests each engineer handles (which can be an indicator of workload).
+- maybe staff utilization, but with 20 employees likely simple, though they might track how many issues each engineer handles (which can be an indicator of workload).
 
 Implementation:
 
@@ -46,11 +46,11 @@ Telegram Bot: as described, can output KPI summaries on command.
 
 ### ERPNext Dashboards
 
-- They might configure some dashboard charts on the desk homepage for Admin (like a chart of requests by month).
+- They might configure some dashboard charts on the desk homepage for Admin (like a chart of issues by month).
 
 ### Standard reports
 
-- maybe custom Script Reports in ERPNext for things like “Open Requests by Engineer” or “Invoice Summary by Project”.
+- maybe custom Script Reports in ERPNext for things like “Open Issues by Engineer” or “Invoice Summary by Project”.
 
 ### Monitoring integration
 
