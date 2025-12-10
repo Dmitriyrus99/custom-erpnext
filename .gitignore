@@ -8,6 +8,8 @@ node_modules
 __pycache__
 *.env
 .env
+.env.*
+*.env
 
 # Bench and environment artifacts
 apps.json
@@ -28,3 +30,11 @@ index
 HEAD
 FETCH_HEAD
 description
+
+# Tool caches
+/.pre-commit-cache/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+coverage.xml
+htmlcov/
