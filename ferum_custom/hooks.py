@@ -19,8 +19,6 @@ doctype_list_js = {
 
 scheduler_events = {
     "daily": [
-        # Generate Issues from due maintenance schedules
-        "ferum_custom.ferum_custom.doctype.service_maintenance_schedule.service_maintenance_schedule.generate_service_requests_from_schedule",
         # Incremental Google Drive backfill (long queue)
         "ferum_custom.ferum_custom.scheduler_wrappers.daily_drive_backfill",
         # Drive healthcheck + alert to admins
@@ -159,8 +157,6 @@ fixtures = [
                 [
                     "Ferum Custom",
                     "Project & Contract Management",
-                    "Service Request Management",
-                    "Work Reporting",
                     "Invoicing",
                     "HR & Payroll",
                     "Document Management",

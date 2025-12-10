@@ -1,9 +1,0 @@
-{ "doctype":"DocType","name":"stg_raw","module":"Ferum Custom","autoname":"hash","custom":1,
-  "fields":[
-    {"fieldname":"company","label":"Company","fieldtype":"Link","options":"Company"},
-    {"fieldname":"source_file","label":"Source File","fieldtype":"Data"},
-    {"fieldname":"sheet","label":"Sheet","fieldtype":"Data"},
-    {"fieldname":"row_json","label":"Row JSON","fieldtype":"Long Text"},
-    {"fieldname":"ingested_at","label":"Ingested At","fieldtype":"Datetime"}
-  ] }
-

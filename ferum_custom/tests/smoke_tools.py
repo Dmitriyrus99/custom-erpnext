@@ -6,7 +6,6 @@ from typing import Any
 
 import frappe
 
-
 def _ensure_module_registered() -> None:
 	"""Make sure custom DocTypes resolve even if module map cache is stale."""
 
@@ -17,7 +16,6 @@ def _ensure_module_registered() -> None:
 		frappe.local.app_modules = None
 		frappe.local.module_app = None
 		frappe.setup_module_map(include_all_apps=True)
-
 
 def _ensure_currency(name: str) -> str:
 	if frappe.db.exists("Currency", name):
@@ -34,7 +32,6 @@ def _ensure_currency(name: str) -> str:
 	)
 	doc.insert(ignore_permissions=True)
 	return name
-
 
 def ensure_company(name: str = "Ferum Co", currency: str = "USD") -> str:
 	"""Ensure a minimal Company exists and set it as the default."""
@@ -59,7 +56,6 @@ def ensure_company(name: str = "Ferum Co", currency: str = "USD") -> str:
 		frappe.db.set_value("Global Defaults", "Global Defaults", "default_company", name)
 	return name
 
-
 def _ensure_customer_group(name: str = "Ferum Customers") -> str:
 	root = "Ferum Customer Groups"
 	if not frappe.db.exists("Customer Group", root):
@@ -81,7 +77,6 @@ def _ensure_customer_group(name: str = "Ferum Customers") -> str:
 		).insert(ignore_permissions=True)
 	return name
 
-
 def _ensure_territory(name: str = "Domestic") -> str:
 	root = "Ferum Territories"
 	if not frappe.db.exists("Territory", root):
@@ -102,7 +97,6 @@ def _ensure_territory(name: str = "Domestic") -> str:
 			}
 		).insert(ignore_permissions=True)
 	return name
-
 
 def ensure_customer(name: str = "Perm Customer", company: str | None = None) -> str:
 	"""Create or reuse a Customer with the bare minimum master data."""
@@ -134,7 +128,6 @@ def ensure_customer(name: str = "Perm Customer", company: str | None = None) -> 
 		return name
 	return doc.name
 
-
 def _ensure_asset_category(name: str = "Test Category") -> str:
 	existing = frappe.get_all("Asset Category", limit=1, pluck="name")
 	if existing:
@@ -145,7 +138,6 @@ def _ensure_asset_category(name: str = "Test Category") -> str:
 	doc.flags.ignore_mandatory = True
 	doc.insert(ignore_permissions=True)
 	return name
-
 
 def _ensure_item(name: str = "Test Asset Item") -> str:
 	if frappe.db.exists("Item", name):
@@ -161,7 +153,6 @@ def _ensure_item(name: str = "Test Asset Item") -> str:
 	item.insert(ignore_permissions=True)
 	return name
 
-
 def _ensure_location(name: str = "Test Location") -> str:
 	if frappe.db.exists("Location", name):
 		return name
@@ -169,7 +160,6 @@ def _ensure_location(name: str = "Test Location") -> str:
 	doc.location_name = name
 	doc.insert(ignore_permissions=True)
 	return name
-
 
 def ensure_asset(object_name: str, customer: str | None = None, company: str | None = None) -> str:
 	_ensure_module_registered()
@@ -204,7 +194,23 @@ def ensure_asset(object_name: str, customer: str | None = None, company: str | N
 
 
 
-
+def ensure_service_department(name: str, company: str | None = None) -> str:
+	_ensure_module_registered()
+	company = company or ensure_company()
+	existing = frappe.db.get_value("Service Department", {"department_name": name}, "name") or frappe.db.get_value(
+		"Service Department", {"name": name}, "name"
+	)
+	if existing:
+		return existing
+	doc = frappe.get_doc(
+		{
+			"doctype": "Service Department",
+			"department_name": name,
+			"company": company,
+		}
+	)
+	doc.insert(ignore_permissions=True)
+	return doc.name
 
 def ensure_project_doc(name: str, customer: str) -> str:
 	_ensure_module_registered()
@@ -222,7 +228,6 @@ def ensure_project_doc(name: str, customer: str) -> str:
 	doc.insert(ignore_permissions=True)
 	return doc.name
 
-
 def create_test_issue() -> str:
 	"""Create a minimal test Issue using first available Company."""
 
@@ -239,18 +244,15 @@ def create_test_issue() -> str:
 	doc.insert(ignore_permissions=True)
 	return doc.name
 
-
 def assign_issue(name: str, user: str = "Administrator") -> None:
 	doc = frappe.get_doc("Issue", name)
 	doc.assigned_to = user
 	doc.save(ignore_permissions=True)
 
-
 def update_issue_status_via_api(name: str, status: str) -> dict[str, Any]:
 	from ferum_custom.ferum_custom.api.service import update_issue_status
 
 	return update_issue_status(name=name, status=status)
-
 
 def _ensure_activity_type(name: str = "Maintenance") -> str:
 	if frappe.db.exists("Activity Type", name):
@@ -259,7 +261,6 @@ def _ensure_activity_type(name: str = "Maintenance") -> str:
 	doc.activity_type = name
 	doc.insert(ignore_permissions=True)
 	return name
-
 
 def _get_or_create_timesheet(issue_name: str, attachment_name: str) -> str:
 	exists = frappe.db.exists("Timesheet", {"issue": issue_name})
@@ -275,12 +276,10 @@ def _get_or_create_timesheet(issue_name: str, attachment_name: str) -> str:
 	timesheet_doc.insert(ignore_permissions=True)
 	return timesheet_doc.name
 
-
 def get_telegram_secret() -> str:
 	from ferum_custom.ferum_custom.settings import get_setting
 
 	return (get_setting("telegram_webhook_secret") or "").strip()
-
 
 def call_webhook_with_secret(secret: str) -> dict[str, Any]:
 	from ferum_custom.ferum_custom.api.telegram_bot import handle_update

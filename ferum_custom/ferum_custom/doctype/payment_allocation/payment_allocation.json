@@ -1,7 +1,0 @@
-{ "doctype":"DocType","name":"Payment Allocation","module":"Ferum Custom","autoname":"hash","custom":1,
-  "fields":[
-    {"fieldname":"payment","label":"Payment","fieldtype":"Link","options":"Payment","reqd":1},
-    {"fieldname":"invoice","label":"Invoice","fieldtype":"Link","options":"Invoice","reqd":1},
-    {"fieldname":"amount","label":"Allocated Amount","fieldtype":"Currency","reqd":1}
-  ] }
-

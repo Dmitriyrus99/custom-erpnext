@@ -44,6 +44,8 @@ def test_generate_issues_from_schedules_creates_issue(monkeypatch):
 					return self
 
 			return DummyIssue()
+		if arg1 == "System Settings":
+			return SimpleNamespace(time_zone="UTC")
 		assert arg1 == "Service Maintenance Schedule"
 		assert arg2 == dummy_schedule.name
 		return dummy_schedule

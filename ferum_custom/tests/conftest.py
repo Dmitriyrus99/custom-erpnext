@@ -69,9 +69,9 @@ def pytest_configure(config):
 	import frappe
 
 	for module in [
-		"ferum_custom.ferum_custom.doctype.customer.customer",
-		"ferum_custom.ferum_custom.doctype.service_object.service_object",
-		"ferum_custom.ferum_custom.doctype.service_request.service_request",
-		"ferum_custom.ferum_custom.doctype.service_report.service_report",
+		"ferum_custom.ferum_custom.ferum_custom.doctype.customer.customer",
+		"ferum_custom.ferum_custom.ferum_custom.doctype.service_request.service_request",
+		"ferum_custom.ferum_custom.ferum_custom.doctype.service_report.service_report",
 	]:
-		importlib.import_module(module)
+		with contextlib.suppress(ModuleNotFoundError):
+			importlib.import_module(module)

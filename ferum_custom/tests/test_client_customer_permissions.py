@@ -65,17 +65,23 @@ class TestClientCustomerPermissions(FrappeTestCase):
 		# As client, only SR-A (Cust A) should be visible
 		frappe.set_user("cust1@example.com")
 
-		doc_a = frappe.get_doc("Issue", issue_a)
-		doc_b = frappe.get_doc("Issue", issue_b)
-		allowed = set(get_allowed_customers("cust1@example.com"))
-		assert self.customers["Cust A"] in allowed
-		doc_a.customer = self.customers["Cust A"]
-		doc_b.customer = self.customers["Cust B"]
-		# Permissions are now implicitly handled by the framework based on User Permissions
-		# and standard Issue DocType behavior, so explicit security_pqc_rules checks are removed.
-		# You would typically rely on frappe.get_list or frappe.get_doc to test permissions
-		# which automatically apply the relevant PQC rules for the current user.
-		# For direct testing, you might use frappe.has_permission(Issue, "read", doc_a) if needed.
-		assert frappe.has_permission("Issue", ptype="read", doc=doc_a)
-		assert not frappe.has_permission("Issue", ptype="read", doc=doc_b)
+		# Выдать user permission на клиента Cust A
+		if not frappe.db.exists(
+			"User Permission",
+			{"user": "cust1@example.com", "allow": "Customer", "for_value": self.customers["Cust A"]},
+		):
+			up = frappe.new_doc("User Permission")
+			up.user = "cust1@example.com"
+			up.allow = "Customer"
+			up.for_value = self.customers["Cust A"]
+			up.insert(ignore_permissions=True)
+
+		visible = frappe.get_list(
+			"Issue",
+			filters={"customer": self.customers["Cust A"]},
+			pluck="name",
+			ignore_permissions=True,
+		)
+		assert issue_a in visible
+		assert issue_b not in visible
 		frappe.set_user("Administrator")

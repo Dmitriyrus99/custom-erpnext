@@ -56,17 +56,7 @@
     "insert_after": "asset_owner",
     "translatable": 0
   },
-  {
-    "doctype": "Custom Field",
-    "name": "Issue-service_maintenance_schedule",
-    "dt": "Issue",
-    "fieldname": "service_maintenance_schedule",
-    "fieldtype": "Link",
-    "label": "Service Maintenance Schedule",
-    "options": "Service Maintenance Schedule",
-    "insert_after": "asset",
-    "translatable": 0
-  },
+
   {
     "doctype": "Custom Field",
     "name": "Issue-service_object",

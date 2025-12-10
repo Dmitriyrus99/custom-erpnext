@@ -26,7 +26,7 @@ def test_create_issue_sets_fields(monkeypatch):
 
     monkeypatch.setattr("frappe.new_doc", fake_new_doc)
 
-    name = service_app.create_service_request(
+    name = service_app.create_issue(
         title="Test",
         description="desc",
         service_object="ASSET-1",
@@ -57,7 +57,7 @@ def test_list_issues_passes_filters(monkeypatch):
 
     monkeypatch.setattr("frappe.get_list", fake_get_list)
 
-    data = service_app.list_service_requests(filters={"status": "Open"}, start=0, page_length=5)
+    data = service_app.list_issues(filters={"status": "Open"}, start=0, page_length=5)
 
     assert recorded["doctype"] == "Issue"
     assert recorded["filters"] == {"status": "Open"}

@@ -1,7 +1,0 @@
-{ "doctype":"DocType","name":"Cashflow Article","module":"Ferum Custom","autoname":"hash","custom":1,
-  "fields":[
-    {"fieldname":"name","label":"Name","fieldtype":"Data","reqd":1},
-    {"fieldname":"direction","label":"Direction","fieldtype":"Select","options":"in\nout","reqd":1},
-    {"fieldname":"group_name","label":"Group","fieldtype":"Data"}
-  ] }
-

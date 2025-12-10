@@ -15,7 +15,6 @@ class TestIssues(FrappeTestCase):
                 "subject": "Smoke create",
                 "company": company,
                 "customer": customer,
-                "priority": "High",
             }
         )
         doc.insert()
