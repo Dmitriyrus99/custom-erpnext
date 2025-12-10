@@ -48,7 +48,7 @@ def find_or_create_project(sp: Any) -> str | None:
 		doc.insert(ignore_permissions=True)
 		return doc.name
 	except Exception:  # log and skip
-		frappe.log_error(frappe.get_traceback(), "Project migration failed (Service Project)")
+		frappe.log_error(frappe.get_traceback(), "Project migration failed (Legacy Service Project)")
 		return None
 
 
@@ -58,12 +58,19 @@ def migrate_attachments(from_dt: str, from_name: str, to_dt: str, to_name: str) 
 	Returns (ok, skipped).
 	"""
 	ok = skipped = 0
-	# Prefer Custom Attachment table if present
+	# Prefer standard File DocType
 	rows = frappe.get_all(
-		"Custom Attachment",
-		filters={"linked_doctype": from_dt, "linked_docname": from_name},
+		"File",
+		filters={"attached_to_doctype": from_dt, "attached_to_name": from_name},
 		fields=["name", "file_url", "file_name"],
 	)
+	if not rows:
+		# Fallback to Custom Attachment table if no File DocTypes found
+		rows = frappe.get_all(
+			"Custom Attachment",
+			filters={"linked_doctype": from_dt, "linked_docname": from_name},
+			fields=["name", "file_url", "file_name"],
+		)
 	for r in rows:
 		try:
 			if not r.file_url:

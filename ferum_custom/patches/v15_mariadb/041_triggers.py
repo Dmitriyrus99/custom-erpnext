@@ -2,15 +2,15 @@ import frappe
 
 
 def _drop_and_create(trigger_name: str, create_ddl: str) -> None:
-    """Replace the trigger so rerunning the patch is safe."""
-    frappe.db.sql(f"DROP TRIGGER IF EXISTS {trigger_name}")
-    frappe.db.sql(create_ddl)
+	"""Replace the trigger so rerunning the patch is safe."""
+	frappe.db.sql(f"DROP TRIGGER IF EXISTS {trigger_name}")
+	frappe.db.sql(create_ddl)
 
 
 def execute():
-    _drop_and_create(
-        "trg_check_allocation_limits",
-        """
+	_drop_and_create(
+		"trg_check_allocation_limits",
+		"""
         CREATE TRIGGER trg_check_allocation_limits
         BEFORE INSERT ON `tabPayment Allocation`
         FOR EACH ROW
@@ -49,11 +49,11 @@ def execute():
           END IF;
         END
         """,
-    )
+	)
 
-    _drop_and_create(
-        "trg_update_invoice_status",
-        """
+	_drop_and_create(
+		"trg_update_invoice_status",
+		"""
         CREATE TRIGGER trg_update_invoice_status
         AFTER INSERT ON `tabPayment Allocation`
         FOR EACH ROW
@@ -85,11 +85,11 @@ def execute():
           END IF;
         END
         """,
-    )
+	)
 
-    _drop_and_create(
-        "trg_after_report_insert",
-        """
+	_drop_and_create(
+		"trg_after_report_insert",
+		"""
         CREATE TRIGGER trg_after_report_insert
         AFTER INSERT ON `tabService Report`
         FOR EACH ROW
@@ -102,4 +102,4 @@ def execute():
               AND status NOT IN ('Completed', 'Closed');
         END
         """,
-    )
+	)

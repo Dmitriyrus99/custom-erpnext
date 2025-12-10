@@ -10,16 +10,16 @@ from pathlib import Path
 # `ferum_custom.ferum_custom...` resolve.
 current_dir = Path(__file__).resolve().parent
 while True:
-    next_dir = current_dir / "ferum_custom"
-    if not next_dir.exists():
-        break
-    __path__.append(str(next_dir))
-    current_dir = next_dir
+	next_dir = current_dir / "ferum_custom"
+	if not next_dir.exists():
+		break
+	__path__.append(str(next_dir))
+	current_dir = next_dir
 
 from . import ferum_custom  # noqa: F401
 
 subpkg_name = f"{__name__}.ferum_custom"
 if subpkg_name not in sys.modules:
-    sys.modules[subpkg_name] = ferum_custom
+	sys.modules[subpkg_name] = ferum_custom
 
 __all__ = ["ferum_custom"]

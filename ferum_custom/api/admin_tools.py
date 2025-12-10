@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 
 from ferum_custom.ferum_custom.integrations.file_sync import (
-	enqueue_custom_attachment_sync,
 	enqueue_file_sync,
 )
 
@@ -64,10 +63,8 @@ def create_telegram_bot_user(
 
 @frappe.whitelist(methods=["GET"])  # read-only; enforces doc permissions below
 def get_file_sync_status(doctype: str, name: str) -> dict:
-	"""Return Drive sync status for a File or Custom Attachment."""
-	doctype = (doctype or "").strip()
-	if doctype not in {"File", "Custom Attachment"}:
-		frappe.throw(_("Unsupported doctype. Use 'File' or 'Custom Attachment'."))
+	if doctype != "File":
+		frappe.throw(_("Unsupported doctype. Use 'File'."))
 	# Respect read permissions on the document
 	if not frappe.has_permission(doctype, ptype="read", doc=name):
 		frappe.throw(_("Not permitted"))
@@ -79,14 +76,6 @@ def get_file_sync_status(doctype: str, name: str) -> dict:
 		"drive_web_link": getattr(doc, "drive_web_link", None),
 		"sync_needed": not bool(getattr(doc, "drive_file_id", None)),
 	}
-	if doctype == "Custom Attachment":
-		status.update(
-			{
-				"file_url": getattr(doc, "file_url", None),
-				"linked_doctype": getattr(doc, "linked_doctype", None),
-				"linked_docname": getattr(doc, "linked_docname", None),
-			}
-		)
 	return status
 
 
@@ -94,14 +83,11 @@ def get_file_sync_status(doctype: str, name: str) -> dict:
 def trigger_file_sync(doctype: str, name: str) -> dict:
 	"""Enqueue Drive sync for a File or Custom Attachment via FileSyncService."""
 	doctype = (doctype or "").strip()
-	if doctype not in {"File", "Custom Attachment"}:
-		frappe.throw(_("Unsupported doctype. Use 'File' or 'Custom Attachment'."))
+	if doctype != "File":
+		frappe.throw(_("Unsupported doctype. Use 'File'."))
 	frappe.only_for("System Manager")
-	if doctype == "File":
-		enqueue_file_sync(name)
-	else:
-		enqueue_custom_attachment_sync(name)
-	return {"ok": True, "queued": True}
+	    enqueue_file_sync(name)
+    return {"ok": True, "queued": True}
 
 
 @frappe.whitelist(methods=["GET"])  # admin diagnostics
@@ -112,16 +98,10 @@ def list_unsynced_attachments(limit: int | None = 200) -> dict:
 	"""
 	frappe.only_for("System Manager")
 	lim = int(limit) if (limit is not None and str(limit).isdigit()) else 200
-	atts = frappe.get_all(
-		"Custom Attachment",
-		filters={"drive_file_id": ["in", ["", None]], "file_url": ["like", "/%"]},
-		fields=["name", "file_url", "linked_doctype", "linked_docname"],
-		limit=lim,
-	)
 	files = frappe.get_all(
 		"File",
 		filters={"drive_file_id": ["in", ["", None]], "is_private": 0},
 		fields=["name", "file_name", "attached_to_doctype", "attached_to_name"],
 		limit=lim,
 	)
-	return {"attachments": atts, "files": files, "limit": lim}
+	return {"files": files, "limit": lim}

@@ -77,6 +77,7 @@ def get_logger(module: str):
 	try:
 		return frappe.logger(module)
 	except Exception:
+
 		class _FallbackLogger:
 			def debug(self, *args, **kwargs):
 				pass

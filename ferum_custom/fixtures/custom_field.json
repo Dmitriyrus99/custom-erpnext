@@ -56,16 +56,15 @@
     "insert_after": "asset_owner",
     "translatable": 0
   },
-
   {
     "doctype": "Custom Field",
-    "name": "Issue-service_object",
-    "dt": "Issue",
-    "fieldname": "service_object",
-    "fieldtype": "Link",
-    "label": "Asset",
-    "options": "Asset",
-    "insert_after": "service_maintenance_schedule",
+    "name": "File-drive_file_id",
+    "dt": "File",
+    "fieldname": "drive_file_id",
+    "fieldtype": "Data",
+    "label": "Drive File ID",
+    "insert_after": "file_url",
+    "read_only": 1,
     "translatable": 0
   }
 ]

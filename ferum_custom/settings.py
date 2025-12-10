@@ -77,26 +77,26 @@ _load_env_files()
 
 
 def _fetch_settings() -> Any | None:
-    """Fetch settings document.
+	"""Fetch settings document.
 
-    Primary path uses frappe.get_single which constructs a proper Document.
-    Some environments exhibit issues resolving Singles via get_single (e.g.
-    legacy schemas or partial migrations). In that case, fall back to reading
-    raw rows from `tabSingles` and return a mapping-like object.
-    """
-    try:
-        return frappe.get_single(SETTINGS_DOCTYPE)
-    except Exception:
-        # Fallback: construct dict from Singles rows via raw SQL (Singles has no DocType)
-        try:
-            rows = frappe.db.sql(
-                """select `field`, `value` from `tabSingles` where `doctype`=%s""",
-                (SETTINGS_DOCTYPE,),
-                as_dict=True,
-            )
-            return frappe._dict({r["field"]: r["value"] for r in rows})
-        except Exception:
-            return None
+	Primary path uses frappe.get_single which constructs a proper Document.
+	Some environments exhibit issues resolving Singles via get_single (e.g.
+	legacy schemas or partial migrations). In that case, fall back to reading
+	raw rows from `tabSingles` and return a mapping-like object.
+	"""
+	try:
+		return frappe.get_single(SETTINGS_DOCTYPE)
+	except Exception:
+		# Fallback: construct dict from Singles rows via raw SQL (Singles has no DocType)
+		try:
+			rows = frappe.db.sql(
+				"""select `field`, `value` from `tabSingles` where `doctype`=%s""",
+				(SETTINGS_DOCTYPE,),
+				as_dict=True,
+			)
+			return frappe._dict({r["field"]: r["value"] for r in rows})
+		except Exception:
+			return None
 
 
 def get_settings(*, refresh: bool = False) -> Any | None:
@@ -109,21 +109,21 @@ def get_settings(*, refresh: bool = False) -> Any | None:
 
 @lru_cache(maxsize=1)
 def _settings_snapshot() -> dict[str, Any] | None:
-    doc = _fetch_settings()
-    if not doc:
-        return None
-    # Support Document, frappe._dict or plain dict
-    try:
-        data = doc.as_dict()  # type: ignore[attr-defined]
-        return dict(data)
-    except Exception:
-        try:
-            # frappe._dict or plain object with __dict__
-            if isinstance(doc, dict):
-                return dict(doc)
-            return {k: v for k, v in doc.__dict__.items() if not k.startswith("_")}
-        except Exception:
-            return None
+	doc = _fetch_settings()
+	if not doc:
+		return None
+	# Support Document, frappe._dict or plain dict
+	try:
+		data = doc.as_dict()  # type: ignore[attr-defined]
+		return dict(data)
+	except Exception:
+		try:
+			# frappe._dict or plain object with __dict__
+			if isinstance(doc, dict):
+				return dict(doc)
+			return {k: v for k, v in doc.__dict__.items() if not k.startswith("_")}
+		except Exception:
+			return None
 
 
 def refresh_settings_cache() -> None:

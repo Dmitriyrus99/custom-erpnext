@@ -45,7 +45,9 @@ def test_run_permission_audit_queries_combined_doctype(monkeypatch):
 	monkeypatch.setattr(
 		"ferum_custom.ferum_custom.automation.get_report_recipients", lambda roles: ["admin@example.com"]
 	)
-	monkeypatch.setattr(automation.frappe, "sendmail", lambda **kwargs: sent.setdefault("calls", []).append(kwargs))
+	monkeypatch.setattr(
+		automation.frappe, "sendmail", lambda **kwargs: sent.setdefault("calls", []).append(kwargs)
+	)
 	monkeypatch.setattr(automation.frappe, "log_info", lambda *args, **kwargs: None, raising=False)
 
 	automation.run_permission_audit()

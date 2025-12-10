@@ -15,8 +15,8 @@ def prometheus() -> None:
 	"""
 
 	open_requests = frappe.db.count("Issue", {"status": ["not in", ["Resolved", "Closed"]]})
-	sent_invoices = frappe.db.count("Invoice", {"status": "Sent"})
-	paid_invoices = frappe.db.count("Invoice", {"status": "Paid"})
+	sent_invoices = frappe.db.count("Sales Invoice", {"status": "Sent"})
+	paid_invoices = frappe.db.count("Sales Invoice", {"status": "Paid"})
 
 	lines: list[str] = []
 	ts = int(time.time())

@@ -21,7 +21,7 @@ def _coerce_filters(filters: Any) -> tuple[dict[str, Any], bool]:
 
 
 def _apply_project_default(report_name: str, filters: Any) -> Any:
-	if report_name != "Invoices by Project":
+	if report_name != "Sales Invoices by Project":
 		return filters
 
 	data, needs_serialization = _coerce_filters(filters)

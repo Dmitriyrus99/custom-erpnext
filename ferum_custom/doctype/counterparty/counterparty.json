@@ -1,0 +1,11 @@
+{ "doctype": "DocType", "name": "Counterparty", "module": "Ferum Custom",
+  "autoname": "hash", "custom": 1, "is_tree": 0, "fields": [
+    {"fieldname":"company","label":"Company","fieldtype":"Link","options":"Company","reqd":1},
+    {"fieldname":"name_full","label":"Full Name","fieldtype":"Data","reqd":1},
+    {"fieldname":"name_short","label":"Short Name","fieldtype":"Data","reqd":1},
+    {"fieldname":"inn","label":"INN","fieldtype":"Data"},
+    {"fieldname":"kpp","label":"KPP","fieldtype":"Data"},
+    {"fieldname":"address","label":"Address","fieldtype":"Small Text"},
+    {"fieldname":"contacts","label":"Contacts","fieldtype":"Small Text"}
+  ] }
+

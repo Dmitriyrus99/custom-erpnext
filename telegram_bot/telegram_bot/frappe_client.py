@@ -20,6 +20,7 @@ class FrappeAuth:
 	Attributes:
 		token (str): The authentication token.
 	"""
+
 	token: str
 
 
@@ -42,6 +43,7 @@ class FrappeClient:
 	"""
 	An asynchronous client for interacting with the Frappe API.
 	"""
+
 	def __init__(
 		self,
 		base_url: str,

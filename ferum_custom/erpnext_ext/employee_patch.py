@@ -10,7 +10,6 @@ _ORIGINAL_UPDATE_USER = Employee.update_user
 
 
 def _should_apply_patch(doc: Employee) -> bool:
-
 	user_id = getattr(doc, "user_id", "") or ""
 	return bool(
 		frappe.flags.in_test

@@ -28,6 +28,7 @@ sys.modules["ferum_custom.ferum_custom.security_pqc_rules"] = _security_module
 importlib.import_module("frappe.auth")
 with contextlib.suppress(Exception):
 	import ferum_custom as _fc  # type: ignore
+
 	_fc.security_pqc_rules = _security_module
 	nested_pkg = importlib.import_module("ferum_custom.ferum_custom")
 	setattr(nested_pkg, "security_pqc_rules", _security_module)

@@ -3,11 +3,20 @@ from __future__ import annotations
 from unittest import mock
 
 import frappe
+import pytest
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import getdate
 
-from ferum_custom.ferum_custom.doctype.invoice import invoice as invoice_module
+try:
+	from ferum_custom.ferum_custom.doctype.invoice import invoice as invoice_module
+except ModuleNotFoundError:  # pragma: no cover - gracefully skip when module removed
+	invoice_module = None  # type: ignore[assignment]
+
 from ferum_custom.ferum_custom.tests import smoke_tools
+
+pytestmark = pytest.mark.skipif(
+	invoice_module is None, reason="Invoice Google Sheets sync module not present in this build."
+)
 
 
 class _DummySheet:
@@ -38,11 +47,14 @@ class TestGoogleSheetsSync(FrappeTestCase):
 		doc.insert()
 
 		sheet = _DummySheet()
-		with mock.patch.object(
-			invoice_module,
-			"get_google_sheet",
-			return_value=sheet,
-		), mock.patch.object(invoice_module, "metrics_inc", lambda *args, **kwargs: None):
+		with (
+			mock.patch.object(
+				invoice_module,
+				"get_google_sheet",
+				return_value=sheet,
+			),
+			mock.patch.object(invoice_module, "metrics_inc", lambda *args, **kwargs: None),
+		):
 			invoice_module.sync_to_google_sheets(doc.name)
 
 		self.assertEqual(sheet.rows[0][0], doc.name)

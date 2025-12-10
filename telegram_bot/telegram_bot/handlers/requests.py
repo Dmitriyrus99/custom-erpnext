@@ -22,6 +22,7 @@ class AttachState(StatesGroup):
 	Attributes:
 		waiting_request (State): The state for waiting for a request ID.
 	"""
+
 	waiting_request = State()
 
 

@@ -6,8 +6,8 @@ import frappe
 
 from ferum_custom.ferum_custom.integrations.drive import upload_bytes
 from ferum_custom.ferum_custom.integrations.file_sync import (
-    enqueue_file_sync,
-    sync_file_by_name,
+	enqueue_file_sync,
+	sync_file_by_name,
 )
 from ferum_custom.ferum_custom.integrations.antivirus import scan_bytes
 from ferum_custom.ferum_custom.settings import is_feature_enabled

@@ -47,8 +47,8 @@ def execute():
 					with contextlib.suppress(Exception):
 						si.posting_date = inv.invoice_date
 					project = getattr(inv, "project", None)
-					if project and frappe.db.exists("Service Project", project):
-						sp = frappe.get_doc("Service Project", project)
+					if project and frappe.db.exists("Project", project):
+						sp = frappe.get_doc("Project", project)
 						project = find_or_create_project(sp) or project
 					with contextlib.suppress(Exception):
 						if project:
@@ -95,8 +95,8 @@ def execute():
 					row.rate = float(getattr(inv, "amount", 0) or 0)
 				with contextlib.suppress(Exception):
 					project = getattr(inv, "project", None)
-					if project and frappe.db.exists("Service Project", project):
-						sp = frappe.get_doc("Service Project", project)
+					if project and frappe.db.exists("Project", project):
+						sp = frappe.get_doc("Project", project)
 						project = find_or_create_project(sp) or project
 					if project:
 						pi.project = project

@@ -1,0 +1,84 @@
+{
+  "name": "Service Maintenance Schedule",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "autoname": "SMSCH-.####",
+  "is_submittable": 0,
+  "fields": [
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
+      "fieldname": "schedule_name",
+      "fieldtype": "Data",
+      "label": "Schedule Name",
+      "reqd": 1
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer",
+      "reqd": 1
+    },
+    {
+      "fieldname": "service_project",
+      "fieldtype": "Link",
+      "label": "Service Project",
+      "options": "Service Project"
+    },
+    {
+      "fieldname": "frequency",
+      "fieldtype": "Select",
+      "label": "Frequency",
+      "options": "Daily\nWeekly\nMonthly\nAnnually",
+      "reqd": 1
+    },
+    {
+      "fieldname": "start_date",
+      "fieldtype": "Date",
+      "label": "Start Date",
+      "reqd": 1
+    },
+    { "fieldname": "end_date", "fieldtype": "Date", "label": "End Date" },
+    {
+      "fieldname": "next_due_date",
+      "fieldtype": "Date",
+      "label": "Next Due Date",
+      "reqd": 1
+    },
+    { "fieldname": "description", "fieldtype": "Text", "label": "Description" },
+    {
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Items",
+      "options": "Service Maintenance Schedule Item"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    },
+    {
+      "role": "Office Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    },
+    {
+      "role": "Project Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1
+    }
+  ]
+}

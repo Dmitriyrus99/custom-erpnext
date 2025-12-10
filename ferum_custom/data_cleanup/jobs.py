@@ -7,14 +7,14 @@ from ferum_custom.ferum_custom.data_cleanup.stg_raw import cleanup_stg_raw_recor
 
 
 def normalize_contracts_job() -> None:
-    try:
-        normalize_contracts_data()
-    except Exception:
-        frappe.log_error(frappe.get_traceback(), "normalize_contracts_job failed")
+	try:
+		normalize_contracts_data()
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "normalize_contracts_job failed")
 
 
 def cleanup_stg_raw_job() -> None:
-    try:
-        cleanup_stg_raw_records()
-    except Exception:
-        frappe.log_error(frappe.get_traceback(), "cleanup_stg_raw_job failed")
+	try:
+		cleanup_stg_raw_records()
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "cleanup_stg_raw_job failed")

@@ -1,0 +1,199 @@
+{
+  "name": "Ferum Custom Settings",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "issingle": 1,
+  "fields": [
+    {
+      "fieldname": "integration_section",
+      "fieldtype": "Section Break",
+      "label": "Integrations"
+    },
+    {
+      "fieldname": "enable_google_sheets_sync",
+      "fieldtype": "Check",
+      "label": "Enable Google Sheets Sync"
+    },
+    {
+      "fieldname": "google_service_account_json",
+      "fieldtype": "Attach",
+      "label": "Google Service Account JSON"
+    },
+    {
+      "fieldname": "google_sheet_name",
+      "fieldtype": "Data",
+      "label": "Google Sheet Name",
+      "default": "Ferum Invoices Tracker"
+    },
+    {
+      "fieldname": "erpnext_section",
+      "fieldtype": "Section Break",
+      "label": "ERPNext Integration"
+    },
+    {
+      "fieldname": "enable_auto_create_sales_invoice",
+      "fieldtype": "Check",
+      "label": "Auto-create Sales Invoice for Customer"
+    },
+    {
+      "fieldname": "default_item_code",
+      "fieldtype": "Link",
+      "label": "Default Item Code",
+      "options": "Item"
+    },
+    {
+      "fieldname": "income_account",
+      "fieldtype": "Link",
+      "label": "Income Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "cost_center",
+      "fieldtype": "Link",
+      "label": "Cost Center",
+      "options": "Cost Center"
+    },
+    {
+      "fieldname": "api_section",
+      "fieldtype": "Section Break",
+      "label": "API / Portal"
+    },
+    {
+      "fieldname": "enable_jwt",
+      "fieldtype": "Check",
+      "label": "Enable JWT Auth for API"
+    },
+    {
+      "fieldname": "jwt_secret",
+      "fieldtype": "Password",
+      "label": "JWT Secret"
+    },
+    {
+      "fieldname": "enable_rate_limit_auth",
+      "fieldtype": "Check",
+      "label": "Enable Rate Limit for Auth"
+    },
+    {
+      "fieldname": "rate_limit_auth_per_minute",
+      "fieldtype": "Int",
+      "label": "Auth Requests per Minute (per IP)",
+      "default": 5
+    },
+    {
+      "fieldname": "notification_section",
+      "fieldtype": "Section Break",
+      "label": "Notifications"
+    },
+    {
+      "fieldname": "telegram_section",
+      "fieldtype": "Section Break",
+      "label": "Telegram"
+    },
+    {
+      "fieldname": "enable_telegram_notifications",
+      "fieldtype": "Check",
+      "label": "Enable Telegram Notifications"
+    },
+    {
+      "fieldname": "telegram_bot_token",
+      "fieldtype": "Password",
+      "label": "Telegram Bot Token",
+      "description": "BotFather token of your Telegram bot"
+    },
+    {
+      "fieldname": "telegram_default_chat_id",
+      "fieldtype": "Data",
+      "label": "Default Chat ID",
+      "description": "Group or user chat_id to send broadcast alerts"
+    },
+    {
+      "fieldname": "telegram_allowed_chat_ids",
+      "fieldtype": "Small Text",
+      "label": "Allowed Chat IDs",
+      "description": "One chat_id per line; leave blank to allow all chats."
+    },
+    {
+      "fieldname": "telegram_admin_usernames",
+      "fieldtype": "Small Text",
+      "label": "Admin Telegram Usernames",
+      "description": "Comma or newline separated telegram usernames that may execute admin commands."
+    },
+    {
+      "fieldname": "check_telegram",
+      "fieldtype": "Button",
+      "label": "Check Telegram"
+    },
+    {
+      "fieldname": "invoice_notification_roles",
+      "fieldtype": "Table MultiSelect",
+      "label": "Invoice Notification Roles",
+      "options": "Role"
+    },
+    {
+      "fieldname": "drive_section",
+      "fieldtype": "Section Break",
+      "label": "Google Drive"
+    },
+    {
+      "fieldname": "enable_google_drive_sync",
+      "fieldtype": "Check",
+      "label": "Enable Google Drive Sync"
+    },
+    {
+      "fieldname": "google_drive_root_folder_id",
+      "fieldtype": "Data",
+      "label": "Drive Root Folder ID",
+      "description": "Root folder ID for project archives"
+    },
+    {
+      "fieldname": "check_google_drive",
+      "fieldtype": "Button",
+      "label": "Check Google Drive"
+    },
+    {
+      "fieldname": "rate_limit_section",
+      "fieldtype": "Section Break",
+      "label": "Rate Limiting"
+    },
+    {
+      "fieldname": "enable_rate_limit_create_request",
+      "fieldtype": "Check",
+      "label": "Enable Rate Limit for New Requests"
+    },
+    {
+      "fieldname": "rate_limit_create_request_per_minute",
+      "fieldtype": "Int",
+      "label": "New Requests per Minute (per IP)",
+      "default": 10
+    }
+    ,
+    { "fieldname": "observability_section", "fieldtype": "Section Break", "label": "Observability" },
+    {
+      "fieldname": "sentry_dsn",
+      "fieldtype": "Data",
+      "label": "Sentry DSN"
+    },
+    {
+      "fieldname": "sentry_traces_sample_rate",
+      "fieldtype": "Float",
+      "label": "Sentry Traces Sample Rate",
+      "default": 0
+    },
+    { "fieldname": "telegram_bot_section", "fieldtype": "Section Break", "label": "Telegram Bot" },
+    {
+      "fieldname": "telegram_webhook_secret",
+      "fieldtype": "Password",
+      "label": "Telegram Webhook Secret",
+      "description": "Shared secret to validate incoming Telegram updates"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
+  ]
+}

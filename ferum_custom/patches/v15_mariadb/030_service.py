@@ -2,4 +2,4 @@ from . import run_sql_file
 
 
 def execute():
-    run_sql_file("030_service.sql")
+	run_sql_file("030_service.sql")

@@ -105,7 +105,7 @@ def _get_or_create_issue(title: str, asset_name: str) -> str:
 	issue_doc.priority = "High"
 	issue_doc.asset = asset_name
 	issue_doc.customer = asset_doc.customer
-	issue_doc.project = asset_doc.project # Project link is via asset's project if available
+	issue_doc.project = asset_doc.project  # Project link is via asset's project if available
 	issue_doc.status = "Open"
 	issue_doc.creation = frappe.utils.now_datetime()
 	issue_doc.insert(ignore_permissions=True)
@@ -120,7 +120,9 @@ def _get_or_create_timesheet(issue_name: str, attachment_name: str) -> str:
 	timesheet_doc.issue = issue_name
 	timesheet_doc.start_date = nowdate()
 	timesheet_doc.status = "Draft"
-	timesheet_doc.append("time_logs", {"activity_type": "Maintenance", "hours": 1.0, "description": "Inspection"})
+	timesheet_doc.append(
+		"time_logs", {"activity_type": "Maintenance", "hours": 1.0, "description": "Inspection"}
+	)
 	timesheet_doc.insert(ignore_permissions=True)
 	return timesheet_doc.name
 

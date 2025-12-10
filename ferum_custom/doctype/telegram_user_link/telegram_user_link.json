@@ -1,0 +1,53 @@
+{
+  "name": "Telegram User Link",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "autoname": "TGL-.####",
+  "editable_grid": 0,
+  "quick_entry": 1,
+  "fields": [
+    {
+      "fieldname": "user",
+      "fieldtype": "Link",
+      "label": "ERPNext User",
+      "options": "User",
+      "reqd": 1
+    },
+    {
+      "fieldname": "telegram_username",
+      "fieldtype": "Data",
+      "label": "Telegram Username"
+    },
+    {
+      "fieldname": "chat_id",
+      "fieldtype": "Data",
+      "label": "Telegram Chat ID",
+      "reqd": 1
+    },
+    {
+      "fieldname": "is_admin",
+      "fieldtype": "Check",
+      "label": "Treat as Telegram Admin"
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    },
+    {
+      "role": "Office Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1
+    }
+  ]
+}

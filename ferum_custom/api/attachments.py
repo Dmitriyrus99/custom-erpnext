@@ -63,22 +63,6 @@ def _store_file(
 	)
 	file_doc.insert(ignore_permissions=True)
 	mime = (content_type or "").lower().strip()
-	try:
-		att = frappe.get_doc(
-			{
-				"doctype": "Custom Attachment",
-				"file_name": filename,
-				"file_url": file_doc.file_url,
-				"linked_doctype": doctype,
-				"linked_docname": docname,
-				"file_type": mime,
-				"uploaded_by": frappe.session.user,
-			}
-		)
-		att.insert(ignore_permissions=True)
-	except Exception:
-		# Non-fatal: File is stored; Drive sync might miss without CustomAttachment
-		frappe.log_error(frappe.get_traceback(), "Create CustomAttachment via API failed")
 	return file_doc.file_url, mime
 
 
@@ -114,6 +98,7 @@ def attach_to_issue(name: str) -> dict:
 		content_type=content_type,
 	)
 	return {"ok": True, "file_url": url, "mime": mime}
+
 
 @frappe.whitelist(methods=["POST"])  # multipart upload
 @rate_limit(limit=30, seconds=60, methods=["POST"])  # 30 uploads/min per IP

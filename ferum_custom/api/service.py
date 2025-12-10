@@ -113,9 +113,7 @@ def _enforce_rate_limit(scope: str, identifier: str | None, limit: int) -> None:
 
 
 @frappe.whitelist(methods=["POST"])  # API used by bot/portal: POST only
-def create_issue(
-	title: str, description: str | None = None, asset: str | None = None
-) -> dict[str, t.Any]:
+def create_issue(title: str, description: str | None = None, asset: str | None = None) -> dict[str, t.Any]:
 	"""
 	Creates a new issue.
 
@@ -160,7 +158,7 @@ def create_issue(
 	name = service_app.create_issue(
 		title=title,
 		description=description,
-		service_object=asset,
+		asset=asset,
 		company=company,
 		project=project,
 		customer=customer,
@@ -169,9 +167,7 @@ def create_issue(
 
 
 @frappe.whitelist(methods=["GET"])  # Listing is idempotent
-def list_issues(
-	status: str | None = None, start: int | None = None, page_length: int | None = None
-) -> dict:
+def list_issues(status: str | None = None, start: int | None = None, page_length: int | None = None) -> dict:
 	"""
 	Lists issues.
 
@@ -338,7 +334,7 @@ def _get_client_ip() -> str:
 	return "unknown"
 
 
-def _check_new_request_rate_limit() -> None:
+def _check_new_issue_rate_limit() -> None:
 	"""
 	Checks and enforces the rate limit for creating new service requests.
 	"""
@@ -351,21 +347,21 @@ def _check_new_request_rate_limit() -> None:
 		except Exception:
 			limit_val = 10
 		ip = _get_client_ip()
-		_enforce_rate_limit("new_request_ip", ip, max(1, limit_val))
+		_enforce_rate_limit("new_issue_ip", ip, max(1, limit_val))
 		user = frappe.session.user
 		if user and user not in {"Guest", "Administrator"}:
-			_enforce_rate_limit("new_request_user", user, max(1, limit_val))
+			_enforce_rate_limit("new_issue_user", user, max(1, limit_val))
 	except Exception:
 		# Never block due to rate-limit implementation errors
 		pass
 
 
 @frappe.whitelist()
-def list_invoices(
+def list_sales_invoices(
 	project: str | None = None, start: int | None = None, page_length: int | None = None
 ) -> dict:
 	"""
-	Lists invoices.
+	Lists sales invoices.
 
 	Args:
 		project (str | None, optional): The project to filter by. Defaults to None.
@@ -373,7 +369,7 @@ def list_invoices(
 		page_length (int | None, optional): The number of items per page. Defaults to None.
 
 	Returns:
-		dict: A dictionary containing the list of invoices.
+		dict: A dictionary containing the list of sales invoices.
 	"""
 	s, pl = _paginate(start, page_length)
 	filters: dict[str, t.Any] = {}
@@ -386,23 +382,22 @@ def list_invoices(
 		if user_type == "Website User" or "Client" in roles:
 			allowed = get_allowed_customers(user)
 			if allowed:
-				filters["counterparty_type"] = "Customer"
-				filters["counterparty_name"] = ["in", allowed]
+				filters["customer"] = ["in", allowed]
+				# Assuming that a client will only be able to view Sales Invoices related to them as a customer.
+				# counterparty_type and counterparty_name filters are relevant to custom Invoice DocType only.
 	except Exception:
 		pass
 
 	data = frappe.get_list(
-		"Invoice",
+		"Sales Invoice",
 		filters=filters,
 		fields=[
 			"name",
 			"project",
-			"counterparty_name",
-			"counterparty_type",
+			"customer_name",
 			"status",
-			"amount",
-			"invoice_date",
-			"sales_invoice",
+			"grand_total",
+			"posting_date",
 			"modified",
 		],
 		start=s,

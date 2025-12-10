@@ -52,7 +52,9 @@ def test_generate_issues_from_schedules_creates_issue(monkeypatch):
 
 	monkeypatch.setattr(frappe, "get_doc", fake_get_doc)
 	monkeypatch.setattr(frappe, "logger", lambda *args, **kwargs: SimpleNamespace(info=lambda *a, **k: None))
-	monkeypatch.setattr("ferum_custom.ferum_custom.services.audit.log_event", lambda **kwargs: None, raising=False)
+	monkeypatch.setattr(
+		"ferum_custom.ferum_custom.services.audit.log_event", lambda **kwargs: None, raising=False
+	)
 
 	result = maintenance.generate_issues_from_schedules()
 	assert result == {"created": 1, "skipped": 0}

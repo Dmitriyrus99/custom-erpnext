@@ -22,12 +22,3 @@ ALTER TABLE `tabContract Stage`
   ADD COLUMN IF NOT EXISTS `period_to` DATE,
   ADD COLUMN IF NOT EXISTS `amount_plan` DECIMAL(18,2),
   ADD UNIQUE KEY IF NOT EXISTS `ux_contract_stage_no`(`contract`, `stage_no`);
-
-ALTER TABLE `tabService Act`
-  ADD COLUMN IF NOT EXISTS `contract` VARCHAR(140),
-  ADD COLUMN IF NOT EXISTS `stage` VARCHAR(140),
-  ADD COLUMN IF NOT EXISTS `act_no` VARCHAR(140),
-  ADD COLUMN IF NOT EXISTS `act_date` DATE,
-  ADD COLUMN IF NOT EXISTS `amount` DECIMAL(18,2),
-  ADD COLUMN IF NOT EXISTS `file_url` VARCHAR(255),
-  ADD UNIQUE KEY IF NOT EXISTS `ux_contract_act_no`(`contract`, `act_no`);

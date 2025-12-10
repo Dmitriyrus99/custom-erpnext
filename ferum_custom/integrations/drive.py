@@ -224,7 +224,11 @@ def _create_health_file(service: Any, root: str) -> dict[str, Any] | None:
 		media = MediaInMemoryUpload(b"healthcheck", "text/plain")
 		resp = (
 			service.files()
-			.create(body={"name": upload_name, "parents": [root], "mimeType": "text/plain"}, media_body=media, fields="id")
+			.create(
+				body={"name": upload_name, "parents": [root], "mimeType": "text/plain"},
+				media_body=media,
+				fields="id",
+			)
 			.execute()
 		)
 		file_id = resp.get("id")
