@@ -134,3 +134,16 @@ def enqueue_custom_attachment_sync(docname: str) -> None:
 	except Exception:
 		# Fall back to synchronous execution to avoid silent drops during migration/testing
 		sync_custom_attachment_by_name(docname)
+
+
+def enqueue_file_sync(file_name: str) -> None:
+	"""Queue File sync to Drive; used by drive_file hook."""
+	try:
+		frappe.enqueue(
+			"ferum_custom.ferum_custom.integrations.file_sync.sync_file_by_name",
+			file_name=file_name,
+			queue="short",
+		)
+	except Exception:
+		# Synchronous fallback to avoid silent failures during bootstrapping
+		sync_file_by_name(file_name)

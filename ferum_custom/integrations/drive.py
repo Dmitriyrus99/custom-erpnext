@@ -247,17 +247,33 @@ def healthcheck() -> dict[str, Any]:
 	"""Return health information for the Drive integration, including write verification."""
 
 	if not is_feature_enabled("enable_google_drive_sync"):
+		try:
+			metrics_inc("ferum_integration_drive_health_total", {"result": "disabled"})
+		except Exception:
+			pass
 		return {"status": "disabled", "message": "Drive sync feature flag disabled"}
 
 	if build is None or MediaInMemoryUpload is None:
+		try:
+			metrics_inc("ferum_integration_drive_health_total", {"result": "error", "reason": "missing_client"})
+		except Exception:
+			pass
 		return {"status": "error", "message": "google-api-python-client is not installed"}
 
 	root = get_setting("google_drive_root_folder_id")
 	if not root:
+		try:
+			metrics_inc("ferum_integration_drive_health_total", {"result": "error", "reason": "no_root"})
+		except Exception:
+			pass
 		return {"status": "error", "message": "Drive root folder ID is not configured"}
 
 	service = _drive_service()
 	if not service:
+		try:
+			metrics_inc("ferum_integration_drive_health_total", {"result": "error", "reason": "init_failed"})
+		except Exception:
+			pass
 		return {"status": "error", "message": "Failed to initialise Drive client"}
 
 	try:
@@ -277,9 +293,17 @@ def healthcheck() -> dict[str, Any]:
 		}
 		if health_file:
 			details["health_file"] = health_file
+		try:
+			metrics_inc("ferum_integration_drive_health_total", {"result": "ok"})
+		except Exception:
+			pass
 		return {"status": "ok", "details": details}
 	except Exception as exc:
 		category, context = _classify_failure(exc)
+		try:
+			metrics_inc("ferum_integration_drive_health_total", {"result": "error", "reason": category or "exception"})
+		except Exception:
+			pass
 		return {
 			"status": "error",
 			"message": f"Unable to access root folder ({context})",

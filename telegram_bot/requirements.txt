@@ -3,5 +3,6 @@ httpx>=0.27
 pydantic>=2
 python-dotenv>=1
 prometheus-client>=0.20
-sentry-sdk>=2
+# Keep aligned with frappe constraint (~=1.45.1) to avoid env conflicts
+sentry-sdk==1.45.1
 pyotp>=2

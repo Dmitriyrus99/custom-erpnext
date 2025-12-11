@@ -49,6 +49,8 @@ class FrappeClient:
 		base_url: str,
 		username: str,
 		password: str,
+		api_key: str | None = None,
+		api_secret: str | None = None,
 		totp_secret: str | None = None,
 		verify_ssl: bool = True,
 	) -> None:
@@ -65,6 +67,8 @@ class FrappeClient:
 		self.base = base_url.rstrip("/")
 		self.username = username
 		self.password = password
+		self.api_key = api_key
+		self.api_secret = api_secret
 		self.totp_secret = totp_secret
 		self._auth: FrappeAuth | None = None
 		self._client = httpx.AsyncClient(base_url=self.base, timeout=20, verify=verify_ssl)
@@ -154,6 +158,9 @@ class FrappeClient:
 		Returns:
 			dict[str, str]: The authentication headers.
 		"""
+		# Prefer API key/secret if provided
+		if self.api_key and self.api_secret:
+			return {"Authorization": f"token {self.api_key}:{self.api_secret}"}
 		if not self._auth:
 			await self._login()
 		assert self._auth is not None
@@ -173,7 +180,7 @@ class FrappeClient:
 		"""
 		headers = await self._headers()
 		r = await self._client.post(
-			"/api/method/ferum_custom.api.service.create_service_request",
+			"/api/method/ferum_custom.api.service.create_issue",
 			headers=headers or None,
 			data={"title": title, "description": description},
 		)
@@ -197,7 +204,7 @@ class FrappeClient:
 			params["status"] = status
 		headers = await self._headers()
 		r = await self._client.get(
-			"/api/method/ferum_custom.api.service.list_service_requests",
+			"/api/method/ferum_custom.api.service.list_issues",
 			headers=headers or None,
 			params=params,
 		)
@@ -242,7 +249,7 @@ class FrappeClient:
 		files = {"file": (file_name, content, content_type)}
 		headers = await self._headers()
 		r = await self._client.post(
-			"/api/method/ferum_custom.api.attachments.attach_to_service_request",
+			"/api/method/ferum_custom.api.attachments.attach_to_issue",
 			headers=headers or None,
 			files=files,
 			params={"name": name},

@@ -85,6 +85,8 @@ async def run_polling() -> None:
 		settings.frappe_base,
 		settings.frappe_username,
 		settings.frappe_password,
+		api_key=settings.frappe_api_key,
+		api_secret=settings.frappe_api_secret,
 		totp_secret=settings.bot_totp_secret,
 		verify_ssl=settings.verify_ssl,
 	)
@@ -119,6 +121,8 @@ async def run_webhook() -> None:
 		settings.frappe_base,
 		settings.frappe_username,
 		settings.frappe_password,
+		api_key=settings.frappe_api_key,
+		api_secret=settings.frappe_api_secret,
 		totp_secret=settings.bot_totp_secret,
 		verify_ssl=settings.verify_ssl,
 	)

@@ -15,6 +15,8 @@ class Settings:
 	mode: str | None
 	port: int | None
 	frappe_base: str
+	frappe_api_key: str | None
+	frappe_api_secret: str | None
 	frappe_username: str
 	frappe_password: str
 	bot_totp_secret: str | None
@@ -39,6 +41,8 @@ def load() -> Settings:
 		mode=_get_env("MODE", ["FERUM_BOT_MODE"]),
 		port=int(_get_env("PORT", ["FERUM_BOT_PORT"]) or 0) or None,
 		frappe_base=_get_env("FRAPPE_BASE_URL", ["FERUM_FRAPPE_BASE_URL"], default="").rstrip("/"),
+		frappe_api_key=_get_env("FRAPPE_API_KEY", ["FERUM_FRAPPE_API_KEY"]),
+		frappe_api_secret=_get_env("FRAPPE_API_SECRET", ["FERUM_FRAPPE_API_SECRET"]),
 		frappe_username=_get_env("FRAPPE_USERNAME", ["FERUM_FRAPPE_USERNAME"], default=""),
 		frappe_password=_get_env("FRAPPE_PASSWORD", ["FERUM_FRAPPE_PASSWORD"], default=""),
 		bot_totp_secret=_get_env("BOT_TOTP_SECRET", ["FERUM_BOT_TOTP_SECRET"]),

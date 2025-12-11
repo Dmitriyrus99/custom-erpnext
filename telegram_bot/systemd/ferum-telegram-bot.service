@@ -1,17 +1,25 @@
 [Unit]
-Description=Ferum Telegram Bot (Aiogram)
-After=network.target
+Description=Ferum Telegram Bot (Aiogram, bench-managed)
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/home/frappe/frappe-bench/config/.env.integrations
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/ferum/telegram-bot
-Environment=MODE=polling
+User=frappe
+Group=frappe
+WorkingDirectory=/home/frappe/frappe-bench
+# Keep stdout/stderr in journald; avoid buffering to see logs live
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/usr/bin/python -m apps.ferum_custom.telegram_bot.main
-User=ferum
-Restart=always
+# Prefer webhook; can be overridden via env
+Environment=MODE=webhook
+# Load shared integration secrets (non-fatal if missing thanks to ConditionPathExists)
+EnvironmentFile=-/home/frappe/frappe-bench/config/.env.integrations
+# Ensure bench root is on sys.path so `apps.ferum_custom.telegram_bot` imports
+Environment=PYTHONPATH=/home/frappe/frappe-bench
+ExecStart=/home/frappe/frappe-bench/env/bin/python -m apps.ferum_custom.telegram_bot.main
+Restart=on-failure
 RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
-

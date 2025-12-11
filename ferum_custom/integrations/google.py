@@ -3,6 +3,7 @@ from __future__ import annotations
 """Shared helpers for Google integrations (Drive, Sheets, ...)."""
 
 import json
+import os
 from collections.abc import Iterable
 from functools import lru_cache
 from typing import Any
@@ -24,6 +25,17 @@ SERVICE_ACCOUNT_SCOPE_SHEETS = "https://www.googleapis.com/auth/spreadsheets"
 
 @lru_cache(maxsize=1)
 def _service_account_info() -> dict[str, Any] | None:
+	env_b64 = os.environ.get("FERUM_GOOGLE_SERVICE_ACCOUNT_JSON_B64")
+	if env_b64:
+		try:
+			import base64
+
+			decoded = base64.b64decode(env_b64).decode("utf-8")
+			return json.loads(decoded)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "Google service account env decode failed")
+			return None
+
 	file_url = get_setting("google_service_account_json")
 	if not file_url:
 		return None

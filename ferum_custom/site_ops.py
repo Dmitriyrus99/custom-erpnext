@@ -269,8 +269,8 @@ def backup_to_drive() -> dict:
 
 
 @frappe.whitelist()
-def backfill_drive_ids(limit: int | None = 200) -> dict:
-	"""Backfill missing Drive IDs for Custom Attachments and File docs.
+def backfill_drive_ids(limit: int | None = 200, dry_run: bool = False) -> dict:
+	"""Backfill missing Drive IDs for Custom Attachments and File docs, with optional dry-run.
 
 	- For Custom Attachment without `drive_file_id` and with ERP-hosted `file_url`,
 	  reuse the existing upload helper to push to Drive and store IDs.
@@ -285,9 +285,39 @@ def backfill_drive_ids(limit: int | None = 200) -> dict:
 		return {"status": "skipped", "reason": "drive-disabled"}
 
 	from ferum_custom.ferum_custom.integrations import drive_file as drive_file_hook
+	from ferum_custom.ferum_custom.integrations import file_sync
 
 	lim = int(limit) if (limit is not None and str(limit).isdigit()) else 200
 	att_ok = att_skip = file_ok = file_skip = 0
+	att_pending: list[str] = []
+	file_pending: list[str] = []
+
+	# Custom Attachments first
+	try:
+		atts = frappe.get_all(
+			"Custom Attachment",
+			filters={
+				"drive_file_id": ["in", ["", None]],
+				"file_url": ["like", "/%"],  # ERP-hosted only
+			},
+			fields=["name", "file_url"],
+			limit=lim,
+			order_by="creation asc",
+		)
+		for att in atts:
+			try:
+				if dry_run:
+					att_pending.append(att["name"])
+					continue
+				file_id = file_sync.sync_custom_attachment_by_name(att["name"])
+				if file_id:
+					att_ok += 1
+				else:
+					att_skip += 1
+			except Exception:
+				att_skip += 1
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "backfill_drive_ids: list custom attachments failed")
 
 	# Files next
 	try:
@@ -296,9 +326,13 @@ def backfill_drive_ids(limit: int | None = 200) -> dict:
 			filters={"drive_file_id": ["in", ["", None]]},
 			fields=["name"],
 			limit=lim,
+			order_by="creation asc",
 		)
 		for f in files:
 			try:
+				if dry_run:
+					file_pending.append(f["name"])
+					continue
 				doc = frappe.get_doc("File", f["name"])
 				drive_file_hook.on_file_update(doc, method="backfill")
 				file_ok += 1
@@ -307,11 +341,19 @@ def backfill_drive_ids(limit: int | None = 200) -> dict:
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "backfill_drive_ids: list files failed")
 
-		return {
-			"status": "ok",
-			"files_processed": file_ok,
-			"files_failed": file_skip,
+	return {
+		"status": "ok",
+		"dry_run": dry_run,
+		"limit": lim,
+		"custom_attachments_processed": att_ok,
+		"custom_attachments_failed": att_skip,
+		"files_processed": file_ok,
+		"files_failed": file_skip,
+		"pending_preview": {
+			"custom_attachments": att_pending[:20],
+			"files": file_pending[:20],
 		}
+	}
 
 
 @frappe.whitelist()
@@ -322,7 +364,7 @@ def daily_backfill_drive_ids_small() -> dict:
 	"""
 	require_roles_if_http(["System Manager"])  # restrict manual HTTP calls
 	require_post_if_http()
-	return backfill_drive_ids(limit=100)
+	return backfill_drive_ids(limit=100, dry_run=False)
 
 
 @frappe.whitelist()
