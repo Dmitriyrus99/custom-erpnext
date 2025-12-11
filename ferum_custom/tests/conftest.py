@@ -46,6 +46,10 @@ def _init_frappe_site() -> None:
 	frappe.init(site=site, sites_path=str(SITES_PATH))
 	frappe.connect()
 	frappe.setup_module_map(include_all_apps=True)
+	# Some benches lose the scrubbed module -> app mapping after cache resets.
+	# Ensure custom modules from ``ferum_custom`` are always registered so
+	# `frappe.new_doc` can resolve controllers during tests.
+	frappe.local.module_app["ferum_custom"] = "ferum_custom"
 	frappe.flags.in_test = True
 	frappe.local.lang = "en"
 	with contextlib.suppress(Exception):

@@ -23,8 +23,8 @@
    "custom": 0,
    "docstatus": 0,
    "doctype": "Module Def",
-   "module_name": "Project & Contract Management",
-   "name": "Project & Contract Management",
+  "module_name": "Project Contract Management",
+  "name": "Project Contract Management",
    "package": null,
    "restrict_to_domain": null
  },
@@ -79,8 +79,8 @@
    "custom": 0,
    "docstatus": 0,
    "doctype": "Module Def",
-   "module_name": "HR & Payroll",
-   "name": "HR & Payroll",
+  "module_name": "HR Payroll",
+  "name": "HR Payroll",
    "package": null,
    "restrict_to_domain": null
  },

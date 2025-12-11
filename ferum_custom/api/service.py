@@ -356,6 +356,29 @@ def _check_new_issue_rate_limit() -> None:
 		pass
 
 
+# Backward-compatible alias used by tests/older clients
+def _check_new_request_rate_limit() -> None:
+	try:
+		if not is_feature_enabled("enable_rate_limit_create_request"):
+			return
+
+		limit = get_setting("rate_limit_create_request_per_minute")
+		try:
+			limit_val = int(limit) if limit is not None else 10
+		except Exception:
+			limit_val = 10
+
+		ip = _get_client_ip()
+		_enforce_rate_limit("new_request_ip", ip, max(1, limit_val))
+
+		user = frappe.session.user
+		if user and user not in {"Guest", "Administrator"}:
+			_enforce_rate_limit("new_request_user", user, max(1, limit_val))
+	except Exception:
+		# Never block end-users because of rate-limit bookkeeping issues
+		pass
+
+
 @frappe.whitelist()
 def list_sales_invoices(
 	project: str | None = None, start: int | None = None, page_length: int | None = None

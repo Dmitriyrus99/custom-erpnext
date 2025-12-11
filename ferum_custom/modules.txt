@@ -1,9 +1,9 @@
 ferum_custom
-Project & Contract Management
+Project Contract Management
 Issue Management
 Work Reporting
 Invoicing
-HR & Payroll
+HR Payroll
 Document Management
 Notifications
 Analytics

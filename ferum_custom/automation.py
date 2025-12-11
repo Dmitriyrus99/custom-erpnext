@@ -43,6 +43,11 @@ def send_daily_overdue_report():
 	frappe.log_info(f"Sent daily overdue report to {len(recipients)} recipients.", "Daily Overdue Report")
 
 
+# Backward-compatible wrappers used by scheduler hooks
+def send_daily_overdue_issue_report():
+	return send_daily_overdue_report()
+
+
 def send_weekly_overdue_maintenance_report():
 	"""
 	Scans for overdue routine maintenance Service Requests and emails a summary
@@ -84,6 +89,11 @@ def send_weekly_overdue_maintenance_report():
 		f"Sent weekly overdue maintenance report to {len(recipients)} recipients.",
 		"Weekly Maintenance Report",
 	)
+
+
+def send_weekly_overdue_issue_report():
+	# Alias to maintenance report until a dedicated flow is added
+	return send_weekly_overdue_maintenance_report()
 
 
 def run_nightly_backup_to_gdrive():

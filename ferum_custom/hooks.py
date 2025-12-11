@@ -152,7 +152,7 @@ fixtures = [
 				"in",
 				[
 					"Ferum Custom",
-					"Project & Contract Management",
+					"Project Contract Management",
 					"Invoicing",
 					"HR Payroll",
 					"Document Management",
