@@ -10,8 +10,8 @@ description: |
   к production-ready состоянию согласно docs/delivery_plan.md.
 
 context:
-  project_root: "/home/frappe/frappe-bench/frappe-bench"
-  branch: "feature/codex-audit-impl"
+  project_root: "/home/frappe/frappe-bench"
+  branch: "housekeeping/precommit-mess"
   venv_path: ".venv"
   python_version: "3.12"
 

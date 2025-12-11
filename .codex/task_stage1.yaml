@@ -4,8 +4,8 @@ description: |
   перенос legacy-документов, обновление .gitignore, и первичный аудит структуры.
 
 context:
-  project_root: "/home/frappe/frappe-bench/frappe-bench"
-  branch: "feature/codex-audit-impl"
+  project_root: "/home/frappe/frappe-bench"
+  branch: "housekeeping/precommit-mess"
 
 steps:
   - title: "Очистка проекта"

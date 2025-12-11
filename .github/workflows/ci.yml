@@ -7,6 +7,10 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 permissions:
   contents: read
   packages: write
@@ -26,45 +30,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Install lint tools
+      - name: Install lint tooling
         run: |
-          pip install --upgrade pip
-          pip install ruff black isort
+          python -m pip install --upgrade pip
+          python -m pip install pre-commit
 
-      - name: Run ruff
-        run: ruff check .
-
-      - name: Run black
-        run: black --check .
-
-      - name: Run isort
-        run: isort --check-only .
-
-  test:
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -e .
-          pip install pytest
-
-      - name: Run pytest
-        run: pytest -q
+      - name: Run linters (pre-commit)
+        run: pre-commit run --all-files --show-diff-on-failure
 
   build:
-    needs: test
+    needs: [lint, test]
     runs-on: ubuntu-latest
     outputs:
       image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
@@ -76,21 +53,98 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: apps/ferum_custom/Dockerfile
-          push: true
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.IMAGE_NAME }}:latest
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install bench & dependencies
+        run: |
+          python -m venv env
+          ./env/bin/pip install --upgrade pip
+          ./env/bin/pip install "frappe-bench<6"
+          ./env/bin/pip install -r apps/frappe/requirements.txt
+          ./env/bin/pip install -r apps/erpnext/requirements.txt
+          ./env/bin/pip install -r apps/ferum_custom/requirements.txt
+
+      - name: Configure common_site_config for CI
+        run: |
+          ./env/bin/python - <<'PY'
+          import json, pathlib
+          cfg_path = pathlib.Path("sites/common_site_config.json")
+          data = json.loads(cfg_path.read_text())
+          data.update(
+              {
+                  "db_host": "127.0.0.1",
+                  "db_port": 3306,
+                  "db_root_password": "root",
+                  "redis_cache": "redis://127.0.0.1:6379",
+                  "redis_queue": "redis://127.0.0.1:6379",
+                  "redis_socketio": "redis://127.0.0.1:6379",
+                  "developer_mode": 1,
+              }
+          )
+          cfg_path.write_text(json.dumps(data, indent=1))
+          PY
+
+      - name: Bootstrap site
+        env:
+          SITE_NAME: test_site
+        run: |
+          ./env/bin/bench new-site "${SITE_NAME}" --admin-password admin --mariadb-root-password root --db-host 127.0.0.1 --db-port 3306 --no-mariadb-socket --force
+          ./env/bin/bench --site "${SITE_NAME}" install-app erpnext
+          ./env/bin/bench --site "${SITE_NAME}" install-app ferum_custom
+          ./env/bin/bench --site "${SITE_NAME}" migrate
+
+      - name: Run tests
+        env:
+          SITE_NAME: test_site
+        run: ./env/bin/bench --site "${SITE_NAME}" run-tests --app ferum_custom
 
   deploy:
     if: github.event_name == 'workflow_dispatch'
