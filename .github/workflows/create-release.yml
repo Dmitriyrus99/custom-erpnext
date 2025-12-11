@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - version-15
+permissions:
+  contents: read
+
 jobs:
   release:
     name: Release
@@ -13,12 +16,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 20
-
       - name: Setup dependencies
         run: |
           npm install @semantic-release/git @semantic-release/exec --no-save
