@@ -11,6 +11,7 @@
     "status",
     "type",
     "priority",
+    "sla_policy",
     "customer",
     "project",
     "service_department",
@@ -67,6 +68,13 @@
       "options": "Low\nMedium\nHigh",
       "in_list_view": 1,
       "in_standard_filter": 1
+    },
+    {
+      "fieldname": "sla_policy",
+      "fieldtype": "Link",
+      "label": "SLA Policy",
+      "options": "SLA Policy",
+      "description": "Опционально: зафиксировать выбранную SLA-политику, иначе подбирается по приоритету/типу"
     },
     {
       "fieldname": "is_billable",

@@ -6,6 +6,6 @@
     {"fieldname":"inn","label":"INN","fieldtype":"Data"},
     {"fieldname":"kpp","label":"KPP","fieldtype":"Data"},
     {"fieldname":"address","label":"Address","fieldtype":"Small Text"},
-    {"fieldname":"contacts","label":"Contacts","fieldtype":"Small Text"}
+    {"fieldname":"contacts","label":"Contacts","fieldtype":"Small Text"},
+    {"fieldname":"customer","label":"Customer","fieldtype":"Link","options":"Customer","description":"Связь с стандартным Customer для унификации контрагентов"}
   ] }
-

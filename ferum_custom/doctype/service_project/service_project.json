@@ -8,6 +8,7 @@
     "company",
     "customer",
     "project_name",
+    "erp_project",
     "service_department",
     "status",
     "amended_from",
@@ -47,6 +48,13 @@
       "fieldtype": "Data",
       "label": "Project Name",
       "reqd": 1
+    },
+    {
+      "fieldname": "erp_project",
+      "fieldtype": "Link",
+      "label": "ERP Project",
+      "options": "Project",
+      "description": "Опционально: связь с стандартным Project (ERPNext) для отчетов"
     },
     {
       "fieldname": "service_department",

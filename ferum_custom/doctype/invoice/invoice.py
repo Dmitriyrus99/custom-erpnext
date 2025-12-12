@@ -99,6 +99,22 @@ class Invoice(Document):
 	def validate(self):
 		# Ensure company aligns with linked project if present
 		try:
+			if getattr(self, "service_request", None):
+				# derive project/company/counterparty from SR
+				sr_project, sr_company, sr_customer = frappe.db.get_value(
+					"Service Request", self.service_request, ["project", "company", "customer"]
+				)
+				if sr_project and not getattr(self, "project", None):
+					self.project = sr_project
+				if sr_company:
+					self.company = sr_company
+				if sr_customer and not getattr(self, "counterparty_name", None):
+					self.counterparty_name = sr_customer
+			if getattr(self, "service_report", None) and not getattr(self, "service_request", None):
+				sr_request = frappe.db.get_value("Service Report", self.service_report, "service_request")
+				if sr_request:
+					self.service_request = sr_request
+					# recursion uses just-fetched SR data above
 			if getattr(self, "project", None):
 				proj_company = frappe.db.get_value("Service Project", self.project, "company")
 				if proj_company:
@@ -462,18 +478,20 @@ def create_sales_invoice(invoice_name: str) -> str:
 	if getattr(inv, "invoice_date", None):
 		si.posting_date = inv.invoice_date
 
+	# Single-line fallback (until Invoice Items child is wired)
+	row = si.append("items", {})
 	item_code = get_setting("default_item_code")
 	if item_code:
-		row = si.append("items", {})
 		row.item_code = item_code
-		row.qty = 1
-		row.rate = inv.amount or 0
-		income_account = get_setting("income_account")
-		if income_account:
-			row.income_account = income_account
-		cost_center = get_setting("cost_center")
-		if cost_center:
-			row.cost_center = cost_center
+	row.qty = 1
+	row.rate = inv.amount or 0
+
+	income_account = inv.income_account or get_setting("income_account")
+	if income_account:
+		row.income_account = income_account
+	cost_center = inv.cost_center or get_setting("cost_center")
+	if cost_center:
+		row.cost_center = cost_center
 
 	si.insert(ignore_permissions=True)
 	inv.db_set("sales_invoice", si.name)

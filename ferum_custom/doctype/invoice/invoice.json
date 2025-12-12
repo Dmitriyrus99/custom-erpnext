@@ -9,6 +9,8 @@
     "invoice_no",
     "invoice_year",
     "project",
+    "service_request",
+    "service_report",
     "counterparty_type",
     "counterparty_name",
     "status",
@@ -47,6 +49,20 @@
       "options": "Service Project"
     },
     {
+      "fieldname": "service_request",
+      "fieldtype": "Link",
+      "label": "Service Request",
+      "options": "Service Request",
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "service_report",
+      "fieldtype": "Link",
+      "label": "Service Report",
+      "options": "Service Report",
+      "description": "Опционально: связывайте счет с актом/заявкой для трассировки"
+    },
+    {
       "fieldname": "counterparty_type",
       "fieldtype": "Select",
       "label": "Counterparty Type",
@@ -83,6 +99,20 @@
       "fieldname": "erpnext_integration_section",
       "fieldtype": "Section Break",
       "label": "ERPNext Integration"
+    },
+    {
+      "fieldname": "income_account",
+      "fieldtype": "Link",
+      "label": "Income Account",
+      "options": "Account",
+      "description": "Если заполнено, попадет в Sales Invoice; иначе возьмется из настроек"
+    },
+    {
+      "fieldname": "cost_center",
+      "fieldtype": "Link",
+      "label": "Cost Center",
+      "options": "Cost Center",
+      "description": "Если заполнено, попадет в Sales Invoice; иначе возьмется из настроек"
     },
     {
       "fieldname": "sales_invoice",

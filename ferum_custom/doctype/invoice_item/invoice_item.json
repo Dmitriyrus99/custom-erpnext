@@ -2,10 +2,10 @@
   "istable": 1,
   "fields":[
     {"fieldname":"invoice","label":"Invoice","fieldtype":"Link","options":"Invoice","reqd":1},
+    {"fieldname":"item_code","label":"Item","fieldtype":"Link","options":"Item"},
     {"fieldname":"item_name","label":"Item","fieldtype":"Data","reqd":1},
     {"fieldname":"qty","label":"Qty","fieldtype":"Float","reqd":1},
     {"fieldname":"uom","label":"UOM","fieldtype":"Data"},
     {"fieldname":"price","label":"Price","fieldtype":"Currency"},
     {"fieldname":"amount","label":"Amount","fieldtype":"Currency"}
   ] }
-

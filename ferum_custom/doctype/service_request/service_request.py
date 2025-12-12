@@ -83,32 +83,56 @@ class ServiceRequest(Document):
 			pass
 
 	def set_customer_and_project(self):
-		if self.is_new() or self.has_value_changed("service_object"):
-			if self.service_object:
-				service_object_doc = frappe.get_doc("Service Object", self.service_object)
-				self.customer = service_object_doc.customer
-				# Respect explicitly provided project if already set; otherwise use object's default
-				if not getattr(self, "project", None) and getattr(service_object_doc, "project", None):
-					self.project = service_object_doc.project
-				# Align company from Service Object or linked Project
-				self.company = getattr(service_object_doc, "company", None)
-				if not self.company and self.project:
-					self.company = frappe.db.get_value("Service Project", self.project, "company")
-				# Align department from Project
-				if self.project:
-					dept = frappe.db.get_value("Service Project", self.project, "service_department")
-					if dept:
-						self.service_department = dept
-			else:
-				self.customer = None
-				self.project = None
-				# keep company unchanged unless explicitly cleared elsewhere
+		"""Cache derived fields from Service Object / Service Project to reduce joins."""
+		needs_sync = self.is_new() or self.has_value_changed("service_object") or self.has_value_changed("project")
+
+		if not needs_sync:
+			return
+
+		if self.service_object:
+			service_object_doc = frappe.get_doc("Service Object", self.service_object)
+			self.customer = service_object_doc.customer
+			# Respect explicitly provided project if already set; otherwise use object's default
+			if not getattr(self, "project", None) and getattr(service_object_doc, "project", None):
+				self.project = service_object_doc.project
+			# Align company from Service Object or linked Project
+			self.company = getattr(service_object_doc, "company", None)
+			if not self.company and self.project:
+				self.company = frappe.db.get_value("Service Project", self.project, "company")
+			# Align department from Project
+			if self.project:
+				dept, default_eng = frappe.db.get_value(
+					"Service Project", self.project, ["service_department", "default_engineer"]
+				)
+				if dept:
+					self.service_department = dept
+				if not getattr(self, "assigned_to", None) and default_eng:
+					self.assigned_to = default_eng
+		elif self.project:
+			# Derive from project only
+			dept, company, customer, default_eng = frappe.db.get_value(
+				"Service Project", self.project, ["service_department", "company", "customer", "default_engineer"]
+			)
+			self.service_department = self.service_department or dept
+			self.company = self.company or company
+			self.customer = self.customer or customer
+			if not getattr(self, "assigned_to", None) and default_eng:
+				self.assigned_to = default_eng
+		else:
+			# No object/project supplied
+			self.customer = None
+			self.project = None
+			# keep company unchanged unless explicitly cleared elsewhere
 
 	def calculate_sla_deadline(self):
 		"""Calculate SLA deadline based on matching SLA policies."""
 		hours = None
-		if self.priority and getattr(self, "type", None):
-			policy = frappe.db.get_value(
+		# 1) explicit selection
+		if getattr(self, "sla_policy", None):
+			hours = frappe.db.get_value("SLA Policy", self.sla_policy, "duration_hours")
+		# 2) fallback: pick by priority/type
+		if hours is None and self.priority and getattr(self, "type", None):
+			hours = frappe.db.get_value(
 				"SLA Policy",
 				filters={
 					"priority": self.priority,
@@ -118,8 +142,9 @@ class ServiceRequest(Document):
 				fieldname="duration_hours",
 				order_by="creation DESC",
 			)
-			if policy:
-				hours = float(policy)
+		# normalize to float
+		if hours is not None:
+			hours = float(hours)
 
 		if hours is not None:
 			self.sla_deadline = add_to_date(self.creation, hours=hours)
