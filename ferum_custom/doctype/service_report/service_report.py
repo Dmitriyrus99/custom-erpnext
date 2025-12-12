@@ -2,9 +2,10 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.pdf import get_pdf
+from frappe.utils import flt
 
 from ferum_custom.ferum_custom.integrations.file_sync import sync_file_by_name
-from ferum_custom.ferum_custom.settings import is_feature_enabled
+from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 from ferum_custom.ferum_custom.utils import get_allowed_customers, user_roles
 
 
@@ -200,6 +201,69 @@ class ServiceReport(Document):
 			)
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Enqueue Drive Upload failed")
+
+
+@frappe.whitelist()
+def create_sales_invoice_from_report(service_report: str) -> str:
+	"""Create Sales Invoice from Service Report work items (time & material lite)."""
+	doc = frappe.get_doc("Service Report", service_report)
+	if not doc.company:
+		frappe.throw(_("Company is required on Service Report"))
+
+	if not doc.service_request:
+		frappe.throw(_("Service Report must be linked to a Service Request"))
+
+	# Derive customer from Service Request (cached field)
+	customer, project = frappe.db.get_value(
+		"Service Request", doc.service_request, ["customer", "project"]
+	)
+	if not customer:
+		frappe.throw(_("Customer not found on Service Request"))
+
+	si = frappe.new_doc("Sales Invoice")
+	si.company = doc.company
+	si.customer = customer
+	si.posting_date = doc.report_date or frappe.utils.nowdate()
+	if project:
+		si.project = project
+
+	default_item = get_setting("default_item_code")
+	income_account = get_setting("income_account")
+	cost_center = get_setting("cost_center")
+
+	# Map work items to invoice rows (one row per work item)
+	for row in doc.work_items or []:
+		si_row = si.append("items", {})
+		if default_item:
+			si_row.item_code = default_item
+		si_row.description = row.description or _("Service work")
+		qty = flt(row.hours or 1)
+		rate = flt(row.rate or 0)
+		if qty <= 0:
+			qty = 1
+		si_row.qty = qty
+		si_row.rate = rate
+		if income_account:
+			si_row.income_account = income_account
+		if cost_center:
+			si_row.cost_center = cost_center
+
+	si.insert(ignore_permissions=True)
+	si.submit()
+
+	# Link back to custom Invoice if it exists
+	try:
+		custom_inv = frappe.get_all(
+			"Invoice",
+			filters={"service_report": doc.name},
+			pluck="name",
+			limit=1,
+		)
+		if custom_inv:
+			frappe.db.set_value("Invoice", custom_inv[0], "sales_invoice", si.name)
+	except Exception:
+		pass
+	return si.name
 
 
 def _upload_report_pdf(docname: str) -> None:
