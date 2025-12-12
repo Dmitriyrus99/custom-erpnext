@@ -225,7 +225,7 @@ class FrappeClient:
 		"""
 		headers = await self._headers()
 		r = await self._client.post(
-			"/api/method/ferum_custom.api.service.update_service_request_status",
+			"/api/method/ferum_custom.api.service.update_request_status",
 			headers=headers or None,
 			data={"name": name, "status": status},
 		)

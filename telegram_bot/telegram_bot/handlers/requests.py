@@ -39,6 +39,8 @@ async def cmd_start(message: Message) -> None:
 		"Привет! Доступные команды:\n"
 		"• /new <текст> — создать заявку\n"
 		"• /my — мои заявки\n"
+		"• /start_work <ID> — взять в работу\n"
+		"• /done <ID> — завершить заявку\n"
 		"• Отправьте фото с подписью /attach <ID> чтобы прикрепить к заявке\n"
 		"• /objects — список объектов (заготовка)"
 	)
@@ -101,6 +103,52 @@ async def cmd_my(message: Message, client: FrappeClient | None) -> None:
 async def cmd_objects(message: Message) -> None:
 	"""Placeholder for future objects list."""
 	await message.answer("Список объектов пока недоступен. Скоро добавим.")
+
+
+async def _ensure_client_or_reply(message: Message, client: FrappeClient | None) -> FrappeClient | None:
+	if client is None:
+		client = state.get_client()
+	if client is None:
+		await message.answer("Сервис пока не готов, попробуйте позже.")
+	return client
+
+
+@router.message(F.text.startswith("/start_work"))
+async def cmd_start_work(message: Message, client: FrappeClient | None) -> None:
+	"""Take request/issue into work."""
+	client = await _ensure_client_or_reply(message, client)
+	if client is None:
+		return
+	parts = message.text.split(" ", 1)
+	if len(parts) < 2 or not parts[1].strip():
+		await message.answer("Используйте: /start_work <ID_ЗАЯВКИ>")
+		return
+	name = parts[1].strip()
+	try:
+		resp = await client.update_request_status(name, "In Progress")
+		await message.answer(f"{name} — В работе ({resp.get('status')})")
+	except Exception as e:
+		log.exception("cmd_start_work failed: %s", e)
+		await message.answer("Не удалось изменить статус, попробуйте позже.")
+
+
+@router.message(F.text.startswith("/done"))
+async def cmd_done(message: Message, client: FrappeClient | None) -> None:
+	"""Mark request/issue as completed."""
+	client = await _ensure_client_or_reply(message, client)
+	if client is None:
+		return
+	parts = message.text.split(" ", 1)
+	if len(parts) < 2 or not parts[1].strip():
+		await message.answer("Используйте: /done <ID_ЗАЯВКИ>")
+		return
+	name = parts[1].strip()
+	try:
+		resp = await client.update_request_status(name, "Completed")
+		await message.answer(f"{name} — Завершена ({resp.get('status')})")
+	except Exception as e:
+		log.exception("cmd_done failed: %s", e)
+		await message.answer("Не удалось изменить статус, попробуйте позже.")
 
 
 @router.callback_query(F.data.startswith("req:"))
@@ -207,5 +255,6 @@ async def unknown_command(message: Message) -> None:
 	"""
 	# Fallback for any unrecognized slash command
 	await message.answer(
-		"Неизвестная команда. Доступно: /start, /new <текст>, /my. Фото прикрепить: отправьте фото с подписью '/attach <ID_ЗАЯВКИ>'."
+		"Неизвестная команда. Доступно: /start, /new <текст>, /my, /start_work <ID>, /done <ID>. "
+		"Фото прикрепить: отправьте фото с подписью '/attach <ID_ЗАЯВКИ>'."
 	)

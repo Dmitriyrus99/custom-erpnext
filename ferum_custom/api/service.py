@@ -270,6 +270,82 @@ def update_issue_status(name: str, status: str) -> dict:
 	return _response_ok(name=doc.name, status=doc.status)
 
 
+def _resolve_target_status(
+	doctype: str, requested: str | None = None, action: str | None = None
+) -> str:
+	"""Map user-friendly actions to allowed statuses for Issue / Service Request."""
+	requested = (requested or "").strip() or None
+	action = (action or "").strip().lower() or None
+
+	if doctype == "Service Request":
+		allowed = {"Open", "In Progress", "Completed", "Closed", "Cancelled"}
+		if action in {"start", "accept", "in_progress"} and "In Progress" in allowed:
+			return "In Progress"
+		if action in {"done", "complete", "finish", "close"} and "Completed" in allowed:
+			return "Completed"
+		if requested in allowed:
+			return requested
+		return "Open"
+
+	# Issue
+	allowed_issue = {"Open", "Replied", "On Hold", "Resolved", "Closed"}
+	if action in {"start", "accept", "in_progress"} and "Replied" in allowed_issue:
+		return "Replied"
+	if action in {"done", "complete", "finish"} and "Resolved" in allowed_issue:
+		return "Resolved"
+	if action in {"close"} and "Closed" in allowed_issue:
+		return "Closed"
+	if requested in allowed_issue:
+		return requested
+	if requested in {"In Progress"}:
+		return "Replied"
+	if requested in {"Completed", "Done"}:
+		return "Resolved"
+	return "Open"
+
+
+@frappe.whitelist(methods=["POST"])
+def update_request_status(name: str, status: str | None = None, action: str | None = None) -> dict:
+	"""Update status for either Service Request (preferred) or Issue (fallback).
+
+	Accepts friendly actions: start/accept -> In Progress (SR) / Replied (Issue),
+	done/complete -> Completed (SR) / Resolved (Issue), close -> Closed (Issue).
+	"""
+	_require_jwt_authentication()
+
+	target_doctype = None
+	if frappe.db.exists("Service Request", name):
+		target_doctype = "Service Request"
+	elif frappe.db.exists("Issue", name):
+		target_doctype = "Issue"
+	else:
+		frappe.throw(_("Request {0} not found").format(name))
+
+	doc = frappe.get_doc(target_doctype, name)
+	target_status = _resolve_target_status(target_doctype, status, action)
+	doc.status = target_status
+
+	# Optional: set assignee when starting work
+	try:
+		user = frappe.session.user
+		if target_status in {"In Progress", "Replied"}:
+			if target_doctype == "Service Request" and not getattr(doc, "assigned_to", None):
+				doc.assigned_to = user
+			if target_doctype == "Issue" and hasattr(doc, "assigned_engineer") and not getattr(doc, "assigned_engineer", None):
+				doc.assigned_engineer = user
+	except Exception:
+		pass
+
+	doc.save()
+	return _response_ok(name=doc.name, status=doc.status, doctype=target_doctype)
+
+
+# Backward compatibility for bot clients expecting service-only endpoint
+@frappe.whitelist(methods=["POST"])
+def update_service_request_status(name: str, status: str | None = None) -> dict:
+	return update_request_status(name=name, status=status)
+
+
 @frappe.whitelist()
 def list_timesheets(
 	project: str | None = None, start: int | None = None, page_length: int | None = None
