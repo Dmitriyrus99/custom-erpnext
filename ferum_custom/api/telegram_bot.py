@@ -210,6 +210,15 @@ def _cmd_new_issue(ctx: TelegramContext) -> None:
 	ctx.reply(_("Request created: {0}").format(name))
 
 
+def _load_request(req: str):
+	"""Resolve request name to Service Request or Issue."""
+	if frappe.db.exists("Service Request", req):
+		return frappe.get_doc("Service Request", req)
+	if frappe.db.exists("Issue", req):
+		return frappe.get_doc("Issue", req)
+	raise CommandError(_("Request {0} not found").format(req))
+
+
 def _cmd_my_issues(ctx: TelegramContext) -> None:
 	res = frappe.call(
 		"ferum_custom.api.service.list_issues",
@@ -224,23 +233,56 @@ def _cmd_start_work(ctx: TelegramContext) -> None:
 	req = _ensure_argument(ctx, "/start_work <issue_name>")
 	if not _user_has_roles(ctx, {"Engineer", "Support Team", "System Manager"}):
 		raise CommandError(_("Only engineers/support may start work"))
-	doc = frappe.get_doc("Issue", req)
-	if doc.status != "Open":
-		raise CommandError(_("Issue status must be Open to start work."))
-	doc.status = "In Progress"
-	doc.save(ignore_permissions=True)
-	ctx.reply(_("Marked as In Progress: {0}").format(req))
+	doc = _load_request(req)
+	user = frappe.session.user
+
+	if doc.doctype == "Service Request":
+		if doc.status not in ("Open", "In Progress"):
+			raise CommandError(_("Service Request must be Open to start work."))
+		if not getattr(doc, "assigned_to", None):
+			doc.assigned_to = user
+		if doc.status != "In Progress":
+			doc.status = "In Progress"
+		doc.save(ignore_permissions=True)
+		ctx.reply(_("Service Request {0} accepted, status: In Progress").format(doc.name))
+	else:
+		# Standard Issue uses allowed statuses: Open/Replied/Resolved/Closed
+		if doc.status == "Closed":
+			raise CommandError(_("Issue is already Closed."))
+		if doc.status == "Resolved":
+			ctx.reply(_("Issue {0} is already Resolved.").format(doc.name))
+			return
+		if hasattr(doc, "assigned_engineer") and not getattr(doc, "assigned_engineer", None):
+			doc.assigned_engineer = user
+		# Replied is the closest allowed value to "in progress" in Issue workflow
+		if doc.status != "Replied":
+			doc.status = "Replied"
+		doc.save(ignore_permissions=True)
+		ctx.reply(_("Issue {0} accepted, status: Replied").format(doc.name))
 
 
 def _cmd_done(ctx: TelegramContext) -> None:
 	req = _ensure_argument(ctx, "/done <issue_name>")
 	if not _user_has_roles(ctx, {"Engineer", "Support Team", "System Manager"}):
 		raise CommandError(_("Only engineers/support may resolve issues"))
-	doc = frappe.get_doc("Issue", req)
-	# Issue completion is typically tied to its resolution, not a linked Service Report
-	doc.status = "Resolved"
-	doc.save(ignore_permissions=True)
-	ctx.reply(_("Marked as Resolved: {0}").format(req))
+	doc = _load_request(req)
+	if doc.doctype == "Service Request":
+		if doc.status in ("Closed", "Cancelled"):
+			ctx.reply(_("Service Request {0} already closed.").format(doc.name))
+			return
+		doc.status = "Completed"
+		doc.save(ignore_permissions=True)
+		ctx.reply(_("Service Request {0} marked as Completed").format(doc.name))
+	else:
+		if doc.status == "Closed":
+			ctx.reply(_("Issue {0} already Closed.").format(doc.name))
+			return
+		if doc.status == "Resolved":
+			ctx.reply(_("Issue {0} already Resolved.").format(doc.name))
+			return
+		doc.status = "Resolved"
+		doc.save(ignore_permissions=True)
+		ctx.reply(_("Issue {0} marked as Resolved").format(doc.name))
 
 
 def _cmd_close(ctx: TelegramContext) -> None:
