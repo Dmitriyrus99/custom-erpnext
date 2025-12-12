@@ -170,7 +170,11 @@ async def run_webhook() -> None:
 	site = web.TCPSite(runner, host="0.0.0.0", port=int(os.getenv("PORT", "8080")))
 	# Best-effort webhook registration; do not crash on transient errors
 	try:
-		await bot.set_webhook(url=settings.webhook_url, secret_token=settings.webhook_secret or None)
+		await bot.set_webhook(
+			url=settings.webhook_url,
+			secret_token=settings.webhook_secret or None,
+			allowed_updates=["message", "edited_message", "callback_query"],
+		)
 		await _set_bot_commands(bot)
 	except Exception as e:
 		log.warning("set_webhook failed: %s", e)
