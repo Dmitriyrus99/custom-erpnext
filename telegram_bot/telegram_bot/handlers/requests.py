@@ -172,18 +172,25 @@ async def on_request_action(cb: CallbackQuery, client: FrappeClient | None) -> N
 			await cb.answer("Неверное действие", show_alert=True)
 			return
 		if action == "start":
-			await client.update_request_status(name, "In Progress")
-			await cb.message.edit_text(f"{name} — В работе")
+			resp = await client.update_request_status(name, "In Progress")
+			await cb.message.edit_text(f"{name} — В работе ({resp.get('status')})")
 		elif action == "done":
-			await client.update_request_status(name, "Completed")
-			await cb.message.edit_text(f"{name} — Завершена")
+			resp = await client.update_request_status(name, "Completed")
+			await cb.message.edit_text(f"{name} — Завершена ({resp.get('status')})")
 		else:
 			await cb.answer("Неизвестное действие", show_alert=True)
 			return
 		await cb.answer("OK")
 	except Exception as e:
 		log.exception("on_request_action failed: %s", e)
-		await cb.answer("Ошибка", show_alert=True)
+		try:
+			await cb.answer("Ошибка", show_alert=True)
+		except Exception:
+			pass
+		try:
+			await cb.message.reply("Не удалось выполнить действие, попробуйте позже.")
+		except Exception:
+			pass
 
 
 @router.message(F.photo)

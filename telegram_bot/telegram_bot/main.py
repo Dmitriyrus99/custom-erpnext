@@ -76,11 +76,6 @@ async def _set_bot_commands(bot: Bot) -> None:
 	except Exception as e:
 		log.warning("set_my_commands failed: %s", e)
 
-	@dp.callback_query.middleware()
-	async def inject_client_cb(handler, event, data):  # type: ignore[no-redef]
-		data["client"] = dp.workflow_data.get("frappe_client")
-		return await handler(event, data)
-
 
 async def run_polling() -> None:
 	"""
