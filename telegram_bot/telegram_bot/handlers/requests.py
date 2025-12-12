@@ -161,6 +161,7 @@ async def on_request_action(cb: CallbackQuery, client: FrappeClient | None) -> N
 		client (FrappeClient | None): The FrappeClient instance.
 	"""
 	try:
+		log.info("callback data=%s from user=%s", cb.data, cb.from_user.id if cb.from_user else "-")
 		if client is None:
 			client = state.get_client()
 		if client is None:
