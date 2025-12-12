@@ -6,7 +6,9 @@
     {"fieldname":"account","label":"Account","fieldtype":"Data"},
     {"fieldname":"direction","label":"Direction","fieldtype":"Select","options":"in\nout","reqd":1},
     {"fieldname":"article","label":"Article","fieldtype":"Link","options":"Cashflow Article"},
-    {"fieldname":"counterparty","label":"Counterparty","fieldtype":"Link","options":"Counterparty"},
+    {"fieldname":"counterparty","label":"Counterparty","fieldtype":"Link","options":"Counterparty","description":"Историческое поле; при наличии customer берется оттуда"},
+    {"fieldname":"customer","label":"Customer","fieldtype":"Link","options":"Customer","description":"Предпочтительно использовать это поле для платежей клиентов"},
+    {"fieldname":"sales_invoice","label":"Sales Invoice","fieldtype":"Link","options":"Sales Invoice","description":"Опционально: привяжите к ERPNext счету"},
+    {"fieldname":"service_request","label":"Service Request","fieldtype":"Link","options":"Service Request","description":"Опционально: трассировка платежа до заявки"},
     {"fieldname":"doc_ref","label":"Reference/Note","fieldtype":"Data"}
   ] }
-
