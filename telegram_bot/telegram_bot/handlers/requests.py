@@ -27,7 +27,7 @@ class AttachState(StatesGroup):
 	waiting_request = State()
 
 
-@router.message(F.text.regexp(r"^/start(?:\\s|$)"))
+@router.message(F.text.regexp(r"^/start(?:\s|$)"))
 async def cmd_start(message: Message) -> None:
 	"""
 	Handles the /start command.
@@ -113,7 +113,7 @@ async def _ensure_client_or_reply(message: Message, client: FrappeClient | None)
 	return client
 
 
-@router.message(F.text.regexp(r"^/start_work\\b"))
+@router.message(F.text.regexp(r"^/start_work\b"))
 async def cmd_start_work(message: Message, client: FrappeClient | None) -> None:
 	"""Take request/issue into work."""
 	client = await _ensure_client_or_reply(message, client)
@@ -132,7 +132,7 @@ async def cmd_start_work(message: Message, client: FrappeClient | None) -> None:
 		await message.answer("Не удалось изменить статус, попробуйте позже.")
 
 
-@router.message(F.text.regexp(r"^/done\\b"))
+@router.message(F.text.regexp(r"^/done\b"))
 async def cmd_done(message: Message, client: FrappeClient | None) -> None:
 	"""Mark request/issue as completed."""
 	client = await _ensure_client_or_reply(message, client)
