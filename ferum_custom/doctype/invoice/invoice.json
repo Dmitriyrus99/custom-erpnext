@@ -12,6 +12,7 @@
     "service_request",
     "service_report",
     "counterparty_type",
+    "customer",
     "counterparty_name",
     "status",
     "invoice_date",
@@ -68,6 +69,13 @@
       "label": "Counterparty Type",
       "options": "Customer\nSubcontractor",
       "reqd": 1
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer",
+      "description": "Используйте стандартного клиента; имя будет продублировано в Counterparty Name"
     },
     {
       "fieldname": "counterparty_name",

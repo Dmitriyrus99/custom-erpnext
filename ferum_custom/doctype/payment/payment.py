@@ -15,6 +15,9 @@ class Payment(Document):
 			if customer:
 				self.customer = customer
 
+		if self.direction == "in" and not getattr(self, "customer", None):
+			frappe.throw(_("Customer is required for incoming payments"))
+
 
 @frappe.whitelist()
 def create_payment_entry_from_payment(payment_name: str) -> str:

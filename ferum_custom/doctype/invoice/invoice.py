@@ -108,8 +108,11 @@ class Invoice(Document):
 					self.project = sr_project
 				if sr_company:
 					self.company = sr_company
-				if sr_customer and not getattr(self, "counterparty_name", None):
-					self.counterparty_name = sr_customer
+				if sr_customer:
+					if not getattr(self, "customer", None):
+						self.customer = sr_customer
+					if not getattr(self, "counterparty_name", None):
+						self.counterparty_name = sr_customer
 			if getattr(self, "service_report", None) and not getattr(self, "service_request", None):
 				sr_request = frappe.db.get_value("Service Report", self.service_report, "service_request")
 				if sr_request:
@@ -119,6 +122,14 @@ class Invoice(Document):
 				proj_company = frappe.db.get_value("Service Project", self.project, "company")
 				if proj_company:
 					self.company = proj_company
+
+			# Customer-first enforcement
+			if getattr(self, "customer", None):
+				self.counterparty_type = "Customer"
+				if not getattr(self, "counterparty_name", None):
+					self.counterparty_name = frappe.db.get_value("Customer", self.customer, "customer_name")
+			elif self.counterparty_type == "Customer":
+				frappe.throw(_("Customer link is required for Counterparty Type = Customer"))
 		except Exception:
 			pass
 

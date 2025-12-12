@@ -48,3 +48,4 @@ ferum_custom.patches.v15_4.ensure_settings_permissions
 ferum_custom.patches.v15_5.website_defaults
 ferum_custom.patches.v15_5.fix_service_request_notification
 ferum_custom.patches.v15_5.map_counterparty_customer_and_projects
+ferum_custom.patches.v15_5.map_contract_customer
