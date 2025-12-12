@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 import sentry_sdk
 from aiogram import Bot, Dispatcher
+from aiogram.types import BotCommand, BotCommandScopeDefault
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 from prometheus_client import Counter, start_http_server
@@ -61,6 +62,26 @@ def _wire_dependencies(dp: Dispatcher) -> None:
 		return await handler(event, data)
 
 
+async def _set_bot_commands(bot: Bot) -> None:
+	"""Register bot command menu in RU (and default)."""
+	commands = [
+		BotCommand(command="start", description="Справка и команды"),
+		BotCommand(command="new", description="Создать заявку"),
+		BotCommand(command="my", description="Мои заявки"),
+		BotCommand(command="objects", description="Объекты"),
+	]
+	try:
+		await bot.set_my_commands(commands, scope=BotCommandScopeDefault(), language_code="ru")
+		await bot.set_my_commands(commands, scope=BotCommandScopeDefault())
+	except Exception as e:
+		log.warning("set_my_commands failed: %s", e)
+
+	@dp.callback_query.middleware()
+	async def inject_client_cb(handler, event, data):  # type: ignore[no-redef]
+		data["client"] = dp.workflow_data.get("frappe_client")
+		return await handler(event, data)
+
+
 async def run_polling() -> None:
 	"""
 	Initializes and runs the bot in polling mode.
@@ -92,6 +113,7 @@ async def run_polling() -> None:
 	)
 	dp.workflow_data["frappe_client"] = client
 	state.set_client(client)
+	await _set_bot_commands(bot)
 	try:
 		await dp.start_polling(bot)
 	finally:
@@ -154,6 +176,7 @@ async def run_webhook() -> None:
 	# Best-effort webhook registration; do not crash on transient errors
 	try:
 		await bot.set_webhook(url=settings.webhook_url, secret_token=settings.webhook_secret or None)
+		await _set_bot_commands(bot)
 	except Exception as e:
 		log.warning("set_webhook failed: %s", e)
 	await site.start()

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import sys
 from typing import Any
 
 import frappe
@@ -10,14 +11,14 @@ def _log(msg: str) -> None:
 	try:
 		frappe.logger("ferum_migration").info(msg)
 	except Exception:
-		print(msg)
+		sys.stderr.write(msg + "\n")
 
 
 def _warn(msg: str) -> None:
 	try:
 		frappe.logger("ferum_migration").warning(msg)
 	except Exception:
-		print("WARN:", msg)
+		sys.stderr.write(f"WARN: {msg}\n")
 
 
 def find_or_create_project(sp: Any) -> str | None:

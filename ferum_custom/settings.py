@@ -24,6 +24,8 @@ ENV_PRIORITY_FIELDS = {
 	"telegram_bot_token",
 	"telegram_webhook_secret",
 	"google_service_account_json",
+	"telegram_bot_token_b64",
+	"google_service_account_json_b64",
 }
 
 
@@ -165,6 +167,14 @@ def _get_env_priority(field: str) -> Any | None:
 		if field in ENV_PRIORITY_FIELDS:
 			value = _get_from_env(field)
 			if _value_is_set(value):
+				# Support base64-encoded secrets with *_B64 suffix
+				if field.endswith("_b64") or field.endswith("_B64"):
+					try:
+						import base64
+
+						return base64.b64decode(str(value)).decode("utf-8")
+					except Exception:
+						return None
 				return value
 	except Exception:
 		pass

@@ -96,13 +96,13 @@
   "name": "Department Head",
   "role_profile": "Department Head",
   "roles": [
-  {
-   "parent": "Department Head",
-   "parentfield": "roles",
-   "parenttype": "Role Profile",
-   "role": "Department Head"
-  }
- ]
+   {
+    "parent": "Department Head",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Department Head"
+   }
+  ]
  },
  {
   "docstatus": 0,
@@ -111,13 +111,48 @@
   "name": "Ferum Admin",
   "role_profile": "Ferum Admin",
   "roles": [
-   { "parent": "Ferum Admin", "parentfield": "roles", "parenttype": "Role Profile", "role": "System Manager" },
-   { "parent": "Ferum Admin", "parentfield": "roles", "parenttype": "Role Profile", "role": "Project Manager" },
-   { "parent": "Ferum Admin", "parentfield": "roles", "parenttype": "Role Profile", "role": "Office Manager" },
-   { "parent": "Ferum Admin", "parentfield": "roles", "parenttype": "Role Profile", "role": "Service Engineer" },
-   { "parent": "Ferum Admin", "parentfield": "roles", "parenttype": "Role Profile", "role": "Chief Accountant" },
-   { "parent": "Ferum Admin", "parentfield": "roles", "parenttype": "Role Profile", "role": "General Director" },
-   { "parent": "Ferum Admin", "parentfield": "roles", "parenttype": "Role Profile", "role": "Department Head" }
+   {
+    "parent": "Ferum Admin",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Ferum Admin",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Project Manager"
+   },
+   {
+    "parent": "Ferum Admin",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Office Manager"
+   },
+   {
+    "parent": "Ferum Admin",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Service Engineer"
+   },
+   {
+    "parent": "Ferum Admin",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Chief Accountant"
+   },
+   {
+    "parent": "Ferum Admin",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "General Director"
+   },
+   {
+    "parent": "Ferum Admin",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Department Head"
+   }
   ]
  },
  {
@@ -127,9 +162,24 @@
   "name": "Ferum Management",
   "role_profile": "Ferum Management",
   "roles": [
-   { "parent": "Ferum Management", "parentfield": "roles", "parenttype": "Role Profile", "role": "General Director" },
-   { "parent": "Ferum Management", "parentfield": "roles", "parenttype": "Role Profile", "role": "Department Head" },
-   { "parent": "Ferum Management", "parentfield": "roles", "parenttype": "Role Profile", "role": "Project Manager" }
+   {
+    "parent": "Ferum Management",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "General Director"
+   },
+   {
+    "parent": "Ferum Management",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Department Head"
+   },
+   {
+    "parent": "Ferum Management",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Project Manager"
+   }
   ]
  },
  {
@@ -139,8 +189,18 @@
   "name": "Ferum Operations",
   "role_profile": "Ferum Operations",
   "roles": [
-   { "parent": "Ferum Operations", "parentfield": "roles", "parenttype": "Role Profile", "role": "Project Manager" },
-   { "parent": "Ferum Operations", "parentfield": "roles", "parenttype": "Role Profile", "role": "Service Engineer" }
+   {
+    "parent": "Ferum Operations",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Project Manager"
+   },
+   {
+    "parent": "Ferum Operations",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Service Engineer"
+   }
   ]
  },
  {
@@ -150,8 +210,18 @@
   "name": "Ferum Accounting",
   "role_profile": "Ferum Accounting",
   "roles": [
-   { "parent": "Ferum Accounting", "parentfield": "roles", "parenttype": "Role Profile", "role": "Chief Accountant" },
-   { "parent": "Ferum Accounting", "parentfield": "roles", "parenttype": "Role Profile", "role": "Office Manager" }
+   {
+    "parent": "Ferum Accounting",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Chief Accountant"
+   },
+   {
+    "parent": "Ferum Accounting",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Office Manager"
+   }
   ]
  },
  {
@@ -161,7 +231,12 @@
   "name": "Ferum Client",
   "role_profile": "Ferum Client",
   "roles": [
-   { "parent": "Ferum Client", "parentfield": "roles", "parenttype": "Role Profile", "role": "Client" }
+   {
+    "parent": "Ferum Client",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Client"
+   }
   ]
  }
 ]

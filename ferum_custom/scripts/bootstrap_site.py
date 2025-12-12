@@ -11,7 +11,7 @@ def bootstrap() -> None:
 	try:
 		_run()
 		frappe.db.commit()
-		print("Bootstrap completed")
+		frappe.logger("ferum_custom").info("Bootstrap completed")
 	finally:
 		frappe.destroy()
 

@@ -6,6 +6,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
+import httpx
 
 from .. import state
 from ..frappe_client import FrappeClient
@@ -34,7 +35,13 @@ async def cmd_start(message: Message) -> None:
 	Args:
 		message (Message): The incoming message object.
 	"""
-	await message.answer("Hello! Use /new <title>, /my, or send a photo with caption /attach <REQ>.")
+	await message.answer(
+		"Привет! Доступные команды:\n"
+		"• /new <текст> — создать заявку\n"
+		"• /my — мои заявки\n"
+		"• Отправьте фото с подписью /attach <ID> чтобы прикрепить к заявке\n"
+		"• /objects — список объектов (заготовка)"
+	)
 
 
 @router.message(F.text.startswith("/new"))
@@ -50,14 +57,14 @@ async def cmd_new(message: Message, client: FrappeClient | None) -> None:
 		if client is None:
 			client = state.get_client()
 		if client is None:
-			await message.answer("Service is not ready yet, please try again.")
+			await message.answer("Сервис пока не готов, попробуйте позже.")
 			return
-		title = message.text.split(" ", 1)[1].strip() if " " in message.text else "New Request"
+		title = message.text.split(" ", 1)[1].strip() if " " in message.text else "Новая заявка"
 		name = await client.create_request(title)
-		await message.answer(f"Request created: {name}")
+		await message.answer(f"Заявка создана: {name}")
 	except Exception as e:
 		log.exception("cmd_new failed: %s", e)
-		await message.answer("Failed to create request. Please try later.")
+		await message.answer("Не удалось создать заявку, попробуйте позже.")
 
 
 @router.message(F.text.startswith("/my"))
@@ -73,11 +80,11 @@ async def cmd_my(message: Message, client: FrappeClient | None) -> None:
 		if client is None:
 			client = state.get_client()
 		if client is None:
-			await message.answer("Service is not ready yet, please try again.")
+			await message.answer("Сервис пока не готов, попробуйте позже.")
 			return
 		rows = await client.list_requests()
 		if not rows:
-			await message.answer("No requests")
+			await message.answer("Заявок нет")
 			return
 		for r in rows[:10]:
 			title = r.get("title") or "—"
@@ -87,7 +94,13 @@ async def cmd_my(message: Message, client: FrappeClient | None) -> None:
 			await message.answer(text, reply_markup=request_actions(name))
 	except Exception as e:
 		log.exception("cmd_my failed: %s", e)
-		await message.answer("Failed to fetch requests. Please try later.")
+		await message.answer("Не удалось получить список заявок, попробуйте позже.")
+
+
+@router.message(F.text.startswith("/objects"))
+async def cmd_objects(message: Message) -> None:
+	"""Placeholder for future objects list."""
+	await message.answer("Список объектов пока недоступен. Скоро добавим.")
 
 
 @router.callback_query(F.data.startswith("req:"))
@@ -103,26 +116,26 @@ async def on_request_action(cb: CallbackQuery, client: FrappeClient | None) -> N
 		if client is None:
 			client = state.get_client()
 		if client is None:
-			await cb.answer("Service not ready", show_alert=True)
+			await cb.answer("Сервис не готов", show_alert=True)
 			return
 		try:
 			_, name, action = cb.data.split(":", 2)
 		except Exception:
-			await cb.answer("Bad action", show_alert=True)
+			await cb.answer("Неверное действие", show_alert=True)
 			return
 		if action == "start":
 			await client.update_request_status(name, "In Progress")
-			await cb.message.edit_text(f"{name} — In Progress")
+			await cb.message.edit_text(f"{name} — В работе")
 		elif action == "done":
 			await client.update_request_status(name, "Completed")
-			await cb.message.edit_text(f"{name} — Completed")
+			await cb.message.edit_text(f"{name} — Завершена")
 		else:
-			await cb.answer("Unknown", show_alert=True)
+			await cb.answer("Неизвестное действие", show_alert=True)
 			return
 		await cb.answer("OK")
 	except Exception as e:
 		log.exception("on_request_action failed: %s", e)
-		await cb.answer("Failed", show_alert=True)
+		await cb.answer("Ошибка", show_alert=True)
 
 
 @router.message(F.photo)
@@ -138,14 +151,14 @@ async def on_photo(message: Message, client: FrappeClient | None) -> None:
 		if client is None:
 			client = state.get_client()
 		if client is None:
-			await message.answer("Service is not ready yet, please try again.")
+			await message.answer("Сервис пока не готов, попробуйте позже.")
 			return
 		caption = (message.caption or "").strip()
 		if not caption.startswith("/attach"):
 			# ignore non-command photos
 			return
 		if " " not in caption:
-			await message.answer("Usage: send a photo with caption '/attach <REQUEST_ID>'")
+			await message.answer("Используйте: пришлите фото с подписью '/attach <ID_ЗАЯВКИ>'")
 			return
 		req = caption.split(" ", 1)[1].strip()
 		photo = message.photo[-1]
@@ -155,10 +168,21 @@ async def on_photo(message: Message, client: FrappeClient | None) -> None:
 		content_bytes = content.read()
 		file_name = file.file_path.split("/")[-1]
 		await client.attach_to_request(req, file_name, content_bytes, "image/jpeg")
-		await message.answer(f"Photo attached to {req}")
+		await message.answer(f"Фото прикреплено к {req}")
+	except httpx.HTTPStatusError as e:
+		# Provide clearer feedback when backend rejects the upload
+		msg = ""
+		try:
+			payload = e.response.json()
+			msg = payload.get("message") or payload.get("exc") or ""
+		except Exception:
+			msg = str(e)
+		log.exception("on_photo failed (HTTP %s): %s", e.response.status_code, msg)
+		hint = f" ({msg})" if msg else ""
+		await message.answer(f"Не удалось прикрепить фото{hint}")
 	except Exception as e:
 		log.exception("on_photo failed: %s", e)
-		await message.answer("Failed to attach photo. Please try later.")
+		await message.answer("Не удалось прикрепить фото. Попробуйте позже.")
 
 
 @router.message(F.text.startswith("/attach"))
@@ -170,7 +194,7 @@ async def attach_usage_text(message: Message) -> None:
 		message (Message): The incoming message object.
 	"""
 	# Handle text-only '/attach' to guide user
-	await message.answer("Usage: send a photo with caption '/attach <REQUEST_ID>'")
+	await message.answer("Пришлите фото с подписью '/attach <ID_ЗАЯВКИ>'")
 
 
 @router.message(F.text.regexp(r"^/"))
@@ -183,5 +207,5 @@ async def unknown_command(message: Message) -> None:
 	"""
 	# Fallback for any unrecognized slash command
 	await message.answer(
-		"Unknown command. Available: /start, /new <title>, /my. To attach a photo: send a photo with caption '/attach <REQUEST_ID>'."
+		"Неизвестная команда. Доступно: /start, /new <текст>, /my. Фото прикрепить: отправьте фото с подписью '/attach <ID_ЗАЯВКИ>'."
 	)
