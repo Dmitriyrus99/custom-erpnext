@@ -57,6 +57,9 @@ jobs:
           # Install bench and app dependencies for build
           python -m venv env
           ./env/bin/pip install --upgrade pip
+          # Ensure frappe lives under apps/ and install editable copy
+          [ -d "frappe" ] && [ ! -d "apps/frappe" ] && mkdir -p apps && mv frappe apps/
+          ./env/bin/pip install -e apps/frappe
           ./env/bin/pip install "frappe-bench<6"
           ./env/bin/pip install -r apps/frappe/requirements.txt
           ./env/bin/pip install -r apps/erpnext/requirements.txt
@@ -120,6 +123,9 @@ jobs:
         run: |
           python -m venv env
           ./env/bin/pip install --upgrade pip
+          # Ensure frappe lives under apps/ and install editable copy
+          [ -d "frappe" ] && [ ! -d "apps/frappe" ] && mkdir -p apps && mv frappe apps/
+          ./env/bin/pip install -e apps/frappe
           ./env/bin/pip install "frappe-bench<6"
           ./env/bin/pip install -r apps/frappe/requirements.txt
           ./env/bin/pip install -r apps/erpnext/requirements.txt
@@ -198,4 +204,3 @@ jobs:
       - name: Deployment notification (placeholder)
         run: echo "Deployment to ${{ env.DEPLOY_HOST }} completed successfully!"
         # TODO: Add actual notification logic (e.g., to Telegram, Slack, GitHub comments)
-
