@@ -246,6 +246,12 @@ class FrappeClient:
 		Returns:
 			dict: The response from the API.
 		"""
+		# Basic safety: limit size and require image/* or application/pdf
+		if len(content) > 7_000_000:  # ~7 MB
+			raise ValueError("File too large")
+		if not (content_type.startswith("image/") or content_type == "application/pdf"):
+			raise ValueError("Unsupported content type")
+
 		files = {"file": (file_name, content, content_type)}
 		headers = await self._headers()
 		r = await self._client.post(
@@ -271,6 +277,11 @@ class FrappeClient:
 		Returns:
 			dict: The response from the API.
 		"""
+		if len(content) > 7_000_000:
+			raise ValueError("File too large")
+		if not (content_type.startswith("image/") or content_type == "application/pdf"):
+			raise ValueError("Unsupported content type")
+
 		files = {"file": (file_name, content, content_type)}
 		headers = await self._headers()
 		r = await self._client.post(

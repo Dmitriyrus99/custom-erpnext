@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import datetime as dt
-from decimal import Decimal
 import typing as t
+from decimal import Decimal
 
 import frappe
 from frappe.utils import getdate, nowdate

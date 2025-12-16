@@ -66,5 +66,16 @@
     "insert_after": "file_url",
     "read_only": 1,
     "translatable": 0
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Issue-service_object",
+    "dt": "Issue",
+    "fieldname": "service_object",
+    "fieldtype": "Link",
+    "label": "Service Object",
+    "options": "Asset",
+    "insert_after": "asset",
+    "translatable": 0
   }
 ]

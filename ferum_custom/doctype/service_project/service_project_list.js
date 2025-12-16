@@ -57,8 +57,8 @@ frappe.listview_settings["Service Project"] = {
 		listview.page.add_action_item(__("Cancel Project"), () => apply_action("Cancel"));
 		listview.page.add_action_item(__("Reopen Project"), () => apply_action("Reopen"));
 
-		// Create Service Request from selected project (prompts for Service Object if available)
-		listview.page.add_action_item(__("Create Service Request"), async () => {
+		// Create Issue from selected project (prompts for Asset if available)
+		listview.page.add_action_item(__("Create Issue"), async () => {
 			const row = ensure_one();
 			if (!row) return;
 			try {
@@ -68,35 +68,37 @@ frappe.listview_settings["Service Project"] = {
 					.filter(Boolean);
 				if (objects.length) {
 					const d = new frappe.ui.Dialog({
-						title: __("Create Service Request"),
+						title: __("Create Issue"),
 						fields: [
 							{
-								fieldname: "service_object",
+								fieldname: "asset",
 								fieldtype: "Select",
-								label: __("Service Object"),
+								label: __("Asset"),
 								options: [""].concat(objects),
 								reqd: 1,
 							},
 							{
-								fieldname: "title",
+								fieldname: "subject",
 								fieldtype: "Data",
-								label: __("Title"),
-								default: project.project_name || __("Service Request"),
+								label: __("Subject"),
+								default: project.project_name || __("New Issue"),
 							},
 						],
 						primary_action_label: __("Create"),
 						primary_action: (values) => {
-							frappe.new_doc("Service Request", {
-								service_object: values.service_object,
-								title: values.title,
+							frappe.new_doc("Issue", {
+								asset: values.asset,
+								subject: values.subject,
+								project: project.name,
 							});
 							d.hide();
 						},
 					});
 					d.show();
 				} else {
-					frappe.new_doc("Service Request", {
-						title: project.project_name || __("Service Request"),
+					frappe.new_doc("Issue", {
+						subject: project.project_name || __("New Issue"),
+						project: project.name,
 					});
 				}
 			} catch (e) {

@@ -5,7 +5,6 @@ from __future__ import annotations
 import frappe
 from erpnext.setup.doctype.employee.employee import Employee
 
-
 _ORIGINAL_UPDATE_USER = Employee.update_user
 
 

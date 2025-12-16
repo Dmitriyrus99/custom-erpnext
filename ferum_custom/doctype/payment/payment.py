@@ -2,6 +2,9 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from ferum_custom.ferum_custom.domain.finance import standard_finance_enabled
+from ferum_custom.ferum_custom.domain.finance.payments import ensure_payment_entry_from_custom
+
 
 class Payment(Document):
 	def validate(self):
@@ -28,6 +31,12 @@ def create_payment_entry_from_payment(payment_name: str) -> str:
 	- allocations map to Sales Invoice if present; otherwise skipped
 	"""
 
+	if standard_finance_enabled():
+		pe = ensure_payment_entry_from_custom(payment_name)
+		if pe:
+			return pe
+
+	# fallback: original custom Payment Entry logic
 	pay = frappe.get_doc("Payment", payment_name)
 
 	if pay.direction not in ("in", "out"):
@@ -73,7 +82,7 @@ def create_payment_entry_from_payment(payment_name: str) -> str:
 	# Optional link back to SR
 	if getattr(pay, "service_request", None):
 		pe.references = pe.references or []
-		pe.custom_service_request = pay.service_request  # requires custom field if needed
+		pe.custom_service_request = pay.service_request
 
 	pe.insert(ignore_permissions=True, ignore_mandatory=True)
 	pe.submit()

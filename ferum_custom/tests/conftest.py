@@ -31,7 +31,7 @@ with contextlib.suppress(Exception):
 
 	_fc.security_pqc_rules = _security_module
 	nested_pkg = importlib.import_module("ferum_custom.ferum_custom")
-	setattr(nested_pkg, "security_pqc_rules", _security_module)
+	nested_pkg.security_pqc_rules = _security_module
 
 BENCH_PATH = Path(__file__).resolve().parents[4]
 SITES_PATH = BENCH_PATH / "sites"

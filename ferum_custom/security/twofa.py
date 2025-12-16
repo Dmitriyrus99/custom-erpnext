@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import hashlib
 import secrets
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import frappe
 from frappe import _

@@ -57,6 +57,14 @@ def sales_invoice_pqc(user: str | None = None) -> str | None:
 	return _company_condition("tabSales Invoice", "company", user)
 
 
+def invoice_pqc(user: str | None = None) -> str | None:
+	"""Permission query condition for custom Invoice (ferum_custom)."""
+	user = user or frappe.session.user
+	if _is_admin(user):
+		return None
+	return _company_condition("tabInvoice", "company", user)
+
+
 def payment_pqc(user: str | None = None) -> str | None:
 	user = user or frappe.session.user
 	if _is_admin(user):

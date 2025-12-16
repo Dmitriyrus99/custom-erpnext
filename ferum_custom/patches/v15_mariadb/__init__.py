@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import Iterable
+from collections.abc import Iterable
 
 import frappe
 from pymysql.err import OperationalError
@@ -23,7 +23,7 @@ def iter_sql_files(filenames: Iterable[str] | None = None):
 		if not os.path.isfile(path):
 			continue
 
-		with open(path, "r", encoding="utf-8") as handle:
+		with open(path, encoding="utf-8") as handle:
 			sql = handle.read().strip()
 
 		if sql:

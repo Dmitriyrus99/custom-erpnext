@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import importlib
 import sys
-from pathlib import Path
-
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 
 try:
 	__version__ = version("ferum_custom")

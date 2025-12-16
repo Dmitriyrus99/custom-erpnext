@@ -49,3 +49,4 @@ ferum_custom.patches.v15_5.website_defaults
 ferum_custom.patches.v15_5.fix_service_request_notification
 ferum_custom.patches.v15_5.map_counterparty_customer_and_projects
 ferum_custom.patches.v15_5.map_contract_customer
+ferum_custom.patches.v15_5.seed_issue_priorities

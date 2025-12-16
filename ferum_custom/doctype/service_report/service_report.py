@@ -1,8 +1,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.pdf import get_pdf
 from frappe.utils import flt
+from frappe.utils.pdf import get_pdf
 
 from ferum_custom.ferum_custom.integrations.file_sync import sync_file_by_name
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
@@ -81,11 +81,10 @@ class ServiceReport(Document):
 				att = frappe.get_doc("Custom Attachment", item.custom_attachment)
 				mime = (att.file_type or "").lower().strip()
 				if not mime:
-					# derive from filename or URL
-					name_or_url = att.file_name or att.file_url or ""
-					m2, enc = guess_type(name_or_url)
-					mime = (m2 or "").lower()
-				if mime.startswith("image/"):
+					                    # derive from filename or URL
+					                    name_or_url = att.file_name or att.file_url or ""
+					                    m2, _ = guess_type(name_or_url)
+					                    mime = (m2 or "").lower()				if mime.startswith("image/"):
 					has_photo = True
 				# consider any PDF as an acceptable Act/Report
 				if mime == "application/pdf" or (att.file_name or "").lower().endswith(".pdf"):

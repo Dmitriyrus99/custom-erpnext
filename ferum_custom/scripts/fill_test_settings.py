@@ -11,7 +11,7 @@ def _load_service_account_payload() -> str | None:
 	path = os.path.join(os.path.dirname(__file__), "creds.json")
 	try:
 		if os.path.exists(path):
-			with open(path, "r", encoding="utf-8") as fh:
+			with open(path, encoding="utf-8") as fh:
 				data = json.load(fh)
 			return json.dumps(data, indent=2)
 	except Exception:

@@ -26,6 +26,8 @@ ENV_PRIORITY_FIELDS = {
 	"google_service_account_json",
 	"telegram_bot_token_b64",
 	"google_service_account_json_b64",
+	# finance migration toggle
+	"enable_standard_finance",
 }
 
 

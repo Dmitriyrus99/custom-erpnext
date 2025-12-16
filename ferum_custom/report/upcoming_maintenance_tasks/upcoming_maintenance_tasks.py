@@ -4,7 +4,8 @@ from datetime import date, timedelta
 from typing import Any
 
 import frappe
-from frappe.query_builder import DocType, functions as fn
+from frappe.query_builder import DocType
+from frappe.query_builder import functions as fn
 
 
 def _date_range_from_filters(filters: dict[str, Any]) -> tuple[str, str]:

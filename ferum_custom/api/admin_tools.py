@@ -85,10 +85,9 @@ def trigger_file_sync(doctype: str, name: str) -> dict:
 	doctype = (doctype or "").strip()
 	if doctype != "File":
 		frappe.throw(_("Unsupported doctype. Use 'File'."))
-	frappe.only_for("System Manager")
+	    frappe.only_for("System Manager")
 	    enqueue_file_sync(name)
-    return {"ok": True, "queued": True}
-
+	    return {"ok": True, "queued": True}
 
 @frappe.whitelist(methods=["GET"])  # admin diagnostics
 def list_unsynced_attachments(limit: int | None = 200) -> dict:

@@ -13,17 +13,25 @@ except Exception:
 		return False
 
 
-from ferum_custom.notifications.dispatcher import notify as notify_dispatch
 from ferum_custom.ferum_custom.services import get_project_manager_email
 from ferum_custom.ferum_custom.utils import (
 	get_allowed_customers,
 	get_users_by_roles,
 	user_roles,
 )
+from ferum_custom.notifications.dispatcher import notify as notify_dispatch
 
 
 class ServiceRequest(Document):
 	def before_insert(self) -> None:
+		# Warn about deprecation unless migrating
+		if not self.flags.ignore_permissions and not self.flags.in_migration:
+			frappe.msgprint(
+				_("Service Request is deprecated. Please use the standard Issue doctype."),
+				alert=True,
+				indicator="orange",
+			)
+
 		if not self.status:
 			self.status = "Open"
 		# Auto-assign engineer if not set
@@ -293,16 +301,16 @@ def send_sla_breach_notifications(service_request_name: str, message: str) -> No
 
 
 from ferum_custom.ferum_custom.permissions import (
+	get_client_conditions,
 	get_company_conditions,
 	get_department_conditions,
 	get_project_manager_conditions,
 	get_service_engineer_conditions,
-	get_client_conditions,
+	has_client_permission,
 	has_company_permission,
 	has_department_permission,
 	has_project_manager_permission,
 	has_service_engineer_permission,
-	has_client_permission,
 )
 
 

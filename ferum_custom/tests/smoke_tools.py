@@ -56,7 +56,7 @@ def ensure_company(name: str = "Ferum Co", currency: str = "USD") -> str:
 	)
 	doc.insert(ignore_permissions=True)
 	with contextlib.suppress(Exception):
-		frappe.db.set_value("Global Defaults", "Global Defaults", "default_company", name)
+		frappe.db.set_single_value("Global Defaults", "default_company", name)
 	return name
 
 
@@ -224,6 +224,13 @@ def ensure_service_department(name: str, company: str | None = None) -> str:
 
 def ensure_project_doc(name: str, customer: str) -> str:
 	_ensure_module_registered()
+	# Resolve customer name (accept customer_name or name) and create if missing
+	resolved_customer = frappe.db.get_value("Customer", {"name": customer}, "name") or frappe.db.get_value(
+		"Customer", {"customer_name": customer}, "name"
+	)
+	if not resolved_customer:
+		resolved_customer = ensure_customer(customer)
+	customer = resolved_customer
 	existing = frappe.db.get_value("Project", {"project_name": name}, "name")
 	if existing:
 		return existing
@@ -233,8 +240,11 @@ def ensure_project_doc(name: str, customer: str) -> str:
 			"company": ensure_company(),
 			"customer": customer,
 			"project_name": name,
+			"code": name,
 		}
 	)
+	# In tests, bypass link validation to reduce fixture coupling
+	doc.flags.ignore_links = True
 	doc.insert(ignore_permissions=True)
 	return doc.name
 

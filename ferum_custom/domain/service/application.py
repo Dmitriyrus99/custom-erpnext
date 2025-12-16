@@ -13,6 +13,7 @@ def create_issue(
 	title: str,
 	description: str | None = None,
 	asset: str | None = None,
+	service_object: str | None = None,
 	company: str | None = None,
 	project: str | None = None,
 	customer: str | None = None,
@@ -25,6 +26,8 @@ def create_issue(
 	issue.subject = title
 	issue.description = description
 	issue.asset = asset
+	# If only asset passed, map it to service_object for compatibility
+	issue.service_object = service_object or asset
 	issue.company = company
 	issue.project = project
 	issue.customer = customer

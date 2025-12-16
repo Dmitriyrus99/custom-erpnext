@@ -1,6 +1,7 @@
+from unittest import mock
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from unittest import mock
 
 from ferum_custom.api.service import portal_token
 from ferum_custom.ferum_custom.api import service as portal_service

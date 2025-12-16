@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import frappe
 
-
 MATERIALIZED_VIEWS = [
 	"mv_invoice_balance",
 	"mv_contract_overview",

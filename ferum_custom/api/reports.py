@@ -4,8 +4,8 @@ import json
 from typing import Any
 
 import frappe
-from frappe.rate_limiter import rate_limit
 from frappe.desk.query_report import run as frappe_query_report_run
+from frappe.rate_limiter import rate_limit
 
 
 def _coerce_filters(filters: Any) -> tuple[dict[str, Any], bool]:

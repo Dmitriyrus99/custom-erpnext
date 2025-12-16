@@ -16,10 +16,10 @@ from typing import Any
 
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 
 from ferum_custom.ferum_custom.integrations import telegram as telegram_integration
 from ferum_custom.ferum_custom.metrics import inc as metrics_inc
-from frappe.rate_limiter import rate_limit
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
 try:  # pragma: no cover - optional dependency, exercised in production
@@ -378,6 +378,8 @@ def _attach_photo(ctx: TelegramContext, issue_name: str) -> None:
 
 	file_path, content = _download_photo(token, file_id)
 	file_name = file_path.split("/")[-1]
+	if len(content) > 7_000_000:
+		raise CommandError(_("File too large (max 7 MB)."))
 
 	try:
 		file_doc = frappe.get_doc(
@@ -585,7 +587,9 @@ def handle_update(secret: str | None = None, update: str | dict[str, Any] | None
 				subject = "Telegram bot update processing failed"
 				body = f"Exception: {exc}\n\nPayload: {frappe.safe_encode(frappe.as_json(payload))[:8000]}\n"
 				# Reuse email notifier from integration module
-				from ferum_custom.ferum_custom.integrations.telegram import _notify_admins_email  # type: ignore
+				from ferum_custom.ferum_custom.integrations.telegram import (
+					_notify_admins_email,  # type: ignore
+				)
 
 				_notify_admins_email(subject, body)
 		except Exception:

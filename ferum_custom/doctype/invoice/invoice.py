@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 
 from ferum_custom.ferum_custom.domain.finance import application as finance_app
+from ferum_custom.ferum_custom.domain.finance.bridge import ensure_sales_invoice_from_custom
 
 try:
 	import gspread  # type: ignore[import-untyped]
@@ -149,6 +150,15 @@ class Invoice(Document):
 
 	def on_update(self):
 		pass  # Handled by hooks
+
+	def on_submit(self):
+		"""Optionally auto-create Sales Invoice when standard finance is enabled."""
+		try:
+			si = ensure_sales_invoice_from_custom(self.name)
+			if si and not getattr(self, "sales_invoice", None):
+				self.db_set("sales_invoice", si, update_modified=False)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "Invoice on_submit auto-create SI failed")
 
 	def notify_on_subcontractor_invoice(self):
 		if self.counterparty_type == "Subcontractor":

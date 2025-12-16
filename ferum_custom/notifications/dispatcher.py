@@ -16,14 +16,14 @@ channel(s) per user (role-based defaults with optional user-level overrides
 when custom fields exist).
 """
 
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 import frappe
 
 from ferum_custom.ferum_custom.integrations import telegram as telegram_integration
 from ferum_custom.ferum_custom.settings import is_feature_enabled
-
 
 # Event templates per channel. Simple Python str.format with context.
 TEMPLATES: dict[str, dict[str, str]] = {

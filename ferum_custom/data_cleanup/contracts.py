@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 import frappe
-
 from ferum_custom.ferum_custom.utils import get_logger
 
 LOGGER = get_logger(__name__)

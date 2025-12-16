@@ -1,6 +1,6 @@
 frappe.listview_settings["Service Object"] = {
 	onload(listview) {
-		listview.page.add_inner_button(__("Create Service Request"), () => {
+		listview.page.add_inner_button(__("Create Issue"), () => {
 			const selected = listview.get_checked_items();
 			if (selected.length !== 1) {
 				frappe.msgprint({
@@ -10,9 +10,9 @@ frappe.listview_settings["Service Object"] = {
 				return;
 			}
 			const obj = selected[0];
-			frappe.new_doc("Service Request", {
-				service_object: obj.name,
-				title: obj.object_name || __("Service Request"),
+			frappe.new_doc("Issue", {
+				asset: obj.name,
+				subject: obj.object_name || __("New Issue"),
 			});
 		});
 	},

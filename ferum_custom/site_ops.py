@@ -6,22 +6,22 @@ Run with:
   bench --site <site> execute ferum_custom.ferum_custom.site_ops.apply_ru_workspaces
 """
 
-from collections.abc import Iterable
-from datetime import date, datetime
+import contextlib
 import os
-from pathlib import Path
 import shutil
 import subprocess
+from collections.abc import Iterable
+from datetime import date, datetime
+from pathlib import Path
 
 import frappe
 from frappe.utils import cint
 
-from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 from ferum_custom.ferum_custom.security.api_guard import (
 	require_post_if_http,
 	require_roles_if_http,
 )
-import contextlib
+from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
 
 def _ensure_dashboard_chart(
@@ -232,7 +232,7 @@ def backup_to_drive() -> dict:
 	# Restrict when invoked via HTTP; scheduler/bench bypass
 	require_roles_if_http(["System Manager"])
 	require_post_if_http()
-	from frappe.utils.backups import new_backup, get_or_generate_backup_encryption_key
+	from frappe.utils.backups import get_or_generate_backup_encryption_key, new_backup
 
 	from ferum_custom.ferum_custom.integrations.drive import upload_bytes
 
@@ -438,7 +438,7 @@ def daily_overdue_summary_email(issue_fallback_days: int = 7) -> dict:
 
 	Sent to Office Manager and Project Manager roles (email only).
 	"""
-	from datetime import date, timedelta
+	from datetime import timedelta
 
 	today = date.today().isoformat()
 	rows_issue: list[dict] = []
@@ -517,7 +517,6 @@ def weekly_overdue_maintenance_schedules_email() -> dict:
 
 	Overdue is defined as Service Maintenance Schedule.next_due_date < today (and not trashed).
 	"""
-	from datetime import date
 
 	today = date.today().isoformat()
 	try:
@@ -567,7 +566,7 @@ def weekly_full_backup_to_drive() -> dict:
 	"""
 	require_roles_if_http(["System Manager"])
 	require_post_if_http()
-	from frappe.utils.backups import new_backup, get_or_generate_backup_encryption_key
+	from frappe.utils.backups import get_or_generate_backup_encryption_key, new_backup
 
 	from ferum_custom.ferum_custom.integrations.drive import upload_bytes
 

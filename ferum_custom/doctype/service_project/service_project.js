@@ -57,44 +57,46 @@ frappe.ui.form.on("Service Project", {
 		}
 		if (frm.doc.status === "Completed") add_action("Reopen Project", "Reopen");
 
-		// Quick create Service Request tied to this project
+		// Quick create Issue tied to this project
 		frm.add_custom_button(
-			__("Service Request"),
+			__("Issue"),
 			() => {
 				const objects = (frm.doc.objects || [])
 					.map((row) => row.service_object)
 					.filter(Boolean);
 				if (objects && objects.length) {
 					const d = new frappe.ui.Dialog({
-						title: __("Create Service Request"),
+						title: __("Create Issue"),
 						fields: [
 							{
-								fieldname: "service_object",
+								fieldname: "asset",
 								fieldtype: "Select",
-								label: __("Service Object"),
+								label: __("Asset"),
 								options: [""].concat(objects),
 								reqd: 1,
 							},
 							{
-								fieldname: "title",
+								fieldname: "subject",
 								fieldtype: "Data",
-								label: __("Title"),
-								default: frm.doc.project_name || __("Service Request"),
+								label: __("Subject"),
+								default: frm.doc.project_name || __("New Issue"),
 							},
 						],
 						primary_action_label: __("Create"),
 						primary_action: (values) => {
-							frappe.new_doc("Service Request", {
-								service_object: values.service_object,
-								title: values.title,
+							frappe.new_doc("Issue", {
+								asset: values.asset,
+								subject: values.subject,
+								project: frm.doc.name,
 							});
 							d.hide();
 						},
 					});
 					d.show();
 				} else {
-					frappe.new_doc("Service Request", {
-						title: frm.doc.project_name || __("Service Request"),
+					frappe.new_doc("Issue", {
+						subject: frm.doc.project_name || __("New Issue"),
+						project: frm.doc.name,
 					});
 				}
 			},

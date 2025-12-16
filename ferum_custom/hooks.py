@@ -246,6 +246,7 @@ permission_query_conditions = {
 	"Project": "ferum_custom.security_pqc_rules.project_pqc",
 	"Service Report": "ferum_custom.security_pqc_rules.service_report_pqc",
 	"Payment Allocation": "ferum_custom.security_pqc_rules.payment_allocation_pqc",
+	"Invoice": "ferum_custom.security_pqc_rules.invoice_pqc",
 	"Data Issue": "ferum_custom.security_pqc_rules.data_issue_pqc",
 }
 

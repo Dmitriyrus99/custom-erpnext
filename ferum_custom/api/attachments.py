@@ -10,11 +10,12 @@ Accepts multipart/form-data with field name 'file'.
 """
 
 from typing import Optional
-from ferum_custom.ferum_custom.integrations.antivirus import scan_bytes
 
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
+
+from ferum_custom.ferum_custom.integrations.antivirus import scan_bytes
 
 
 def _require_auth() -> None:

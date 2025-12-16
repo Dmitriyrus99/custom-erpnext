@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import frappe
 
-
 SENSITIVE_ATTACH_DOCTYPES = {
 	"Issue",
 	"Timesheet",

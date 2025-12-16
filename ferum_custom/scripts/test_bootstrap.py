@@ -10,10 +10,11 @@ This is idempotent and safe to re-run.
 from __future__ import annotations
 
 import contextlib
+
 import frappe
 
 
-def _insert(doc: "frappe.model.document.Document") -> str:
+def _insert(doc: frappe.model.document.Document) -> str:
 	doc.insert(ignore_permissions=True)
 	return doc.name
 
