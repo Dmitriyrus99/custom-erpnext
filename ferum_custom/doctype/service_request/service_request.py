@@ -26,12 +26,8 @@ class ServiceRequest(Document):
 	def before_insert(self) -> None:
 		# Warn about deprecation unless migrating
 		if not self.flags.ignore_permissions and not self.flags.in_migration:
-			frappe.msgprint(
-				_("Service Request is deprecated. Please use the standard Issue doctype."),
-				alert=True,
-				indicator="orange",
-			)
-
+							frappe.msgprint(
+								_("Service Request is deprecated. Please use the standard Issue doctype."),
 		if not self.status:
 			self.status = "Open"
 		# Auto-assign engineer if not set
