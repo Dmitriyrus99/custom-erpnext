@@ -116,10 +116,11 @@ jobs:
           ./env/bin/pip install -r apps/frappe/requirements.txt
           ./env/bin/pip install -r apps/erpnext/requirements.txt
           ./env/bin/pip install -r apps/ferum_custom/requirements.txt
+          ./env/bin/pip install pytest-cov
 
       - name: Configure common_site_config for CI
         run: |
-          ./env/bin/python - <<'PY'
+          ./env/bin/python - <<\'PY\'
           import json, pathlib
           cfg_path = pathlib.Path("sites/common_site_config.json")
           data = json.loads(cfg_path.read_text())
@@ -146,10 +147,16 @@ jobs:
           ./env/bin/bench --site "${SITE_NAME}" install-app ferum_custom
           ./env/bin/bench --site "${SITE_NAME}" migrate
 
-      - name: Run tests
+      - name: Run tests with coverage
         env:
           SITE_NAME: test_site
-        run: ./env/bin/bench --site "${SITE_NAME}" run-tests --app ferum_custom
+        run: ./env/bin/bench --site "${SITE_NAME}" run-tests --app ferum_custom --coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: apps/ferum_custom/coverage.xml
 
   deploy:
     if: github.event_name == 'workflow_dispatch'

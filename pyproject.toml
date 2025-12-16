@@ -15,7 +15,35 @@ dependencies = [
 dev = [
 	"pre-commit",
 	"pytest",
+	"pytest-cov",
 ]
+
+[tool.pytest.ini_options]
+addopts = "--cov=ferum_custom --cov-report=xml --cov-report=term-missing"
+testpaths = [
+    "ferum_custom",
+    "telegram_bot",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["ferum_custom", "telegram_bot"]
+omit = [
+    "ferum_custom/__init__.py",
+    "ferum_custom/migrations/*",
+    "ferum_custom/tests/*",
+    "telegram_bot/__init__.py",
+    "telegram_bot/migrations/*",
+    "telegram_bot/tests/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if t.TYPE_CHECKING:",
+    "@override",
+]
+show_missing = true
 
 [build-system]
 requires = ["flit_core >=3.4,<4"]
