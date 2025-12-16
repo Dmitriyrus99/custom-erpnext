@@ -1,0 +1,8 @@
+# Default gitleaks configuration file
+# For more information, see https://github.com/gitleaks/gitleaks
+
+[extend]
+# You can extend from a remote config here, e.g.:
+# https://raw.githubusercontent.com/zricethezav/gitleaks/master/config/gitleaks.toml
+
+# Or define custom rules below.
