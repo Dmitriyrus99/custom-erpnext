@@ -14,6 +14,19 @@ During the `[deploy]` job the workflow:
 1. Logs into GitHub Container Registry and builds/pushes the Docker image defined in `apps/ferum_custom/Dockerfile`.
 2. Connects to the production host, pulls the latest branch, and invokes `./scripts/deploy.sh deploy <image>` with the pushed image.
 
+## Editable Frappe in CI/CD
+
+Immediately after cloning `custom-erpnext` and before running any `bench` commands, ensure Frappe is installed in editable mode within `frappe-bench/apps/frappe`. Add the following snippet to your CI/CD workflow or bootstrapping script:
+
+```bash
+# Ensure frappe sits under apps/ and is installed editable
+cd frappe-bench
+[ -d "frappe" ] && [ ! -d "apps/frappe" ] && mkdir -p apps && mv frappe apps/
+./env/bin/pip install -e apps/frappe
+```
+
+On CI runners keep this before any `bench` invocation so changes under `apps/frappe` obey development flow. If the repo was cloned directly under `frappe-bench/apps`, the script simply installs the existing path (`pip install -e apps/frappe`).
+
 ## Preparing for deploy
 
 1. Keep recent backups in `backups/` (e.g. `backup-YYYYMMDD.dump` or `backups/latest.dump`). The deploy script expects a PostgreSQL dump or plain SQL file for rollbacks (`pg_restore` is used unless the file ends in `.sql`).

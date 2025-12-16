@@ -51,11 +51,11 @@ ci-bench: lint bench-test
 
 .PHONY: test
 test:
-	$(PYTEST) $(if $(FILE),$(TEST_PATH)/$(FILE),$(TEST_PATH)) $(PYTEST_OPTS)
+	FRAPPE_STREAM_LOGGING=1 $(PYTEST) $(if $(FILE),$(TEST_PATH)/$(FILE),$(TEST_PATH)) $(PYTEST_OPTS)
 
 .PHONY: bench-test
 bench-test:
-	bench --site $(BENCH_SITE) run-tests --app $(APP)
+	FRAPPE_STREAM_LOGGING=1 bench --site $(BENCH_SITE) run-tests --app $(APP)
 
 .PHONY: build-prod
 build-prod:

@@ -53,3 +53,7 @@ __pycache__/
 # Coverage output
 htmlcov/
 coverage.xml
+
+# Codex / MCP venv cache
+.fastmcp-venv/
+**/.fastmcp-venv/
