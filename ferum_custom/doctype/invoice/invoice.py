@@ -245,27 +245,30 @@ def sync_to_google_sheets(docname: str):
 			pm_email,  # J
 		]
 		if cell:
-			# Update existing row
-			sheet.update(f"A{cell.row}", [row_data])
-			frappe.msgprint(_(f"Invoice {doc.name} updated in Google Sheets."))
-		else:
-			# Append new row
-			sheet.append_row(row_data)
-			frappe.msgprint(_(f"Invoice {doc.name} added to Google Sheets."))
-		_ensure_sheet_formatting(sheet)
-		try:
-			metrics_inc("ferum_integration_sheets_sync_total", {"result": "success"})
-		except Exception:
-			pass
-	except Exception as e:
-		frappe.log_error(
-			f"Google Sheets sync failed for invoice {doc.name}: {e!s}", "Google Sheets Sync Error"
-		)
-		try:
-			metrics_inc("ferum_integration_sheets_sync_total", {"result": "error"})
-		except Exception:
-			pass
-
+			            # Update existing row
+			            sheet.update(f"A{cell.row}", [row_data])
+			            frappe.msgprint(_(f"Invoice {doc.name} updated in Google Sheets."))
+			        else:
+			            # Append new row
+			            sheet.append_row(row_data)
+			            frappe.msgprint(_(f"Invoice {doc.name} added to Google Sheets."))
+			        _ensure_sheet_formatting(sheet)
+			        try:
+			            metrics_inc("ferum_integration_sheets_sync_total", {"result": "success"})
+			        except Exception:
+			            pass
+			    except Exception as e:
+			        frappe.log_error(
+			            f"Google Sheets sync failed for invoice {doc.name}: {e!s}", "Google Sheets Sync Error"
+			        )
+			        category, context = _classify_failure(exc)
+			        _notify_admins(
+			            "Sheets sync failed", f"Failed to sync invoice {doc.name} to Google Sheet. Error: {context}"
+			        )
+			        try:
+			            metrics_inc("ferum_integration_sheets_sync_total", {"result": "error", "category": category})
+			        except Exception:
+			            pass
 
 def _ensure_sheet_formatting(sheet) -> None:
 	"""Ensure basic conditional formatting is present (idempotent)."""
