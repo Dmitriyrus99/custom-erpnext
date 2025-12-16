@@ -201,6 +201,11 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} \
             "cd ${{ env.DEPLOY_PATH }} && BACKUP_FILE='${{ env.BACKUP_FILE }}' ./scripts/deploy.sh deploy '${{ env.IMAGE_TAG }}'"
 
+      - name: Verify deployment healthcheck
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} \
+            "sleep 10 && curl --fail http://127.0.0.1:80/healthz || exit 1"
+
       - name: Deployment notification (placeholder)
         run: echo "Deployment to ${{ env.DEPLOY_HOST }} completed successfully!"
         # TODO: Add actual notification logic (e.g., to Telegram, Slack, GitHub comments)

@@ -111,6 +111,15 @@ load_state_file
 case "${1:-}" in
   deploy)
     deploy "${2:-}"
+    echo "Waiting for health check..."
+    sleep 10 # Give services some time to start
+    if curl --fail http://127.0.0.1:80/healthz; then
+      echo "Health check passed."
+    else
+      echo "❌ Health check failed. Rolling back..."
+      rollback "${PREVIOUS_IMAGE:-}" "${ROLLBACK_BACKUP:-backups/latest.dump}"
+      exit 1
+    fi
     ;;
   rollback)
     rollback "${2:-}" "${3:-}"
