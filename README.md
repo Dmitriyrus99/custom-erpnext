@@ -44,9 +44,10 @@ Coverage reports can be generated via `pytest --cov=ferum_custom --cov-report=xm
 The CI/CD pipeline (defined in `.github/workflows/ci.yml`) includes:
 
 - **Linting & Secrets Scanning:** `pre-commit` checks and `gitleaks`.
-- **Testing:** Unit, integration, and e2e tests with coverage reporting (`pytest-cov`).
-- **Build:** Compiling static assets (`bench build`) and building Docker images.
-- **Deployment:** Automated deployment to staging/production environments via SSH.
+- **Testing:** `pytest` with `pytest-cov` runs unit and e2e tests, generating XML coverage reports.
+- **Migrations:** `bench migrate` is run to apply database schema changes.
+- **Build:** `bench build` compiles static assets (JS/CSS) for the custom app.
+- **Deployment:** Docker image build/push for main branch, manual trigger deployment to staging/prod via SSH.
 
 ## Documentation
 
