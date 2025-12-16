@@ -16,7 +16,18 @@ line-length = 100
 target-version = "py312"
 src = ["apps/ferum_custom"]
 exclude = ["apps/erpnext", "apps/frappe", "node_modules", ".git", ".bench"]
-extend-exclude = "(apps/erpnext/|apps/frappe/|services/|docs/|monitoring/|legacy/|build/|env/|\\.venv/|sites/)"
+extend-exclude = [
+    "apps/erpnext/",
+    "apps/frappe/",
+    "services/",
+    "docs/",
+    "monitoring/",
+    "legacy/",
+    "build/",
+    "env/",
+    ".venv/",
+    "sites/"
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B"]
