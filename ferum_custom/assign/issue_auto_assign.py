@@ -39,9 +39,10 @@ def _asset_default_engineer_from_issue(doc) -> str | None:
 		pass
 
 	    # Try from description "Service Object: ..."
-	    try:
-	        so = _parse_asset_from_text(getattr(doc, "description", None))
-	        if so:			if frappe.db.exists("Asset", so):
+	try:
+		so = _parse_asset_from_text(getattr(doc, "description", None))
+		if so:
+			if frappe.db.exists("Asset", so):
 				return frappe.db.get_value("Asset", so, "default_engineer")
 			obj = frappe.db.get_value("Asset", {"object_name": so}, "name")
 			if obj:

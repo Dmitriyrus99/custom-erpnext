@@ -298,3 +298,21 @@ def build_report_html(title: str, items: list) -> str:
             </tbody>
         </table>
     """
+
+def enqueue_weekly_full_backup():
+	"""Legacy scheduler hook wrapper for nightly backup uploads."""
+	try:
+		return run_nightly_backup_to_gdrive()
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Weekly full backup task failed")
+		return None
+
+
+def enqueue_daily_drive_backfill_small():
+	"""Runs a trimmed backup/upload to keep Drive warm for smaller batches."""
+	try:
+		return run_nightly_backup_to_gdrive()
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Daily drive backfill task failed")
+		return None
+

@@ -110,12 +110,12 @@ def payment_allocation_pqc(user: str | None = None) -> str | None:
 	)
 
 
-def data_issue_pqc(user: str | None = None) -> str | None:
-	user = user or frappe.session.user
-	roles = _roles(user)
-	if _is_admin(user) or SECURITY_ROLE in roles:
-		return None
-	return "FALSE"
+def service_report_pqc(user: str | None = None) -> str | None:
+    """Permission query condition for custom Service Report."""
+    user = user or frappe.session.user
+    if _is_admin(user):
+        return None
+    return _company_condition("tabService Report", "company", user)
 
 
 def default_has_permission(doc, user: str | None = None) -> bool:
