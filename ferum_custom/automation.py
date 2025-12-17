@@ -246,6 +246,35 @@ def on_role_update_audit(doc, method):
         frappe.sendmail(recipients=admin_recipients, subject=subject, message=message)
 
 
+def on_rppr_after_insert(doc, method=None):
+    """Alert admins when non-admin roles get access to system pages/reports."""
+    try:
+        role = getattr(doc, "role", None)
+        if not role or role in ALLOWED_ADMIN_ROLES:
+            return
+
+        page = getattr(doc, "page", None)
+        report = getattr(doc, "report", None)
+        if not page and not report:
+            return
+
+        recipients = get_report_recipients(["System Manager"])
+        if not recipients:
+            return
+
+        target = page or report
+        target_type = "странице" if page else "отчёту"
+        subject = "[Security Alert] Изменение прав на страницы/отчёты"
+        message = (
+            f"<p>Роли <b>{frappe.utils.escape_html(role)}</b> предоставлен доступ к "
+            f"{target_type} <b>{frappe.utils.escape_html(target)}</b>.</p>"
+            "<p>Проверьте настройки в 'Role Permissions Manager'.</p>"
+        )
+        frappe.sendmail(recipients=recipients, subject=subject, message=message)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "on_rppr_after_insert failed")
+
+
 # Helper Functions
 
 
