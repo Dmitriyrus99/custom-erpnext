@@ -43,7 +43,7 @@ async def cmd_start(message: Message) -> None:
         "• /start_work <ID> — взять в работу\n"
         "• /done <ID> — завершить заявку\n"
         "• Отправьте фото с подписью /attach <ID> чтобы прикрепить к заявке\n"
-        "• /objects — список объектов (заготовка)"
+        "• /objects — список объектов"
     )
 
 
@@ -193,9 +193,37 @@ async def cmd_archive(message: Message, client: FrappeClient | None) -> None:
 
 
 @router.message(F.text.startswith("/objects"))
-async def cmd_objects(message: Message) -> None:
-    """Placeholder for future objects list."""
-    await message.answer("Список объектов пока недоступен. Скоро добавим.")
+async def cmd_objects(message: Message, client: FrappeClient | None) -> None:
+    """List service objects (ERPNext Assets)."""
+    client = await _ensure_client_or_reply(message, client)
+    if client is None:
+        return
+    try:
+        rows = await client.list_objects(limit=30)
+    except httpx.HTTPError:
+        log.exception("list_objects failed")
+        await message.answer("Не удалось получить список объектов, попробуйте позже.")
+        return
+    except Exception:
+        log.exception("list_objects failed (unexpected)")
+        await message.answer("Не удалось получить список объектов, попробуйте позже.")
+        return
+
+    if not rows:
+        await message.answer("Объектов нет.")
+        return
+
+    lines: list[str] = []
+    for idx, r in enumerate(rows[:30], start=1):
+        name = r.get("name") or "—"
+        title = (r.get("asset_name") or name).strip()
+        customer = r.get("customer") or "—"
+        project = r.get("project") or "—"
+        lines.append(f"{idx}. {title} ({name}) — {customer} — {project}")
+
+    text = "Объекты (первые {0}):\n{1}".format(len(lines), "\n".join(lines))
+    for i in range(0, len(text), 3800):
+        await message.answer(text[i : i + 3800])
 
 
 async def _ensure_client_or_reply(

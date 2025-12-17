@@ -213,6 +213,18 @@ class FrappeClient:
         payload = _normalize_response(r.json().get("message") or r.json())
         return list(payload.get("data", []))
 
+    async def list_objects(self, limit: int = 20) -> list[dict]:
+        """List service objects (ERPNext Assets) for the bot."""
+        headers = await self._headers()
+        r = await self._client.get(
+            "/api/method/ferum_custom.api.service.list_objects",
+            headers=headers or None,
+            params={"page_length": int(limit)},
+        )
+        r.raise_for_status()
+        payload = _normalize_response(r.json().get("message") or r.json())
+        return list(payload.get("data", []))
+
     async def update_request_status(self, name: str, status: str) -> dict:
         """
         Updates the status of a service request.

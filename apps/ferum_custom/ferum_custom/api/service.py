@@ -213,6 +213,51 @@ def list_issues(
     return _response_ok(data=data, start=s, page_length=pl)
 
 
+@frappe.whitelist(methods=["GET"])  # Read-only listing
+def list_objects(
+    customer: str | None = None, start: int | None = None, page_length: int | None = None
+) -> dict:
+    """List service objects (ERPNext Assets) for portal/bot.
+
+    When JWT is enabled, bearer token will be used to resolve the user and apply customer scoping.
+    """
+    _require_jwt_authentication()
+    s, pl = _paginate(start, page_length)
+
+    if not frappe.db.exists("DocType", "Asset"):
+        return _response_ok(data=[], start=s, page_length=pl)
+
+    filters: dict[str, t.Any] = {}
+
+    # Restrict scope for website users or clients to their Customer
+    try:
+        user = frappe.session.user
+        user_type = frappe.get_cached_value("User", user, "user_type")
+        roles = set(frappe.get_roles(user))
+        if user_type == "Website User" or "Client" in roles:
+            allowed = get_allowed_customers(user)
+            if allowed:
+                filters["customer"] = ["in", allowed]
+            else:
+                # no explicit customer permission -> return empty
+                return _response_ok(data=[], start=s, page_length=pl)
+    except Exception:
+        pass
+
+    if customer:
+        filters["customer"] = customer
+
+    data = frappe.get_all(
+        "Asset",
+        filters=filters,
+        fields=["name", "asset_name", "customer", "project", "company", "modified"],
+        order_by="modified desc",
+        start=s,
+        page_length=pl,
+    )
+    return _response_ok(data=data, start=s, page_length=pl)
+
+
 @frappe.whitelist(methods=["GET"])  # Read-only fetch
 def get_issue(name: str) -> dict:
     """
