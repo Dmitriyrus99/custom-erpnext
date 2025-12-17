@@ -165,9 +165,12 @@
       "fieldtype": "Int",
       "label": "New Requests per Minute (per IP)",
       "default": 10
-    }
-    ,
-    { "fieldname": "observability_section", "fieldtype": "Section Break", "label": "Observability" },
+    },
+    {
+      "fieldname": "observability_section",
+      "fieldtype": "Section Break",
+      "label": "Observability"
+    },
     {
       "fieldname": "sentry_dsn",
       "fieldtype": "Data",

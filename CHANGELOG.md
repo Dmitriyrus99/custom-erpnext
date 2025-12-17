@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+
 - Service Report: strict attachment validation on validate (require at least one image and one PDF act) and automatic linking of `Custom Attachment` to the report for Drive sync.
 - Data patch `v15_1.sync_service_report_attachment_links` to backfill attachment links for existing Service Reports (idempotent).
 - Audit comment on Issue when a Timesheet is submitted and linked.
@@ -12,5 +13,6 @@
 - Telegram: `Telegram User Link` DocType for mapping ERPNext users to Telegram chat IDs and admin flag; webhook now impersonates mapped user.
 
 ### Improved
+
 - Google Drive consistency by ensuring all attachments referenced by Timesheet are linked and synchronized under `/Customer/Project/Reports`.
- - Telegram webhook hardened with official secret header verification.
+- Telegram webhook hardened with official secret header verification.

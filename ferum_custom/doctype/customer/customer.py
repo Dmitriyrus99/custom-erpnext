@@ -14,12 +14,12 @@ from frappe.model.document import Document
 
 
 class Customer(Document):
-	"""Simple customer master used across custom doctypes."""
+    """Simple customer master used across custom doctypes."""
 
-	customer_name: str
-	email: str | None
-	phone: str | None
-	address: str | None
-	notes: str | None
-	customer_group: str | None
-	territory: str | None
+    customer_name: str
+    email: str | None
+    phone: str | None
+    address: str | None
+    notes: str | None
+    customer_group: str | None
+    territory: str | None

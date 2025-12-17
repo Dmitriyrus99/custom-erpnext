@@ -1,79 +1,98 @@
 <div class="container">
-        <h2 id="sr-title"></h2>
-        <div id="sr-details"></div>
-        <p id="confirm-wrapper" style="display:none;">
-                <button id="confirm-btn" class="btn btn-sm btn-success">{{ _("Confirm Completion") }}</button>
-        </p>
-        <p id="report-wrapper" style="display:none;">
-                <a id="report-link" target="_blank">{{ _("Download Timesheet") }}</a>
-                <button id="confirm-report-btn" class="btn btn-sm btn-outline-primary" style="display:none;">{{ _("Confirm Report") }}</button>
-        </p>
-        <p><a href="/portal">{{ _("Back to list") }}</a></p>
+	<h2 id="sr-title"></h2>
+	<div id="sr-details"></div>
+	<p id="confirm-wrapper" style="display: none">
+		<button id="confirm-btn" class="btn btn-sm btn-success">
+			{{ _("Confirm Completion") }}
+		</button>
+	</p>
+	<p id="report-wrapper" style="display: none">
+		<a id="report-link" target="_blank">{{ _("Download Timesheet") }}</a>
+		<button
+			id="confirm-report-btn"
+			class="btn btn-sm btn-outline-primary"
+			style="display: none"
+		>
+			{{ _("Confirm Report") }}
+		</button>
+	</p>
+	<p><a href="/portal">{{ _("Back to list") }}</a></p>
 </div>
 <script>
-        frappe.ready(() => {
-                const params = new URLSearchParams(window.location.search);
-                const name = params.get("name");
-                const detailsEl = document.getElementById("sr-details");
-                if (!name) {
-                        detailsEl.innerHTML = `<p>${__("Missing Issue ID.")}</p>`;
-                        return;
-                }
+	frappe.ready(() => {
+		const params = new URLSearchParams(window.location.search);
+		const name = params.get("name");
+		const detailsEl = document.getElementById("sr-details");
+		if (!name) {
+			detailsEl.innerHTML = `<p>${__("Missing Issue ID.")}</p>`;
+			return;
+		}
 
-        frappe
-                .call({
-                        method: "ferum_custom.api.service.get_service_request",
-                        args: { name },
-                })
-                .then((r) => {
-                        const doc = r.message || {};
-                        // Minimal field projection for website users
-                        const safe = {
-                                name: doc.name,
-                                title: doc.title,
-                                status: doc.status,
-                                description: doc.description,
-                                linked_report: doc.linked_report,
-                        };
-                        document.getElementById("sr-title").innerText =
-                                `${safe.name || name} - ${safe.title || ""}`;
-                        const pieces = [
-                                `<p><strong>${__("Status")}:</strong> ${safe.status || ""}</p>`,
-                        ];
-                        if (safe.description) {
-                                pieces.push(
-                                        `<p><strong>${__("Description")}:</strong> ${
-                                                frappe.utils.escape_html(safe.description)
-                                        }</p>`,
-                                );
-                        }
-                        detailsEl.innerHTML = pieces.join("\n");
-                        if (safe.status === 'Resolved') {
-                                document.getElementById("confirm-wrapper").style.display = "";
-                                document.getElementById("confirm-btn").onclick = () => {
-                                        frappe.call({ method: 'ferum_custom.api.service.confirm_issue_completion', args: { name } }).then(() => {
-                                                frappe.show_alert({ message: __('Confirmed'), indicator: 'green' });
-                                        });
-                                };
-                        }
-                        if (safe.linked_report) {
-                                const reportLink = document.getElementById("report-link");
-                                reportLink.href =
-                                        "/api/method/frappe.utils.print_format.download_pdf?doctype=" +
-                                        encodeURIComponent("Timesheet") +
-                                        "&name=" +
-                                        encodeURIComponent(safe.linked_report);
-                                document.getElementById("report-wrapper").style.display = "";
-                                document.getElementById("confirm-report-btn").style.display = "inline-block";
-                                document.getElementById("confirm-report-btn").onclick = () => {
-                                        frappe.call({ method: 'ferum_custom.api.service.confirm_timesheet_report', args: { name: safe.linked_report } }).then(() => {
-                                                frappe.show_alert({ message: __('Report confirmed'), indicator: 'green' });
-                                        });
-                                };
-                        }
-                })
-                .catch((e) => {
-                        detailsEl.innerHTML = `<p>${__("Not found.")}</p>`;
-                });
-        });
+		frappe
+			.call({
+				method: "ferum_custom.api.service.get_service_request",
+				args: { name },
+			})
+			.then((r) => {
+				const doc = r.message || {};
+				// Minimal field projection for website users
+				const safe = {
+					name: doc.name,
+					title: doc.title,
+					status: doc.status,
+					description: doc.description,
+					linked_report: doc.linked_report,
+				};
+				document.getElementById("sr-title").innerText =
+					`${safe.name || name} - ${safe.title || ""}`;
+				const pieces = [`<p><strong>${__("Status")}:</strong> ${safe.status || ""}</p>`];
+				if (safe.description) {
+					pieces.push(
+						`<p><strong>${__("Description")}:</strong> ${frappe.utils.escape_html(
+							safe.description
+						)}</p>`
+					);
+				}
+				detailsEl.innerHTML = pieces.join("\n");
+				if (safe.status === "Resolved") {
+					document.getElementById("confirm-wrapper").style.display = "";
+					document.getElementById("confirm-btn").onclick = () => {
+						frappe
+							.call({
+								method: "ferum_custom.api.service.confirm_issue_completion",
+								args: { name },
+							})
+							.then(() => {
+								frappe.show_alert({ message: __("Confirmed"), indicator: "green" });
+							});
+					};
+				}
+				if (safe.linked_report) {
+					const reportLink = document.getElementById("report-link");
+					reportLink.href =
+						"/api/method/frappe.utils.print_format.download_pdf?doctype=" +
+						encodeURIComponent("Timesheet") +
+						"&name=" +
+						encodeURIComponent(safe.linked_report);
+					document.getElementById("report-wrapper").style.display = "";
+					document.getElementById("confirm-report-btn").style.display = "inline-block";
+					document.getElementById("confirm-report-btn").onclick = () => {
+						frappe
+							.call({
+								method: "ferum_custom.api.service.confirm_timesheet_report",
+								args: { name: safe.linked_report },
+							})
+							.then(() => {
+								frappe.show_alert({
+									message: __("Report confirmed"),
+									indicator: "green",
+								});
+							});
+					};
+				}
+			})
+			.catch((e) => {
+				detailsEl.innerHTML = `<p>${__("Not found.")}</p>`;
+			});
+	});
 </script>

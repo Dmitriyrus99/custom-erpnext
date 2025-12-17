@@ -18,7 +18,7 @@ frappe.ui.form.on("Payment", {
 				}
 			} catch (e) {
 				// Errors are already raised server-side
-				console.error(e);
+				frappe.msgprint(__("Could not create Payment Entry. Please try again."));
 			}
 		});
 	},

@@ -16,7 +16,7 @@ while True:
 	__path__.append(str(next_dir))
 	current_dir = next_dir
 
-from . import ferum_custom  # noqa: F401
+from . import ferum_custom
 
 subpkg_name = f"{__name__}.ferum_custom"
 if subpkg_name not in sys.modules:

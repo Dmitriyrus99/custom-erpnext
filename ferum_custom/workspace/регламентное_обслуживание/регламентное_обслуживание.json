@@ -1,59 +1,58 @@
 {
- "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"\u0420\u0435\u0433\u043b\u0430\u043c\u0435\u043d\u0442\u043d\u043e\u0435 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0413\u0440\u0430\u0444\u0438\u043a\u0438 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u044f\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u043e\u0432\u044b\u0439 \u0433\u0440\u0430\u0444\u0438\u043a\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041e\u0431\u044a\u0435\u043a\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0417\u0430\u044f\u0432\u043a\u0438\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041f\u0440\u043e\u0441\u0440\u043e\u0447\u0435\u043d\u043d\u044b\u0435 \u0433\u0440\u0430\u0444\u0438\u043a\u0438\",\"col\":4}}]",
- "creation": "2025-10-14 12:30:00.000000",
- "custom_blocks": [],
- "docstatus": 0,
- "doctype": "Workspace",
- "hide_custom": 0,
- "idx": 0,
- "is_hidden": 0,
- "label": "\u0420\u0435\u0433\u043b\u0430\u043c\u0435\u043d\u0442\u043d\u043e\u0435 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435",
- "links": [],
- "modified": "2025-10-14 12:30:00.000000",
- "modified_by": "Administrator",
- "module": "Ferum Custom",
- "name": "\u0420\u0435\u0433\u043b\u0430\u043c\u0435\u043d\u0442\u043d\u043e\u0435 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435",
- "number_cards": [],
- "owner": "Administrator",
- "public": 1,
- "quick_lists": [],
- "roles": [
-  { "role": "Project Manager" },
-  { "role": "Office Manager" },
-  { "role": "System Manager" }
- ],
- "sequence_id": 0.0,
- "shortcuts": [
-  {
-   "doc_view": "List",
-   "label": "\u0413\u0440\u0430\u0444\u0438\u043a\u0438 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u044f",
-   "link_to": "Service Maintenance Schedule",
-   "type": "DocType"
-  },
-  {
-   "label": "\u041d\u043e\u0432\u044b\u0439 \u0433\u0440\u0430\u0444\u0438\u043a",
-   "type": "URL",
-   "url": "/app/service-maintenance-schedule/new"
-  },
-  {
-   "doc_view": "List",
-   "label": "\u041e\u0431\u044a\u0435\u043a\u0442\u044b",
-   "link_to": "Service Object",
-   "type": "DocType"
-  },
-  {
-   "label": "\u0417\u0430\u044f\u0432\u043a\u0438",
-   "type": "URL",
-   "url": "/app/issue"
-  },
-  {
-   "label": "\u041f\u0440\u043e\u0441\u0440\u043e\u0447\u0435\u043d\u043d\u044b\u0435 \u0433\u0440\u0430\u0444\u0438\u043a\u0438",
-   "link_to": "Due Service Maintenance Schedules",
-   "report_ref_doctype": "Service Maintenance Schedule",
-   "type": "Report"
-  }
- ],
- "title": "\u0420\u0435\u0433\u043b\u0430\u043c\u0435\u043d\u0442\u043d\u043e\u0435 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435"
+  "charts": [],
+  "content": "[{\"type\":\"header\",\"data\":{\"text\":\"\u0420\u0435\u0433\u043b\u0430\u043c\u0435\u043d\u0442\u043d\u043e\u0435 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0413\u0440\u0430\u0444\u0438\u043a\u0438 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u044f\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041d\u043e\u0432\u044b\u0439 \u0433\u0440\u0430\u0444\u0438\u043a\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041e\u0431\u044a\u0435\u043a\u0442\u044b\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u0417\u0430\u044f\u0432\u043a\u0438\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\u041f\u0440\u043e\u0441\u0440\u043e\u0447\u0435\u043d\u043d\u044b\u0435 \u0433\u0440\u0430\u0444\u0438\u043a\u0438\",\"col\":4}}]",
+  "creation": "2025-10-14 12:30:00.000000",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "hide_custom": 0,
+  "idx": 0,
+  "is_hidden": 0,
+  "label": "\u0420\u0435\u0433\u043b\u0430\u043c\u0435\u043d\u0442\u043d\u043e\u0435 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435",
+  "links": [],
+  "modified": "2025-10-14 12:30:00.000000",
+  "modified_by": "Administrator",
+  "module": "Ferum Custom",
+  "name": "\u0420\u0435\u0433\u043b\u0430\u043c\u0435\u043d\u0442\u043d\u043e\u0435 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435",
+  "number_cards": [],
+  "owner": "Administrator",
+  "public": 1,
+  "quick_lists": [],
+  "roles": [
+    { "role": "Project Manager" },
+    { "role": "Office Manager" },
+    { "role": "System Manager" }
+  ],
+  "sequence_id": 0.0,
+  "shortcuts": [
+    {
+      "doc_view": "List",
+      "label": "\u0413\u0440\u0430\u0444\u0438\u043a\u0438 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u044f",
+      "link_to": "Service Maintenance Schedule",
+      "type": "DocType"
+    },
+    {
+      "label": "\u041d\u043e\u0432\u044b\u0439 \u0433\u0440\u0430\u0444\u0438\u043a",
+      "type": "URL",
+      "url": "/app/service-maintenance-schedule/new"
+    },
+    {
+      "doc_view": "List",
+      "label": "\u041e\u0431\u044a\u0435\u043a\u0442\u044b",
+      "link_to": "Service Object",
+      "type": "DocType"
+    },
+    {
+      "label": "\u0417\u0430\u044f\u0432\u043a\u0438",
+      "type": "URL",
+      "url": "/app/issue"
+    },
+    {
+      "label": "\u041f\u0440\u043e\u0441\u0440\u043e\u0447\u0435\u043d\u043d\u044b\u0435 \u0433\u0440\u0430\u0444\u0438\u043a\u0438",
+      "link_to": "Due Service Maintenance Schedules",
+      "report_ref_doctype": "Service Maintenance Schedule",
+      "type": "Report"
+    }
+  ],
+  "title": "\u0420\u0435\u0433\u043b\u0430\u043c\u0435\u043d\u0442\u043d\u043e\u0435 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435"
 }
-

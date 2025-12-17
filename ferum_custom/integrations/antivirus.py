@@ -56,9 +56,7 @@ def _clamscan_cmd(path: str) -> tuple[bool, str | None]:
     """Scan a file via clamscan subprocess."""
     exe = (get_setting("clamscan_path") or "clamscan").strip()
     try:
-        proc = subprocess.run(
-            [exe, "--no-summary", path], capture_output=True, timeout=30
-        )
+        proc = subprocess.run([exe, "--no-summary", path], capture_output=True, timeout=30)
         out = proc.stdout.decode("utf-8", errors="ignore")
         # Output: /path/file: OK or /path/file: Eicar-Test-Signature FOUND
         if "FOUND" in out:
@@ -73,19 +71,19 @@ def _clamscan_cmd(path: str) -> tuple[bool, str | None]:
 
 
 def scan_bytes(content: bytes, filename: str | None = None) -> tuple[bool, str | None]:
-	"""Scan bytes using configured antivirus; returns (ok, signature)."""
-	if not is_feature_enabled("enable_antivirus"):
-		return True, None
-	engine = (get_setting("antivirus_engine") or "clamav").strip().lower()
-	# Write to temp file and scan
-	with tempfile.NamedTemporaryFile(
-		prefix="upload_", suffix=Path(filename or "upload.bin").suffix, delete=True
-	) as tmp:
-		tmp.write(content)
-		tmp.flush()
-		if engine == "clamav":
-			ok, sig = _clamd_scan(tmp.name)
-			if not ok and (sig == "clamd socket not found" or sig == "clamd error"):
-				ok, sig = _clamscan_cmd(tmp.name)
-			return ok, sig
-	return True, None
+    """Scan bytes using configured antivirus; returns (ok, signature)."""
+    if not is_feature_enabled("enable_antivirus"):
+        return True, None
+    engine = (get_setting("antivirus_engine") or "clamav").strip().lower()
+    # Write to temp file and scan
+    with tempfile.NamedTemporaryFile(
+        prefix="upload_", suffix=Path(filename or "upload.bin").suffix, delete=True
+    ) as tmp:
+        tmp.write(content)
+        tmp.flush()
+        if engine == "clamav":
+            ok, sig = _clamd_scan(tmp.name)
+            if not ok and (sig == "clamd socket not found" or sig == "clamd error"):
+                ok, sig = _clamscan_cmd(tmp.name)
+            return ok, sig
+    return True, None

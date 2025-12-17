@@ -70,7 +70,7 @@
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-      "query": "WITH invoice_summary AS (SELECT project, SUM(CASE WHEN counterparty_type='Customer' AND status!='Cancelled' THEN amount ELSE 0 END) AS customer_invoices, SUM(CASE WHEN counterparty_type='Subcontractor' AND status!='Cancelled' THEN amount ELSE 0 END) AS subcontractor_invoices FROM `tabInvoice` GROUP BY project) SELECT p.name AS \"Проект:Link/Service Project:150\", COALESCE(s.customer_invoices,0) AS \"Счета (клиент):Currency:150\", COALESCE(s.subcontractor_invoices,0) AS \"Счета (субподрядчик):Currency:180\", COALESCE(s.customer_invoices,0) - COALESCE(s.subcontractor_invoices,0) AS \"Прибыль:Currency:150\" FROM `tabService Project` p LEFT JOIN invoice_summary s ON s.project = p.name GROUP BY p.name, p.modified ORDER BY p.modified DESC",
+    "query": "WITH invoice_summary AS (SELECT project, SUM(CASE WHEN counterparty_type='Customer' AND status!='Cancelled' THEN amount ELSE 0 END) AS customer_invoices, SUM(CASE WHEN counterparty_type='Subcontractor' AND status!='Cancelled' THEN amount ELSE 0 END) AS subcontractor_invoices FROM `tabInvoice` GROUP BY project) SELECT p.name AS \"Проект:Link/Service Project:150\", COALESCE(s.customer_invoices,0) AS \"Счета (клиент):Currency:150\", COALESCE(s.subcontractor_invoices,0) AS \"Счета (субподрядчик):Currency:180\", COALESCE(s.customer_invoices,0) - COALESCE(s.subcontractor_invoices,0) AS \"Прибыль:Currency:150\" FROM `tabService Project` p LEFT JOIN invoice_summary s ON s.project = p.name GROUP BY p.name, p.modified ORDER BY p.modified DESC",
     "roles": [
       {
         "doctype": "Report Perm",
@@ -94,7 +94,7 @@
     "module": "Ferum Custom",
     "report_type": "Query Report",
     "is_standard": "No",
-      "query": "SELECT name AS \"Заявка:Link/Issue:150\", status AS \"Статус:Data:120\", priority AS \"Приоритет:Data:120\", modified AS \"Изменен:Datetime:160\" FROM `tabIssue` WHERE assigned_to IS NULL AND status != 'Closed' ORDER BY modified DESC",
+    "query": "SELECT name AS \"Заявка:Link/Issue:150\", status AS \"Статус:Data:120\", priority AS \"Приоритет:Data:120\", modified AS \"Изменен:Datetime:160\" FROM `tabIssue` WHERE assigned_to IS NULL AND status != 'Closed' ORDER BY modified DESC",
     "roles": [
       { "doctype": "Report Perm", "role": "System Manager" },
       { "doctype": "Report Perm", "role": "Office Manager" }

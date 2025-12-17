@@ -1,10 +1,21 @@
-{ "doctype":"DocType","name":"data_issue","module":"Ferum Custom","autoname":"hash","custom":1,
-  "fields":[
-    {"fieldname":"entity","label":"Entity","fieldtype":"Data","reqd":1},
-    {"fieldname":"entity_id","label":"Entity Id","fieldtype":"Data"},
-    {"fieldname":"severity","label":"Severity","fieldtype":"Select","options":"Low\nMedium\nHigh\nCritical","reqd":1},
-    {"fieldname":"message","label":"Message","fieldtype":"Text","reqd":1},
-    {"fieldname":"detected_at","label":"Detected At","fieldtype":"Datetime","reqd":1},
-    {"fieldname":"resolved_at","label":"Resolved At","fieldtype":"Datetime"}
-  ] }
-
+{
+  "doctype": "DocType",
+  "name": "data_issue",
+  "module": "Ferum Custom",
+  "autoname": "hash",
+  "custom": 1,
+  "fields": [
+    { "fieldname": "entity", "label": "Entity", "fieldtype": "Data", "reqd": 1 },
+    { "fieldname": "entity_id", "label": "Entity Id", "fieldtype": "Data" },
+    {
+      "fieldname": "severity",
+      "label": "Severity",
+      "fieldtype": "Select",
+      "options": "Low\nMedium\nHigh\nCritical",
+      "reqd": 1
+    },
+    { "fieldname": "message", "label": "Message", "fieldtype": "Text", "reqd": 1 },
+    { "fieldname": "detected_at", "label": "Detected At", "fieldtype": "Datetime", "reqd": 1 },
+    { "fieldname": "resolved_at", "label": "Resolved At", "fieldtype": "Datetime" }
+  ]
+}

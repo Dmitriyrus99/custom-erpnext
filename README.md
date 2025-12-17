@@ -6,10 +6,10 @@ Ferum Custom is an ERPNext-based system designed to manage and streamline operat
 
 This repository includes a Telegram bot that integrates with the Ferum Custom ERP system. The bot allows users to perform the following actions:
 
--   **Create Issues**: Quickly create new issues directly from Telegram.
--   **List Issues**: View a list of your own or assigned issues.
--   **Update Issue Status**: Change the status of an issue using inline buttons.
--   **Attach Files**: Attach photos and documents to issues and timesheets.
+- **Create Issues**: Quickly create new issues directly from Telegram.
+- **List Issues**: View a list of your own or assigned issues.
+- **Update Issue Status**: Change the status of an issue using inline buttons.
+- **Attach Files**: Attach photos and documents to issues and timesheets.
 
 For detailed setup and deployment instructions, see the `telegram_bot/README.md` file.
 

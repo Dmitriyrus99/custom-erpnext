@@ -39,5 +39,5 @@ flags:
     carryforward: true
 
 profiling:
-   critical_files_paths:
-      - /ferum_custom/**
+  critical_files_paths:
+    - /ferum_custom/**

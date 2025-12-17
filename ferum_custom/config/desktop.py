@@ -41,7 +41,7 @@ def get_data():
     ]
 
     data = []
-    for name, color, icon in zip(module_names, colors, icons):
+    for name, color, icon in zip(module_names, colors, icons, strict=False):
         data.append(
             {
                 "module_name": name,

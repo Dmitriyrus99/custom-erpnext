@@ -27,6 +27,5 @@ async function ensure_user_type_matches_roles(frm) {
 		}
 	} catch (e) {
 		// graceful degradation; server-side validation still applies
-		console && console.warn && console.warn("User Type auto-adjust skipped:", e);
 	}
 }
