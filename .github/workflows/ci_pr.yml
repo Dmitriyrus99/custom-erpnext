@@ -64,9 +64,18 @@ jobs:
           python-version: "3.12"
           setup-node: "false"
 
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: precommit-${{ runner.os }}-py312-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Fetch PR base/head SHAs (for pre-commit diff)
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
+
       - name: Lint (pre-commit on PR diff)
         run: |
-          ./env/bin/pip install --upgrade pre-commit
           ./env/bin/pre-commit run --from-ref "${{ github.event.pull_request.base.sha }}" --to-ref "${{ github.event.pull_request.head.sha }}" --show-diff-on-failure
 
       - name: Write CI common_site_config.json (no secrets)
@@ -108,4 +117,3 @@ jobs:
           SITE_NAME: test_site
         run: |
           ./env/bin/pytest -q apps/ferum_custom/ferum_custom/tests
-

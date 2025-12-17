@@ -63,7 +63,6 @@ certs/
 *.acl
 *.rdb
 *.log
-*.sql
 *.sql.gz
 *.dump
 *.bak
