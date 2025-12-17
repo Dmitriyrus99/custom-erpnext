@@ -9,13 +9,14 @@ DOCKERFILE ?= apps/$(APP)/Dockerfile
 DOCKER_REGISTRY ?=
 BOOTSTRAP_SITE ?= $(BENCH_SITE)
 DOCKER_PLATFORM ?=
+PY_PATHS ?= apps/$(APP)/$(APP) apps/$(APP)/telegram_bot
 
 .PHONY: help
 help:
 	@echo "Common targets:"
 	@echo "  make install          # install pre-commit hooks (dev hygiene)"
-	@echo "  make lint             # run Ruff/Black/isort/ESLint/Prettier via pre-commit"
-	@echo "  make format           # format Python/JS/CSS/MD in apps/ferum_custom"
+	@echo "  make lint             # run Ruff/Black/isort/mypy + ESLint/Prettier on apps/$(APP)"
+	@echo "  make format           # auto-format Python/JS/CSS/MD in apps/$(APP)"
 	@echo "  make test [FILE=...]  # run pytest suite (or single file) for $(APP)"
 	@echo "  make bench-test       # run bench test runner for $(APP) on $(BENCH_SITE)"
 	@echo "  make ci               # lint + pytest"
@@ -39,11 +40,17 @@ install:
 
 .PHONY: lint
 lint:
-	pre-commit run --all-files
+	$(PYTHON) -m ruff check $(PY_PATHS)
+	$(PYTHON) -m mypy --config-file pyproject.toml
+	./node_modules/.bin/prettier --check "apps/$(APP)/**/*.{js,jsx,ts,tsx,css,scss,html,json,md,yaml,yml,jinja,j2}"
+	./node_modules/.bin/eslint "apps/$(APP)/**/*.{js,jsx,ts,tsx}" --max-warnings=0 --no-error-on-unmatched-pattern
 
 .PHONY: format
 format:
-	pre-commit run black isort prettier --all-files
+	$(PYTHON) -m ruff check $(PY_PATHS) --fix
+	$(PYTHON) -m isort $(PY_PATHS)
+	$(PYTHON) -m black $(PY_PATHS)
+	./node_modules/.bin/prettier --write "apps/$(APP)/**/*.{js,jsx,ts,tsx,css,scss,html,json,md,yaml,yml,jinja,j2}"
 
 .PHONY: ci
 ci: lint test
