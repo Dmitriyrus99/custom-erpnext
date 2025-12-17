@@ -1,0 +1,79 @@
+name: "Setup bench"
+description: "Setup Python venv (cached), install bench + app deps, optionally setup Node/Yarn cache"
+
+inputs:
+  python-version:
+    description: "Python version"
+    required: true
+  node-version:
+    description: "Node.js version"
+    required: false
+    default: "20"
+  setup-node:
+    description: "Whether to setup Node/Yarn cache"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+        cache-dependency-path: |
+          pyproject.toml
+          uv.lock
+          apps/frappe/requirements.txt
+          apps/erpnext/requirements.txt
+          apps/ferum_custom/requirements.txt
+
+    - name: Cache venv (env/)
+      id: venv-cache
+      uses: actions/cache@v4
+      with:
+        path: env
+        key: venv-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock', 'apps/frappe/requirements.txt', 'apps/erpnext/requirements.txt', 'apps/ferum_custom/requirements.txt') }}
+        restore-keys: |
+          venv-${{ runner.os }}-py${{ inputs.python-version }}-
+
+    - name: Install bench & Python deps (when cache miss)
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ -f "env/.ci-ready" ]] && [[ -x "env/bin/python" ]]; then
+          echo "[ci] venv cache hit"
+          exit 0
+        fi
+
+        python -m venv env
+        ./env/bin/pip install --upgrade pip
+        ./env/bin/pip install "frappe-bench<6"
+
+        # Ensure frappe is importable/editable
+        ./env/bin/pip install -e apps/frappe
+
+        ./env/bin/pip install -r apps/frappe/requirements.txt
+        ./env/bin/pip install -r apps/erpnext/requirements.txt
+
+        if [[ -f "apps/ferum_custom/requirements.txt" ]]; then
+          ./env/bin/pip install -r apps/ferum_custom/requirements.txt
+        fi
+
+        # Test runner and CI tooling
+        ./env/bin/pip install pytest pytest-cov pre-commit
+
+        touch env/.ci-ready
+
+    - name: Set up Node (optional)
+      if: ${{ inputs.setup-node == 'true' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: yarn
+        cache-dependency-path: |
+          apps/frappe/yarn.lock
+          apps/erpnext/yarn.lock
+

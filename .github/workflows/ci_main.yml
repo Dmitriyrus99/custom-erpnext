@@ -1,0 +1,109 @@
+name: CI (Main / Manual)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  full:
+    name: Migrate + Build assets + Full tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Setup bench env (Python + Node/Yarn caches)
+        uses: ./.github/actions/setup-bench
+        with:
+          python-version: "3.12"
+          node-version: "20"
+          setup-node: "true"
+
+      - name: Write CI common_site_config.json (no secrets)
+        run: |
+          mkdir -p sites
+          ./env/bin/python - <<'PY'
+          import json
+          from pathlib import Path
+          cfg = {
+              "db_host": "127.0.0.1",
+              "db_port": 3306,
+              "db_root_password": "root",
+              "redis_cache": "redis://127.0.0.1:6379",
+              "redis_queue": "redis://127.0.0.1:6379",
+              "redis_socketio": "redis://127.0.0.1:6379",
+              "developer_mode": 1,
+              "maintenance_mode": 0,
+              "pause_scheduler": 1,
+          }
+          Path("sites/common_site_config.json").write_text(json.dumps(cfg, indent=2) + "\n")
+          PY
+
+      - name: Create ephemeral site (test_site)
+        env:
+          SITE_NAME: test_site
+        run: |
+          ./env/bin/bench new-site "${SITE_NAME}" \
+            --admin-password admin \
+            --mariadb-root-password root \
+            --db-host 127.0.0.1 \
+            --db-port 3306 \
+            --no-mariadb-socket \
+            --force
+          ./env/bin/bench --site "${SITE_NAME}" install-app erpnext
+          ./env/bin/bench --site "${SITE_NAME}" install-app ferum_custom
+
+      - name: Migrate (explicit)
+        env:
+          SITE_NAME: test_site
+        run: ./env/bin/bench --site "${SITE_NAME}" migrate
+
+      - name: Build assets (production)
+        run: |
+          corepack enable
+          ./env/bin/bench build --production
+
+      - name: Pytest (ferum_custom)
+        env:
+          SITE_NAME: test_site
+        run: |
+          ./env/bin/pytest -q apps/ferum_custom/ferum_custom/tests
+

@@ -1,40 +1,93 @@
+############################
+# Python
+############################
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
 
-.DS_Store
-*.pyc
-*.egg-info
-*.swp
-tags
-node_modules
-__pycache__
-*.env
+############################
+# Node / Frontend
+############################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+############################
+# Bench / Frappe / ERPNext
+############################
+/logs/
+/sites/
+/test_site
+/.bench/
+/.frappe/
+/assets/
+/dist/
+/build/
+/archived/
+
+############################
+# Virtualenvs / tool caches
+############################
+/.venv/
+/venv/
+/env/
+/env_ci/
+/.pre-commit-cache/
+
+############################
+# Local env files (keep examples committed)
+############################
 .env
 .env.*
 *.env
+!.env.example
+config/.env.integrations
+config/.env.local.integrations
 
-# Bench and environment artifacts
-apps.json
-config
-logs/
-docker-compose.yml
-compose*.yaml
-Caddyfile
-Dockerfile
-backup-job.yml
+############################
+# Secrets / credentials / runtime artifacts
+############################
+site_config.json
+sites/*/site_config.json
+sites/*/private/
+*.key
+*.crt
+certs/
+*.acl
+*.rdb
+*.log
+*.sql
+*.sql.gz
+*.dump
+*.bak
 
-# Git internals accidentally committed
-objects/
-refs/
-hooks/
-info/
-index
-HEAD
-FETCH_HEAD
-description
+############################
+# OS / IDE
+############################
+.DS_Store
+.idea/
+.vscode/
+.python-version
+.tool-versions
 
-# Tool caches
-/.pre-commit-cache/
-.mypy_cache/
-.ruff_cache/
-.pytest_cache/
-coverage.xml
-htmlcov/
+############################
+# Codex / MCP
+############################
+.fastmcp-venv/
+**/.fastmcp-venv/
+.codex/
+.mcp/
+.cache/codex/
+
+############################
+# Generic caches
+############################
+/.cache/
+/config/*.lock
