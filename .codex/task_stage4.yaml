@@ -1,0 +1,72 @@
+name: "Stage 4 — Deployment & Monitoring"
+description: |
+  Этап 4. Развёртывание Ferum Customizations в production-среде,
+  настройка Docker, Traefik, PostgreSQL, Prometheus и Sentry.
+
+context:
+  project_root: "/home/frappe/frappe-bench"
+  branch: "housekeeping/precommit-mess"
+
+steps:
+  - title: "Создание docker-compose.production.yml"
+    write_file:
+      path: "docker-compose.production.yml"
+      content: |
+        version: "3.9"
+
+        services:
+          traefik:
+            image: traefik:v2.10
+            command:
+              - "--providers.docker=true"
+              - "--entrypoints.web.address=:80"
+              - "--entrypoints.websecure.address=:443"
+              - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+              - "--certificatesresolvers.letsencrypt.acme.email=admin@ferumrus.ru"
+              - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+            ports:
+              - "80:80"
+              - "443:443"
+            volumes:
+              - "/var/run/docker.sock:/var/run/docker.sock:ro"
+              - "./certs:/letsencrypt"
+
+          backend:
+            image: ferum/erpnext:latest
+            depends_on: [postgres]
+            env_file: .env
+            labels:
+              - "traefik.enable=true"
+              - "traefik.http.routers.erpclone.rule=Host(`erp.ferumrus.ru`)"
+              - "traefik.http.routers.erpclone.entrypoints=websecure"
+              - "traefik.http.routers.erpclone.tls.certresolver=letsencrypt"
+
+          postgres:
+            image: postgres:13
+            environment:
+              POSTGRES_USER: frappe
+              POSTGRES_PASSWORD: frappe
+              POSTGRES_DB: erpnext
+            volumes:
+              - pgdata:/var/lib/postgresql/data
+
+        volumes:
+          pgdata:
+
+  - title: "Добавление мониторинга"
+    run: |
+      mkdir -p monitor/
+      echo "global:\n  scrape_interval: 15s\nscrape_configs:\n  - job_name: 'ferum'\n    static_configs:\n      - targets: ['backend:8000']" > monitor/prometheus.yml
+      echo "[OK] Prometheus конфиг создан."
+
+  - title: "Добавление Sentry интеграции"
+    run: |
+      echo "SENTRY_DSN=https://project@sentry.io/ferum" >> .env
+      echo "[OK] Sentry добавлен в конфигурацию."
+
+  - title: "Git Commit"
+    run: |
+      git add .
+      git commit -m "deploy: add docker-compose.production, prometheus config and sentry setup"
+
+success_message: "✅ Stage 4 выполнен — готово к production-развёртыванию."

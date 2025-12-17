@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="https://ferum.example/bpmn">
+  <process id="FerumServiceFlow" name="Service Request to Payment" isExecutable="false">
+    <startEvent id="start" name="Start"/>
+    <task id="t1" name="Create Service Request"/>
+    <task id="t2" name="Complete Service Report"/>
+    <task id="t3" name="Create Invoice"/>
+    <task id="t4" name="Receive Payment"/>
+    <endEvent id="end" name="Done"/>
+    <sequenceFlow id="s1" sourceRef="start" targetRef="t1"/>
+    <sequenceFlow id="s2" sourceRef="t1" targetRef="t2"/>
+    <sequenceFlow id="s3" sourceRef="t2" targetRef="t3"/>
+    <sequenceFlow id="s4" sourceRef="t3" targetRef="t4"/>
+    <sequenceFlow id="s5" sourceRef="t4" targetRef="end"/>
+  </process>
+</definitions>

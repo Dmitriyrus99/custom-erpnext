@@ -1,0 +1,20 @@
+modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200,302]
+  drive_health:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200]
+      headers:
+        Accept: application/json
+  telegram_health:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200]
+      headers:
+        Accept: application/json

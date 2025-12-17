@@ -1,95 +1,44 @@
-[project]
-name = "ferum_custom"
-authors = [
-    { name = "Ferum", email = "rusakov@ferumrus.ru"}
-]
-description = "Custom erp system for Ferum"
-requires-python = ">=3.10"
-readme = "README.md"
-dynamic = ["version"]
-dependencies = [
-    # "frappe~=15.0.0", # Installed and managed by bench.
-]
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+include = "^apps/ferum_custom/.*\\.pyi?$"
+extend-exclude = "(apps/erpnext/|apps/frappe/|services/|docs/|monitoring/|legacy/|build/|.*/node_modules/|env/|\\.venv/|sites/)"
 
-[project.optional-dependencies]
-dev = [
-	"pre-commit",
-	"pytest",
-	"pytest-cov",
-]
-
-[tool.pytest.ini_options]
-addopts = "--cov=ferum_custom --cov-report=xml --cov-report=term-missing"
-testpaths = [
-    "ferum_custom",
-    "telegram_bot",
-]
-
-[tool.coverage.run]
-branch = true
-source = ["ferum_custom", "telegram_bot"]
-omit = [
-    "ferum_custom/__init__.py",
-    "ferum_custom/migrations/*",
-    "ferum_custom/tests/*",
-    "telegram_bot/__init__.py",
-    "telegram_bot/migrations/*",
-    "telegram_bot/tests/*",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "if t.TYPE_CHECKING:",
-    "@override",
-]
-show_missing = true
-
-[build-system]
-requires = ["flit_core >=3.4,<4"]
-build-backend = "flit_core.buildapi"
-
-# These dependencies are only installed when developer mode is enabled
-[tool.bench.dev-dependencies]
-# package_name = "~=1.1.0"
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 100
+skip_gitignore = true
+skip = ["env", ".venv", "node_modules", "sites"]
 
 [tool.ruff]
-line-length = 110
-target-version = "py310"
+line-length = 100
+target-version = "py312"
+src = ["apps/ferum_custom"]
+exclude = ["apps/erpnext", "apps/frappe", "node_modules", ".git", ".bench"]
+extend-exclude = [
+    "apps/erpnext/",
+    "apps/frappe/",
+    "services/",
+    "docs/",
+    "monitoring/",
+    "legacy/",
+    "build/",
+    "env/",
+    ".venv/",
+    "sites/"
+]
 
 [tool.ruff.lint]
-select = [
-    "F",
-    "E",
-    "W",
-    "I",
-    "UP",
-    "B",
-    "RUF",
-]
-ignore = [
-    "B017", # assertRaises(Exception) - should be more specific
-    "B018", # useless expression, not assigned to anything
-    "B023", # function doesn't bind loop variable - will have last iteration's value
-    "B904", # raise inside except without from
-    "E101", # indentation contains mixed spaces and tabs
-    "E402", # module level import not at top of file
-    "E501", # line too long
-    "E741", # ambiguous variable name
-    "F401", # "unused" imports
-    "F403", # can't detect undefined names from * import
-    "F405", # can't detect undefined names from * import
-    "F722", # syntax error in forward type annotation
-    "W191", # indentation contains tabs
-]
-typing-modules = ["frappe.types.DF"]
+select = ["E", "F", "W", "I", "B"]
+# Keep E203 ignored for Black compatibility; remove W503 to avoid parser issues
+ignore = ["E203"]
 
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "tab"
-docstring-code-format = true
-
-[tool.black]
-line-length = 110
-target-version = ["py310"]
-skip-string-normalization = true
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+follow_imports = "silent"
+pretty = true
+disable_error_code = ["attr-defined", "import-untyped"]
+files = ["apps/ferum_custom/ferum_custom"]
+exclude = '(env/|\\.venv/|node_modules/|sites/|apps/(frappe|erpnext)/|apps/ferum_custom/telegram_bot/|apps/ferum_custom/ferum_custom/patches/|apps/ferum_custom/ferum_custom/scripts/|apps/ferum_custom/ferum_custom/site_ops\\.py)'

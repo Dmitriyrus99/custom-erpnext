@@ -1,0 +1,12 @@
+[submodule "apps/frappe"]
+	path = apps/frappe
+	url = https://github.com/frappe/frappe.git
+
+[submodule "apps/erpnext"]
+	path = apps/erpnext
+	url = https://github.com/frappe/erpnext.git
+
+[submodule "apps/ferum_custom"]
+	path = apps/ferum_custom
+	url = https://github.com/Dmitriyrus99/custom-erpnext.git
+

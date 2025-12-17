@@ -1,59 +1,61 @@
-### Ferum Custom
+# Frappe/ERPNext v15 - Ferum Customizations
 
-Ferum Custom is an ERPNext-based system designed to manage and streamline operations for Ferum. It includes custom modules for issue management, invoicing, and integrations with external services like Google Drive, Google Sheets, and Telegram.
+This project is a Frappe/ERPNext v15 system, with custom modifications and integrations tailored for Ferum's operations.
 
-### Telegram Bot Integration
+## Project Goals
 
-This repository includes a Telegram bot that integrates with the Ferum Custom ERP system. The bot allows users to perform the following actions:
+- **Migration:** Transitioned from custom DocTypes (e.g., Service Request, Service Project) to standard ERPNext DocTypes (Issue, Project, Asset, Timesheet, Sales Invoice).
+- **Integrations:** Key integrations include a Telegram Bot (Aiogram), Google Drive (File Sync), and Google Sheets (Reporting).
+- **Operational Efficiency:** Streamlined workflows for service requests, project management, and financial reporting.
 
--   **Create Issues**: Quickly create new issues directly from Telegram.
--   **List Issues**: View a list of your own or assigned issues.
--   **Update Issue Status**: Change the status of an issue using inline buttons.
--   **Attach Files**: Attach photos and documents to issues and timesheets.
+## Technology Stack
 
-For detailed setup and deployment instructions, see the `telegram_bot/README.md` file.
+- **Backend:** Frappe Framework v15, ERPNext, Python 3.12, FastAPI (for custom APIs).
+- **Database:** PostgreSQL 13.
+- **Caching/Queue:** Redis.
+- **Containerization:** Docker.
+- **CI/CD:** GitHub Actions.
+- **Bot Framework:** Aiogram.
+- **External APIs:** Google Drive API, Google Sheets API.
 
-### Installation
+## Setup & Installation
 
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
+Refer to the project's `docs/` directory for detailed setup instructions, including environment configuration, dependency installation, and bench setup.
 
+## Running the Application
+
+1. **Bench Setup:** Ensure you have a Frappe bench environment set up.
+2. **Start Services:** Use `bench start` to run the Frappe development server.
+
+## Testing
+
+Unit and integration tests are located in `apps/ferum_custom/ferum_custom/tests/` and `apps/ferum_custom/telegram_bot/telegram_bot/tests/`.
+
+Run tests using:
 ```bash
-cd $PATH_TO_YOUR_BENCH
-bench get-app $URL_OF_THIS_REPO --branch develop
-bench install-app ferum_custom
+./env/bin/pytest apps/ferum_custom/ferum_custom/tests
+./env/bin/pytest apps/ferum_custom/telegram_bot/telegram_bot/tests
 ```
 
-> **Note**
->
-> The project depends on the Frappe framework. Its version is pinned but commented out in `pyproject.toml` because Frappe is installed and managed through the `bench` CLI.
+Coverage reports can be generated via `pytest --cov=ferum_custom --cov-report=xml`.
 
-### Contributing
+## CI/CD Pipeline
 
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
+The CI/CD pipeline (defined in `.github/workflows/ci.yml`) includes:
 
-```bash
-cd apps/ferum_custom
-pre-commit install
-```
+- **Linting & Secrets Scanning:** `pre-commit` checks and `gitleaks`.
+- **Testing:** `pytest` with `pytest-cov` runs unit and e2e tests, generating XML coverage reports.
+- **Migrations:** `bench migrate` is run to apply database schema changes.
+- **Build:** `bench build` compiles static assets (JS/CSS) for the custom app.
+- **Deployment:** Docker image build/push for main branch, manual trigger deployment to staging/prod via SSH.
 
-Pre-commit is configured to use the following tools for checking and formatting your code:
+## Documentation
 
-- ruff
-- eslint
-- prettier
-- pyupgrade
+Comprehensive documentation is available in the `docs/` directory, covering:
 
-### CI
-
-This app can use GitHub Actions for CI. The following workflows are configured:
-
-- CI: Installs this app and runs unit tests on every push to `develop` branch.
-- Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
-
-### Setup & Operations
-
-- See `install.md` for detailed role mapping, Customer‑based Client access (User Permission), and integration settings for Google Drive/Sheets and Telegram.
-
-### License
-
-mit
+- **Architecture Overview:** `docs/architecture/architecture_overview.md`
+- **Delivery Plan:** `docs/delivery_plan.md`
+- **Infrastructure & CI/CD:** `docs/infrastructure_and_ci.md`
+- **Roles & ACL:** `docs/roles_and_acl.md`
+- **Integrations:** `docs/integrations/` (e.g., `google_drive_setup.md`, `google_sheets_setup.md`)
+- **Runbooks:** `docs/runbooks/` for operational guidance.

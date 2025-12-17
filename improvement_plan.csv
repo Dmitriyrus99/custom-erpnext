@@ -1,0 +1,7 @@
+area,severity,issue,recommendation,location,status
+security,high,Missing PQC for several doctypes,Add permission_query_conditions/has_permission for Invoice/Payment/Counterparty/Contract,apps/ferum_custom/ferum_custom/hooks.py,implemented
+data-model,high,Invoice lacks invoice_no/year,Add fields + unique index (company,year,no),doctype Invoice + migration_script.sql,implemented (non-destructive)
+notifications,medium,No event wrappers for business notifications,Add notifications_module.py and wire after_insert handlers,apps/ferum_custom/ferum_custom/hooks.py,implemented
+portal,low,Portal SR page can improve UX/safety,Sanitize + explicit error states,apps/ferum_custom/ferum_custom/www/portal/service-request.html,implemented
+migrations,medium,MariaDB/PostgreSQL series can conflict,Guard runners; keep MariaDB apply_sql separate and idempotent,patches/v15_mariadb and v15_erp,acknowledged
+analytics,low,Views exist but no refresh on MariaDB,Optional EVENT or scheduled job stub,analytics/views.sql (MariaDB),optional

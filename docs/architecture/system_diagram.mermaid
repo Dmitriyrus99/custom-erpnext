@@ -1,0 +1,66 @@
+graph TD
+    User([User])
+    Admin([Admin])
+    BotUser([Telegram User])
+
+    subgraph "Reverse Proxy (Traefik)"
+        Proxy[Traefik HTTPS]
+    end
+
+    subgraph "Application Server (Frappe Bench)"
+        Web[Gunicorn / Web]
+        Worker[Celery Worker]
+        Scheduler[Celery Beat]
+        SocketIO[Node SocketIO]
+        
+        subgraph "Ferum Custom App"
+            API[API Layer / FastMCP]
+            Domain[Domain Services]
+            Hooks[Event Hooks]
+            BotApp[Telegram Bot Process]
+        end
+    end
+
+    subgraph "Data Storage"
+        DB[(PostgreSQL)]
+        RedisCache[(Redis Cache)]
+        RedisQueue[(Redis Queue)]
+        FS[File System / Vol]
+    end
+
+    subgraph "External Services"
+        GDrive[Google Drive API]
+        TeleAPI[Telegram Bot API]
+        Sentry[Sentry.io]
+        Prom[Prometheus]
+    end
+
+    %% Interactions
+    User -->|HTTPS/JSON| Proxy
+    Admin -->|HTTPS/Desk| Proxy
+    BotUser -->|Message| TeleAPI
+    TeleAPI -->|Webhook| Proxy
+
+    Proxy --> Web
+    Proxy --> BotApp
+
+    Web --> Hooks
+    Web --> API
+    API --> Domain
+    Domain --> DB
+    Domain --> RedisCache
+    
+    Hooks --> RedisQueue
+    RedisQueue --> Worker
+    Worker --> Domain
+    Worker --> GDrive
+    
+    BotApp --> Domain
+    BotApp --> TeleAPI
+
+    %% Monitoring
+    Prom -->|Scrape| Web
+    Prom -->|Scrape| BotApp
+    Web -.->|Error| Sentry
+    Worker -.->|Error| Sentry
+    BotApp -.->|Error| Sentry

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ferum-repo": {
+      "command": "./scripts/run_fastmcp.sh",
+      "args": []
+    }
+  }
+}

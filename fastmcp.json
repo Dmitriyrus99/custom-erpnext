@@ -1,0 +1,17 @@
+{
+  "$schema": "https://gofastmcp.com/public/schemas/fastmcp.json/v1.json",
+  "source": {
+    "type": "filesystem",
+    "path": "scripts/mcp_repo_server.py",
+    "entrypoint": "server"
+  },
+  "environment": {
+    "type": "uv",
+    "python": "3.12",
+    "project": "."
+  },
+  "deployment": {
+    "transport": "stdio",
+    "log_level": "INFO"
+  }
+}
