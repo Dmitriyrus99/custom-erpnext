@@ -13,7 +13,7 @@ frappe.ui.form.on("Service Report", {
 					frm.reload_doc();
 				}
 			} catch (e) {
-				console.error(e);
+				frappe.msgprint(__("Could not create Sales Invoice. Please try again."));
 			}
 		});
 	},

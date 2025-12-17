@@ -1,28 +1,30 @@
 {
- "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Инженер\",\"col\":12}}]",
- "doctype": "Workspace",
- "hide_custom": 0,
- "is_hidden": 0,
- "label": "Инженер",
- "links": [],
- "modified": "2025-10-17 00:00:00.000000",
- "modified_by": "Administrator",
- "module": "Ferum Custom",
- "name": "Инженер",
- "number_cards": [],
- "owner": "Administrator",
- "public": 1,
- "quick_lists": [],
- "roles": [
-  {"role": "Service Engineer"}
- ],
- "sequence_id": 0.0,
- "shortcuts": [
-  {"label": "Мои заявки (Issues)", "type": "URL", "url": "/app/issue"},
-  {"label": "Табели (Timesheets)", "type": "DocType", "link_to": "Timesheet"},
-  {"label": "Просроченные графики", "type": "Report", "link_to": "Due Service Maintenance Schedules", "report_ref_doctype": "Service Maintenance Schedule"}
- ],
- "title": "Инженер"
+  "charts": [],
+  "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Инженер\",\"col\":12}}]",
+  "doctype": "Workspace",
+  "hide_custom": 0,
+  "is_hidden": 0,
+  "label": "Инженер",
+  "links": [],
+  "modified": "2025-10-17 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Ferum Custom",
+  "name": "Инженер",
+  "number_cards": [],
+  "owner": "Administrator",
+  "public": 1,
+  "quick_lists": [],
+  "roles": [{ "role": "Service Engineer" }],
+  "sequence_id": 0.0,
+  "shortcuts": [
+    { "label": "Мои заявки (Issues)", "type": "URL", "url": "/app/issue" },
+    { "label": "Табели (Timesheets)", "type": "DocType", "link_to": "Timesheet" },
+    {
+      "label": "Просроченные графики",
+      "type": "Report",
+      "link_to": "Due Service Maintenance Schedules",
+      "report_ref_doctype": "Service Maintenance Schedule"
+    }
+  ],
+  "title": "Инженер"
 }
-

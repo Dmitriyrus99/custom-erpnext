@@ -14,4 +14,3 @@ services:
       - "traefik.http.routers.tg-bot.rule=Host(`erp.example.com`) && PathPrefix(`/tg-bot`)"
       - "traefik.http.routers.tg-bot.entrypoints=websecure"
       - "traefik.http.routers.tg-bot.tls=true"
-

@@ -2,16 +2,13 @@ from __future__ import annotations
 
 import frappe
 
-from ferum_custom.ferum_custom.domain.finance.bridge import (
-    ensure_sales_invoice_from_custom,
-)
-from ferum_custom.ferum_custom.domain.finance.payments import (
-    ensure_payment_entry_from_custom,
-)
+from ferum_custom.ferum_custom.domain.finance.bridge import ensure_sales_invoice_from_custom
+from ferum_custom.ferum_custom.domain.finance.payments import ensure_payment_entry_from_custom
 
 
-def migrate_finance_records(limit: int = 100, create_sales_invoices: bool = True,
-                            create_payment_entries: bool = True) -> dict[str, int]:
+def migrate_finance_records(
+    limit: int = 100, create_sales_invoices: bool = True, create_payment_entries: bool = True
+) -> dict[str, int]:
     """Batch migration helper for legacy Invoice/Payment docs."""
 
     migrated = {"sales_invoice": 0, "payment_entry": 0, "errors": 0}

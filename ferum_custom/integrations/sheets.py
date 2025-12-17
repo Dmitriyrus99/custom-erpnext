@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import time
-from typing import Any, Iterable, Literal
+from typing import Any
 
 import frappe
 
@@ -96,9 +95,12 @@ def append_rows(
         frappe.log_error(frappe.get_traceback(), f"Sheets append failed: {exc}")
         category, context = _classify_failure(exc)
         _notify_admins(
-            "Sheets append failed", f"Failed to append rows to Google Sheet {spreadsheet_id}. Error: {context}"
+            "Sheets append failed",
+            f"Failed to append rows to Google Sheet {spreadsheet_id}. Error: {context}",
         )
-        metrics_inc("ferum_integration_sheets_append_total", {"result": "error", "category": category})
+        metrics_inc(
+            "ferum_integration_sheets_append_total", {"result": "error", "category": category}
+        )
         return None
 
 
@@ -131,9 +133,12 @@ def update_rows(
         frappe.log_error(frappe.get_traceback(), f"Sheets update failed: {exc}")
         category, context = _classify_failure(exc)
         _notify_admins(
-            "Sheets update failed", f"Failed to update rows in Google Sheet {spreadsheet_id}. Error: {context}"
+            "Sheets update failed",
+            f"Failed to update rows in Google Sheet {spreadsheet_id}. Error: {context}",
         )
-        metrics_inc("ferum_integration_sheets_update_total", {"result": "error", "category": category})
+        metrics_inc(
+            "ferum_integration_sheets_update_total", {"result": "error", "category": category}
+        )
         return None
 
 
@@ -158,9 +163,12 @@ def read_range(spreadsheet_id: str, range_name: str) -> list[list[Any]] | None:
         frappe.log_error(frappe.get_traceback(), f"Sheets read failed: {exc}")
         category, context = _classify_failure(exc)
         _notify_admins(
-            "Sheets read failed", f"Failed to read range {range_name} from Google Sheet {spreadsheet_id}. Error: {context}"
+            "Sheets read failed",
+            f"Failed to read range {range_name} from Google Sheet {spreadsheet_id}. Error: {context}",
         )
-        metrics_inc("ferum_integration_sheets_read_total", {"result": "error", "category": category})
+        metrics_inc(
+            "ferum_integration_sheets_read_total", {"result": "error", "category": category}
+        )
         return None
 
 
@@ -175,23 +183,35 @@ def healthcheck() -> dict[str, Any]:
 
     if build is None:
         try:
-            metrics_inc("ferum_integration_sheets_health_total", {"result": "error", "reason": "missing_client"})
+            metrics_inc(
+                "ferum_integration_sheets_health_total",
+                {"result": "error", "reason": "missing_client"},
+            )
         except Exception:
             pass
         return {"status": "error", "message": "google-api-python-client is not installed"}
 
-    spreadsheet_id = get_setting("google_sheet_id") # Assuming a setting for sheet ID
+    spreadsheet_id = get_setting("google_sheet_id")  # Assuming a setting for sheet ID
     if not spreadsheet_id:
         try:
-            metrics_inc("ferum_integration_sheets_health_total", {"result": "warning", "reason": "no_sheet_id_configured"})
+            metrics_inc(
+                "ferum_integration_sheets_health_total",
+                {"result": "warning", "reason": "no_sheet_id_configured"},
+            )
         except Exception:
             pass
-        return {"status": "warning", "message": "Google Sheet ID is not configured. Basic connectivity only."}
+        return {
+            "status": "warning",
+            "message": "Google Sheet ID is not configured. Basic connectivity only.",
+        }
 
     service = _sheets_service()
     if not service:
         try:
-            metrics_inc("ferum_integration_sheets_health_total", {"result": "error", "reason": "init_failed"})
+            metrics_inc(
+                "ferum_integration_sheets_health_total",
+                {"result": "error", "reason": "init_failed"},
+            )
         except Exception:
             pass
         return {"status": "error", "message": "Failed to initialise Sheets client"}
@@ -199,7 +219,9 @@ def healthcheck() -> dict[str, Any]:
     # Attempt to read a small range to verify connectivity and permissions
     test_range = "Sheet1!A1"
     try:
-        service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=test_range).execute()
+        service.spreadsheets().values().get(
+            spreadsheetId=spreadsheet_id, range=test_range
+        ).execute()
         try:
             metrics_inc("ferum_integration_sheets_health_total", {"result": "ok"})
         except Exception:
@@ -208,10 +230,18 @@ def healthcheck() -> dict[str, Any]:
     except Exception as exc:
         category, context = _classify_failure(exc)
         _notify_admins(
-            "Sheets healthcheck failed", f"Failed to access Google Sheet {spreadsheet_id} for health check. Error: {context}"
+            "Sheets healthcheck failed",
+            f"Failed to access Google Sheet {spreadsheet_id} for health check. Error: {context}",
         )
         try:
-            metrics_inc("ferum_integration_sheets_health_total", {"result": "error", "reason": category or "exception"})
+            metrics_inc(
+                "ferum_integration_sheets_health_total",
+                {"result": "error", "reason": category or "exception"},
+            )
         except Exception:
             pass
-        return {"status": "error", "message": f"Unable to access Google Sheet {spreadsheet_id} ({context})", "category": category}
+        return {
+            "status": "error",
+            "message": f"Unable to access Google Sheet {spreadsheet_id} ({context})",
+            "category": category,
+        }

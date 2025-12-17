@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import click
-
 from frappe import _  # type: ignore[import-untyped]
 
 

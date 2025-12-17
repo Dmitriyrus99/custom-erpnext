@@ -34,4 +34,3 @@ ACTION_TO_STATUS_SERVICE = {
     "finish": "Completed",
     "close": "Closed",
 }
-

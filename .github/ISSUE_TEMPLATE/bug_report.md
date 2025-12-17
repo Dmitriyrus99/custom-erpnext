@@ -22,6 +22,7 @@ Welcome to the Frappe Framework issue tracker! Before creating an issue, please 
 ## Context information (for bug reports)
 
 **Output of `bench version`**
+
 ```
 (paste here)
 ```

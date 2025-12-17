@@ -40,10 +40,7 @@ repos:
       - id: mypy
         files: ^apps/ferum_custom/.*\\.py$
         additional_dependencies: ["types-requests"]
-        args:
-          [
-            "--config-file=pyproject.toml",
-          ]
+        args: ["--config-file=pyproject.toml"]
 
   # JS/TS/HTML/CSS: Prettier (format)
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -60,11 +57,7 @@ repos:
       - id: eslint
         name: eslint
         files: ^apps/ferum_custom/.*\\.(js|jsx|ts|tsx)$
-        additional_dependencies:
-          [
-            "eslint@9.4.0",
-            "eslint-config-prettier@9.1.0"
-          ]
+        additional_dependencies: ["eslint@9.4.0", "eslint-config-prettier@9.1.0"]
 
   # Local custom hooks
   - repo: local

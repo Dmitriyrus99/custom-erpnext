@@ -7,9 +7,8 @@
   "report_type": "Script Report",
   "module": "Ferum Custom",
   "roles": [
-    {"role": "System Manager"},
-    {"role": "Project Manager"},
-    {"role": "Office Manager"}
+    { "role": "System Manager" },
+    { "role": "Project Manager" },
+    { "role": "Office Manager" }
   ]
 }
-

@@ -1,13 +1,14 @@
 import frappe
 
+
 def setup_financials():
     company_name = "Ferum Co" # Assumed based on prompt
 
     # --- Price List Setup ---
     usd_price_list_name = "USD Standard Price List"
-    
+
     price_lists = frappe.get_list("Price List", filters={"currency": "USD"}, fields=["name"])
-    
+
     if not price_lists:
         try:
             company_doc = frappe.get_doc("Company", company_name)
@@ -17,7 +18,7 @@ def setup_financials():
                 return
 
             new_price_list = frappe.new_doc("Price List")
-            new_price_list.name = usd_price_list_name 
+            new_price_list.name = usd_price_list_name
             new_price_list.currency = "USD"
             new_price_list.price_list_name = usd_price_list_name
             new_price_list.company = company_doc.name
@@ -32,7 +33,7 @@ def setup_financials():
 
     # --- Currency Exchange Rate Setup ---
     rub_usd_exchange_rate_placeholder = 0.01
-    usd_rub_exchange_rate_placeholder = 100.0 
+    usd_rub_exchange_rate_placeholder = 100.0
 
     # RUB to USD
     rub_to_usd_exchanges = frappe.get_list("Currency Exchange", filters={"from_currency": "RUB", "to_currency": "USD"}, fields=["name"])

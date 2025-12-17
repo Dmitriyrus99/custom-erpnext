@@ -47,8 +47,7 @@
       "submit": 1,
       "cancel": 1,
       "amend": 1
-    }
-    ,
+    },
     {
       "role": "Chief Accountant",
       "read": 1,

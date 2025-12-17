@@ -1,6 +1,5 @@
-import frappe
 from frappe.model.document import Document
 
 
 class SLAPolicy(Document):
-	pass
+    pass
