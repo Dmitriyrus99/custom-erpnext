@@ -1,0 +1,25 @@
+{
+  "name": "Ferum Invoice Notification Role",
+  "doctype": "DocType",
+  "module": "Ferum Custom",
+  "istable": 1,
+  "fields": [
+    {
+      "fieldname": "role",
+      "fieldtype": "Link",
+      "label": "Role",
+      "options": "Role",
+      "reqd": 1,
+      "in_list_view": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
+  ]
+}

@@ -180,7 +180,7 @@ class Invoice(Document):
             roles: list[str] = []
             for row in configured_roles:
                 if isinstance(row, dict):
-                    role = row.get("link_name") or row.get("value")
+                    role = row.get("role") or row.get("link_name") or row.get("value")
                 else:
                     role = str(row)
                 if role:

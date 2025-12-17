@@ -127,7 +127,7 @@
       "fieldname": "invoice_notification_roles",
       "fieldtype": "Table MultiSelect",
       "label": "Invoice Notification Roles",
-      "options": "Role"
+      "options": "Ferum Invoice Notification Role"
     },
     {
       "fieldname": "drive_section",
