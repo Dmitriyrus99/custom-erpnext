@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import frappe
+from frappe.model.document import Document
 
 from ferum_custom.ferum_custom.domain.finance import standard_finance_enabled
 from ferum_custom.ferum_custom.domain.finance.bridge import (
@@ -78,5 +79,5 @@ def _resolve_sales_invoice(inv_name: str) -> str | None:
     return ensure_sales_invoice_from_custom(inv_name) or custom_invoice_to_sales_invoice(inv_name)
 
 
-def _default_customer(pay: frappe.Document) -> str | None:
+def _default_customer(pay: Document) -> str | None:
     return getattr(pay, "customer", None)

@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from .frappe_client import FrappeClient
 
 _CLIENT: FrappeClient | None = None
 
 
 def set_client(client: FrappeClient) -> None:
-	global _CLIENT
-	_CLIENT = client
+    global _CLIENT
+    _CLIENT = client
 
 
 def get_client() -> FrappeClient | None:
-	return _CLIENT
+    return _CLIENT

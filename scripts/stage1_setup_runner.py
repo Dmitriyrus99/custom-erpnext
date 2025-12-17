@@ -1,6 +1,7 @@
-import frappe
-import sys
 import os
+import sys
+
+import frappe
 
 # Define bench path and add it to sys.path
 bench_path = "/home/frappe/frappe-bench"
@@ -21,7 +22,7 @@ try:
     # This assumes ferum_custom is an installed app and its scripts are importable
     import ferum_custom.scripts.stage1_setup
     ferum_custom.scripts.stage1_setup.setup_financials()
-    
+
     print("\n--- Setup Summary ---")
     print("Financial and currency setup script executed successfully.")
     print("Please note that exchange rates are set to placeholder values.")

@@ -2,16 +2,16 @@ from __future__ import annotations  # moved into package 'telegram_bot'
 
 import logging
 
+import httpx
 from aiogram import F, Router
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
-import httpx
+
+from ferum_custom.ferum_custom.constants import statuses as status_consts
 
 from .. import state
 from ..frappe_client import FrappeClient
 from ..keyboards import request_actions
-from ferum_custom.ferum_custom.constants import statuses as status_consts
 
 log = logging.getLogger("ferum.telegram.bot")
 router = Router()
@@ -129,12 +129,6 @@ async def _send_requests_list(
 
     text = f"{heading} (первые {len(lines)}):\n" + "\n".join(lines)
 
-    # Inline actions only for non-final statuses and only when enabled
-    keyboard = None
-    if with_actions:
-        # Show per-line inline actions for each active item (Open/Replied/In Progress)
-        keyboard = None  # we send separate messages with per-row buttons below
-
     # Telegram max text ~4096; split if needed
     chunk_size = 3800
     if with_actions:
@@ -160,7 +154,9 @@ async def cmd_my(message: Message, client: FrappeClient | None) -> None:
     if client is None:
         await message.answer("Сервис пока не готов, попробуйте позже.")
         return
-    await _send_requests_list(message, client, "Мои заявки", list(ACTIVE_STATUSES), with_actions=True)
+    await _send_requests_list(
+        message, client, "Мои заявки", list(ACTIVE_STATUSES), with_actions=True
+    )
 
 
 @router.message(F.text.startswith("/open"))
@@ -202,7 +198,9 @@ async def cmd_objects(message: Message) -> None:
     await message.answer("Список объектов пока недоступен. Скоро добавим.")
 
 
-async def _ensure_client_or_reply(message: Message, client: FrappeClient | None) -> FrappeClient | None:
+async def _ensure_client_or_reply(
+    message: Message, client: FrappeClient | None
+) -> FrappeClient | None:
     if client is None:
         client = state.get_client()
     if client is None:

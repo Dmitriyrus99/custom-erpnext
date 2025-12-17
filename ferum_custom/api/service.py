@@ -1,4 +1,5 @@
 import typing as t
+from types import ModuleType
 
 import frappe
 from frappe import _
@@ -8,10 +9,13 @@ from ferum_custom.ferum_custom.constants import statuses as status_consts
 from ferum_custom.ferum_custom.domain.service import application as service_app
 from ferum_custom.ferum_custom.settings import get_setting, is_feature_enabled
 
+erpnext: ModuleType | None
 try:
-    import erpnext  # type: ignore
+    import erpnext as _erpnext  # type: ignore[import-untyped]
 except Exception:  # pragma: no cover - erpnext always present in this bench
     erpnext = None  # fallback safety
+else:
+    erpnext = _erpnext
 from ferum_custom.ferum_custom.utils import get_allowed_customers
 
 
@@ -114,7 +118,9 @@ def _enforce_rate_limit(scope: str, identifier: str | None, limit: int) -> None:
 
 
 @frappe.whitelist(methods=["POST"])  # API used by bot/portal: POST only
-def create_issue(title: str, description: str | None = None, asset: str | None = None) -> dict[str, t.Any]:
+def create_issue(
+    title: str, description: str | None = None, asset: str | None = None
+) -> dict[str, t.Any]:
     """
     Creates a new issue.
 
@@ -169,7 +175,9 @@ def create_issue(title: str, description: str | None = None, asset: str | None =
 
 
 @frappe.whitelist(methods=["GET"])  # Listing is idempotent
-def list_issues(status: str | None = None, start: int | None = None, page_length: int | None = None) -> dict:
+def list_issues(
+    status: str | None = None, start: int | None = None, page_length: int | None = None
+) -> dict:
     """
     Lists issues.
 
@@ -272,7 +280,9 @@ def update_issue_status(name: str, status: str) -> dict:
     return _response_ok(name=doc.name, status=doc.status)
 
 
-def _resolve_target_status(doctype: str, requested: str | None = None, action: str | None = None) -> str:
+def _resolve_target_status(
+    doctype: str, requested: str | None = None, action: str | None = None
+) -> str:
     """Map user-friendly actions to allowed statuses for Issue / Service Request."""
     requested = (requested or "").strip() or None
     action = (action or "").strip().lower() or None
@@ -319,10 +329,14 @@ def update_request_status(name: str, status: str | None = None, action: str | No
     else:
         frappe.throw(_("Request {0} not found").format(name))
 
+    assert target_doctype is not None
     doc = frappe.get_doc(target_doctype, name)
     target_status = _resolve_target_status(target_doctype, status, action)
 
-    if target_doctype == "Service Request" and target_status not in status_consts.SERVICE_REQUEST_STATUSES:
+    if (
+        target_doctype == "Service Request"
+        and target_status not in status_consts.SERVICE_REQUEST_STATUSES
+    ):
         frappe.throw(_("Unsupported status {0} for Service Request").format(target_status))
     if target_doctype == "Issue" and target_status not in status_consts.ISSUE_STATUSES:
         frappe.throw(_("Unsupported status {0} for Issue").format(target_status))

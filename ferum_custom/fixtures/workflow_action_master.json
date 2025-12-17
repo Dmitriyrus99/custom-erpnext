@@ -1,86 +1,86 @@
 [
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.480624",
-  "name": "Approve",
-  "workflow_action_name": "Approve"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.497193",
-  "name": "Reject",
-  "workflow_action_name": "Reject"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.511983",
-  "name": "Submit",
-  "workflow_action_name": "Submit"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.527366",
-  "name": "Cancel",
-  "workflow_action_name": "Cancel"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.541541",
-  "name": "Reopen",
-  "workflow_action_name": "Reopen"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.556012",
-  "name": "Close",
-  "workflow_action_name": "Close"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.573089",
-  "name": "Complete",
-  "workflow_action_name": "Complete"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.588126",
-  "name": "Start Work",
-  "workflow_action_name": "Start Work"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.603232",
-  "name": "Archive",
-  "workflow_action_name": "Archive"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.617661",
-  "name": "Activate",
-  "workflow_action_name": "Activate"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.631518",
-  "name": "Send",
-  "workflow_action_name": "Send"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-10-06 16:03:49.646719",
-  "name": "Mark Paid",
-  "workflow_action_name": "Mark Paid"
- }
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.480624",
+    "name": "Approve",
+    "workflow_action_name": "Approve"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.497193",
+    "name": "Reject",
+    "workflow_action_name": "Reject"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.511983",
+    "name": "Submit",
+    "workflow_action_name": "Submit"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.527366",
+    "name": "Cancel",
+    "workflow_action_name": "Cancel"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.541541",
+    "name": "Reopen",
+    "workflow_action_name": "Reopen"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.556012",
+    "name": "Close",
+    "workflow_action_name": "Close"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.573089",
+    "name": "Complete",
+    "workflow_action_name": "Complete"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.588126",
+    "name": "Start Work",
+    "workflow_action_name": "Start Work"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.603232",
+    "name": "Archive",
+    "workflow_action_name": "Archive"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.617661",
+    "name": "Activate",
+    "workflow_action_name": "Activate"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.631518",
+    "name": "Send",
+    "workflow_action_name": "Send"
+  },
+  {
+    "docstatus": 0,
+    "doctype": "Workflow Action Master",
+    "modified": "2025-10-06 16:03:49.646719",
+    "name": "Mark Paid",
+    "workflow_action_name": "Mark Paid"
+  }
 ]

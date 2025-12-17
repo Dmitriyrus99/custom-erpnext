@@ -1,35 +1,40 @@
 <div class="container">
-  <h2>{{ _("My Closed Requests") }}</h2>
-  <p class="text-muted">{{ _("Below are your requests that have been resolved or closed.") }}</p>
-  <div id="sr-list"></div>
-  <p class="mt-3"><a href="/portal">{{ _("Back to My Requests") }}</a></p>
+	<h2>{{ _("My Closed Requests") }}</h2>
+	<p class="text-muted">{{ _("Below are your requests that have been resolved or closed.") }}</p>
+	<div id="sr-list"></div>
+	<p class="mt-3"><a href="/portal">{{ _("Back to My Requests") }}</a></p>
 </div>
 <script>
-frappe.ready(() => {
-  const el = document.getElementById('sr-list');
-  const load = async () => {
-    // Show both Resolved and Closed (Issue statuses)
-    let rows = [];
-    for (const status of ['Resolved','Closed']) {
-      try {
-        const r = await frappe.call({
-          method: 'ferum_custom.api.service.list_service_requests',
-          args: { start: 0, page_length: 50, status },
-        });
-        const part = (r.message && r.message.data) || [];
-        rows = rows.concat(part);
-      } catch (e) {}
-    }
-    if (!rows.length) {
-      el.innerHTML = `<p>${__("No closed requests yet.")}</p>`;
-      return;
-    }
-    rows.sort((a,b) => (a.modified < b.modified ? 1 : -1));
-    el.innerHTML = "<ul>" + rows.map(x => (
-      `<li><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title || ''} - ${x.status}</li>`
-    )).join("") + "</ul>";
-  };
-  load();
-});
+	frappe.ready(() => {
+		const el = document.getElementById("sr-list");
+		const load = async () => {
+			// Show both Resolved and Closed (Issue statuses)
+			let rows = [];
+			for (const status of ["Resolved", "Closed"]) {
+				try {
+					const r = await frappe.call({
+						method: "ferum_custom.api.service.list_service_requests",
+						args: { start: 0, page_length: 50, status },
+					});
+					const part = (r.message && r.message.data) || [];
+					rows = rows.concat(part);
+				} catch (e) {}
+			}
+			if (!rows.length) {
+				el.innerHTML = `<p>${__("No closed requests yet.")}</p>`;
+				return;
+			}
+			rows.sort((a, b) => (a.modified < b.modified ? 1 : -1));
+			el.innerHTML =
+				"<ul>" +
+				rows
+					.map(
+						(x) =>
+							`<li><a href="/portal/service-request?name=${x.name}">${x.name}</a> - ${x.title || ""} - ${x.status}</li>`
+					)
+					.join("") +
+				"</ul>";
+		};
+		load();
+	});
 </script>
-

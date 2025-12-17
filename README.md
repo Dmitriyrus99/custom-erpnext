@@ -8,6 +8,13 @@ This project is a Frappe/ERPNext v15 system, with custom modifications and integ
 - **Integrations:** Key integrations include a Telegram Bot (Aiogram), Google Drive (File Sync), and Google Sheets (Reporting).
 - **Operational Efficiency:** Streamlined workflows for service requests, project management, and financial reporting.
 
+## Telegram Bot Integration
+
+- **Create Issues**: Quickly create new issues directly from Telegram.
+- **List Issues**: View a list of your own or assigned issues.
+- **Update Issue Status**: Change the status of an issue using inline buttons.
+- **Attach Files**: Attach photos and documents to issues and timesheets.
+
 ## Technology Stack
 
 - **Backend:** Frappe Framework v15, ERPNext, Python 3.12, FastAPI (for custom APIs).
