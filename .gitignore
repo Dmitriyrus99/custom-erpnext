@@ -26,6 +26,7 @@ yarn-error.log*
 /sites/
 /test_site
 /.bench/
+/.frappe/
 /assets/
 /dist/
 /build/
@@ -54,12 +55,18 @@ config/.env.local.integrations
 # Secrets / credentials / runtime artifacts
 ############################
 site_config.json
+sites/*/site_config.json
+sites/*/private/
 *.key
 *.crt
 certs/
 *.acl
 *.rdb
 *.log
+*.sql
+*.sql.gz
+*.dump
+*.bak
 
 ############################
 # OS / IDE
