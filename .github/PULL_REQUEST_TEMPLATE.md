@@ -1,33 +1,19 @@
-<!--
+## Что сделано
 
-Some key notes before you open a PR:
+- …
 
- 1. Select which branch should this PR be merged in?
- 2. PR name follows [convention](http://karma-runner.github.io/4.0/dev/git-commit-msg.html)
- 3. All tests pass locally, UI and Unit tests
- 4. All business logic and validations must be on the server-side
- 5. Update necessary Documentation
- 6. Put `closes #XXXX` in your comment to auto-close the issue that your PR fixes
+## Почему
 
+- …
 
-Also, if you're new here
+## Риски / откат
 
-- Documentation Guidelines => https://github.com/frappe/erpnext/wiki/Updating-Documentation
+- Риск:
+- Откат:
 
-- Contribution Guide => https://github.com/frappe/frappe/blob/develop/.github/CONTRIBUTING.md
+## Проверки
 
-- Pull Request Checklist => https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist
-
--->
-
-> Please provide enough information so that others can review your pull request:
-
-<!-- You can skip this if you're fixing a typo or updating existing documentation -->
-
-> Explain the **details** for making this change. What existing problem does the pull request solve?
-
-<!-- Example: When "Adding a function to do X", explain why it is necessary to have a way to do X. -->
-
-> Screenshots/GIFs
-
-<!-- Add images/recordings to better visualize the change: expected/current behviour -->
+- [ ] CI зелёный
+- [ ] Миграции/патчи не сломаны (если есть): `bench --site test_site migrate`
+- [ ] Тесты/смоук пройдены по затронутому флоу (если применимо)
+- [ ] В diff нет секретов/дампов/артефактов (`.env*`, `site_config.json`, `sites/`, `*.key`, `*.crt`)
