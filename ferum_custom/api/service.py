@@ -70,6 +70,7 @@ def _require_jwt_authentication() -> None:
     token = _get_bearer_token()
     if not token:
         frappe.throw(_("Authorization token required"), frappe.AuthenticationError)
+    assert token is not None
     try:
         payload = auth_api.decode_jwt(token)
     except Exception as exc:
@@ -293,7 +294,7 @@ def _resolve_target_status(
             target = status_consts.ACTION_TO_STATUS_SERVICE[action]
             if target in allowed:
                 return target
-        if requested in allowed:
+        if requested is not None and requested in allowed:
             return requested
         return "Open"
 
@@ -303,7 +304,7 @@ def _resolve_target_status(
         target = status_consts.ACTION_TO_STATUS_ISSUE[action]
         if target in allowed_issue:
             return target
-    if requested in allowed_issue:
+    if requested is not None and requested in allowed_issue:
         return requested
     if requested in {"In Progress"}:
         return "Replied"

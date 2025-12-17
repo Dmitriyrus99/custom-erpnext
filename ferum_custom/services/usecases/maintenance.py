@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+from collections.abc import Callable
 
 import frappe
 from frappe.utils import add_days, add_months, add_years, getdate, nowdate
@@ -12,6 +13,8 @@ try:
     )  # type: ignore[import-not-found]
 except Exception:  # pragma: no cover - optional in CI
     find_or_create_project = None  # type: ignore[assignment]
+else:
+    find_or_create_project: Callable[[object], object] | None = find_or_create_project
 
 
 def generate_issues_from_schedules() -> dict:
@@ -41,7 +44,7 @@ def generate_issues_from_schedules() -> dict:
                     company = frappe.db.get_value(
                         "Service Project", schedule.service_project, "company"
                     )
-            if getattr(schedule, "service_project", None) and find_or_create_project:
+            if getattr(schedule, "service_project", None) and find_or_create_project is not None:
                 with contextlib.suppress(Exception):
                     sp = frappe.get_doc("Service Project", schedule.service_project)
                     std_project = find_or_create_project(sp)
