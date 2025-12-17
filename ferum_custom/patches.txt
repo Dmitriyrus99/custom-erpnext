@@ -53,3 +53,4 @@ ferum_custom.patches.v15_5.seed_issue_priorities
 ferum_custom.patches.v15_6.fix_currency_and_pricelist
 ferum_custom.patches.v15_7.remove_unused_doctypes
 ferum_custom.patches.v15_7.drop_unused_doctype_tables
+ferum_custom.patches.v15_7.fix_system_settings_language
