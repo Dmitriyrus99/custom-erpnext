@@ -29,6 +29,8 @@ help:
 	@echo "  make deploy           # docker-build (+platform) then docker-push"
 	@echo "  make watch            # bench watch (asset rebuilds)"
 	@echo "  make start            # bench start (dev services)"
+	@echo "  make mcp              # run FastMCP server for Codex/agents"
+	@echo "  make mcp-venv         # create/update .fastmcp-venv (pinned fastmcp)"
 	@echo "  make clean            # drop __pycache__/.pyc/.pytest_cache/htmlcov (keeps env/node_modules)"
 
 .PHONY: install
@@ -91,6 +93,14 @@ watch:
 .PHONY: start
 start:
 	bench start
+
+.PHONY: mcp-venv
+mcp-venv:
+	./scripts/bootstrap_fastmcp_venv.sh
+
+.PHONY: mcp
+mcp:
+	./scripts/run_fastmcp.sh
 
 .PHONY: clean
 clean:

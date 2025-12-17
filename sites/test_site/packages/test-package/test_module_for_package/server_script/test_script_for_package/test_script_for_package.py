@@ -1,1 +1,0 @@
-frappe.msgprint("Test")
