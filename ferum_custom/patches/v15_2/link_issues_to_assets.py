@@ -3,7 +3,6 @@ from __future__ import annotations
 import contextlib
 
 import frappe
-
 from ferum_custom.patches.utils_migration import _log
 
 

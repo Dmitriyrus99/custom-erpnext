@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import frappe
-
 from ferum_custom.ferum_custom.patches.utils_migration import _log, has_doctypes
 
 INDEXES = [

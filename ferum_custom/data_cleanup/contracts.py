@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import frappe
-
 from ferum_custom.ferum_custom.utils import get_logger
 
 LOGGER = get_logger(__name__)

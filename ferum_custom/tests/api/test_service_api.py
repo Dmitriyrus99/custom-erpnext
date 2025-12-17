@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
-
 from ferum_custom.ferum_custom.api import service
 from ferum_custom.ferum_custom.tests import smoke_tools
+from frappe.tests.utils import FrappeTestCase
 
 
 class TestServiceAPI(FrappeTestCase):

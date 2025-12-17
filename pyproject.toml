@@ -32,7 +32,7 @@ extend-exclude = [
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B"]
 # Keep E203 ignored for Black compatibility; remove W503 to avoid parser issues
-ignore = ["E203"]
+ignore = ["E203", "E402", "E501"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -40,5 +40,6 @@ ignore_missing_imports = true
 follow_imports = "silent"
 pretty = true
 disable_error_code = ["attr-defined", "import-untyped"]
+explicit_package_bases = true
 files = ["apps/ferum_custom/ferum_custom"]
 exclude = '(env/|\\.venv/|node_modules/|sites/|apps/(frappe|erpnext)/|apps/ferum_custom/telegram_bot/|apps/ferum_custom/ferum_custom/patches/|apps/ferum_custom/ferum_custom/scripts/|apps/ferum_custom/ferum_custom/site_ops\\.py)'

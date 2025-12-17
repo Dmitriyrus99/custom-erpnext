@@ -4,7 +4,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from aiogram.types import Message
-
 from ferum_custom.telegram_bot.telegram_bot.frappe_client import FrappeClient
 from ferum_custom.telegram_bot.telegram_bot.handlers import requests as requests_handlers
 
