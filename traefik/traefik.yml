@@ -26,7 +26,7 @@ http:
         stsIncludeSubdomains: true
         stsPreload: true
 
-#@codex:router-dashboard
+  #@codex:router-dashboard
   routers:
     traefik-dashboard:
       rule: "Host(`traefik.example.com`)"

@@ -38,7 +38,7 @@ services:
       - redis
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.erpclone.rule=Host(`${SITE_NAME}`)'
+      - "traefik.http.routers.erpclone.rule=Host(`${SITE_NAME}`)"
       - "traefik.http.routers.erpclone.entrypoints=websecure"
       - "traefik.http.routers.erpclone.tls.certresolver=letsencrypt"
     networks:

@@ -28,14 +28,14 @@ This document summarises the current implementation of the two priority integrat
 
 **Checklist status**
 
-| Check                                          | Status | Notes                                                                                                                                       |
-| ---------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Credentials kept out of repo                   | ✅     | No service-account JSON present in git; settings expect upload via ERP `File`.                                                              |
-| Scopes minimal (least privilege)               | ⚠️     | Uses full `https://www.googleapis.com/auth/drive`; consider `drive.file`.                                                                   |
-| Healthcheck action in settings                 | ✅     | “Check Google Drive” button runs the new healthcheck helper and surfaces folder metadata.                                                   |
+| Check                                           | Status | Notes                                                                                                                                       |
+| ----------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Credentials kept out of repo                    | ✅     | No service-account JSON present in git; settings expect upload via ERP `File`.                                                              |
+| Scopes minimal (least privilege)                | ⚠️     | Uses full `https://www.googleapis.com/auth/drive`; consider `drive.file`.                                                                   |
+| Healthcheck action in settings                  | ✅     | “Check Google Drive” button runs the new healthcheck helper and surfaces folder metadata.                                                   |
 | Unified mapping `fileId` ↔ ERP File/Attachment | ⚠️     | `File` has `drive_file_id` fields (patch `add_file_drive_fields.py`) and `Custom Attachment` stores IDs, but legacy rows may lack backfill. |
-| 401/403/404/429/5xx retry/backoff              | ⚠️     | Retries now cover HTTP 429/5xx; 401/403/404 are surfaced as fatal errors that still require operator follow-up.                             |
-| Logging & audit trail                          | ⚠️     | Relies on `frappe.log_error`; no aggregated dashboard or success metrics.                                                                   |
+| 401/403/404/429/5xx retry/backoff               | ⚠️     | Retries now cover HTTP 429/5xx; 401/403/404 are surfaced as fatal errors that still require operator follow-up.                             |
+| Logging & audit trail                           | ⚠️     | Relies on `frappe.log_error`; no aggregated dashboard or success metrics.                                                                   |
 
 **Risks**
 

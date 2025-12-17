@@ -4,18 +4,18 @@ This runbook ensures that every sensitive value (JWT secret, DB password, integr
 
 ## 1. Secret inventory
 
-| NAME | Description | Consumers | Owner |
-| --- | --- | --- | --- |
-| `FERUM_JWT_SECRET` | JWT/signing key for portal/API tokens | Portal endpoints, integrations, tests | Security Engineer |
-| `FERUM_TELEGRAM_BOT_TOKEN`, `FERUM_TELEGRAM_WEBHOOK_SECRET` | Telegram bot credentials and webhook guard | Integrations Engine, CI smoke flows | Integrations Engineer |
-| `FERUM_GOOGLE_SERVICE_ACCOUNT_JSON` | Drive/Sheets service account payload | Google Drive sync, invoice exports | Integrations Engineer |
-| `FERUM_GOOGLE_DRIVE_ROOT_FOLDER_ID`, `FERUM_GOOGLE_SHEET_NAME` | Drive folder/sheet targets | Drive exports, invoice sync | Integrations Engineer |
-| `POSTGRES_HOST/PORT/DB/USER/PASSWORD` | Primary PostgreSQL access | Backend, worker, scheduler, CI | DevOps |
-| `REDIS_CACHE`, `REDIS_QUEUE`, `REDIS_SOCKETIO` | Redis endpoints for cache, queue and socketio | Backend + queue workers | DevOps |
-| `SENTRY_DSN`, `FERUM_SENTRY_DSN`, `FRAPPE_SENTRY_DSN` | Sentry DSNs for the ERPNext/Frappe stack | Backend, workers, portal | Observability / Security |
-| `TRAEFIK_DASHBOARD_HOST`, `TRAEFIK_DASHBOARD_BASIC_AUTH` | Traefik dashboard authentication | Monitoring / DevOps | DevOps |
-| `GRAFANA_USER`, `GRAFANA_PASSWORD` | Grafana credentials | Monitoring dashboards | DevOps |
-| `FERUM_SECRET_ROTATION_SCHEDULE` | Last rotation cadence/note | Runbooks & auditors | Security Engineer |
+| NAME                                                           | Description                                   | Consumers                             | Owner                    |
+| -------------------------------------------------------------- | --------------------------------------------- | ------------------------------------- | ------------------------ |
+| `FERUM_JWT_SECRET`                                             | JWT/signing key for portal/API tokens         | Portal endpoints, integrations, tests | Security Engineer        |
+| `FERUM_TELEGRAM_BOT_TOKEN`, `FERUM_TELEGRAM_WEBHOOK_SECRET`    | Telegram bot credentials and webhook guard    | Integrations Engine, CI smoke flows   | Integrations Engineer    |
+| `FERUM_GOOGLE_SERVICE_ACCOUNT_JSON`                            | Drive/Sheets service account payload          | Google Drive sync, invoice exports    | Integrations Engineer    |
+| `FERUM_GOOGLE_DRIVE_ROOT_FOLDER_ID`, `FERUM_GOOGLE_SHEET_NAME` | Drive folder/sheet targets                    | Drive exports, invoice sync           | Integrations Engineer    |
+| `POSTGRES_HOST/PORT/DB/USER/PASSWORD`                          | Primary PostgreSQL access                     | Backend, worker, scheduler, CI        | DevOps                   |
+| `REDIS_CACHE`, `REDIS_QUEUE`, `REDIS_SOCKETIO`                 | Redis endpoints for cache, queue and socketio | Backend + queue workers               | DevOps                   |
+| `SENTRY_DSN`, `FERUM_SENTRY_DSN`, `FRAPPE_SENTRY_DSN`          | Sentry DSNs for the ERPNext/Frappe stack      | Backend, workers, portal              | Observability / Security |
+| `TRAEFIK_DASHBOARD_HOST`, `TRAEFIK_DASHBOARD_BASIC_AUTH`       | Traefik dashboard authentication              | Monitoring / DevOps                   | DevOps                   |
+| `GRAFANA_USER`, `GRAFANA_PASSWORD`                             | Grafana credentials                           | Monitoring dashboards                 | DevOps                   |
+| `FERUM_SECRET_ROTATION_SCHEDULE`                               | Last rotation cadence/note                    | Runbooks & auditors                   | Security Engineer        |
 
 ## 2. Mapping to Secret Manager
 
@@ -53,7 +53,7 @@ This runbook ensures that every sensitive value (JWT secret, DB password, integr
 
 ### AWS SSM (Parameter Store)
 
-1. Store each key as `/ferum/<env>/<KEY>` with type `SecureString`.  
+1. Store each key as `/ferum/<env>/<KEY>` with type `SecureString`.
 2. Example command:
    `aws ssm put-parameter --name /ferum/dev/FERUM_JWT_SECRET --value "<secret>" --type SecureString --overwrite`
 3. Grant IAM roles limited to `ssm:GetParametersByPath` for `/ferum/dev`.

@@ -6,20 +6,22 @@
 
 ## 📌 Основные этапы
 
-| Этап     | Название                           | Цель                                                                                                             | Длительность           | Owner                      | Status        | Blocked by                          | Notes                                     |
-| -------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------------------- | ------------- | ------------------------------------ | ----------------------------------------- |
-| **P0-1** | Очистка и нормализация репозитория | Полностью вычищен мусор, секреты и временные файлы; структура docs/ и legacy/ оформлена                          | ✅ Выполнено           | Архитектор / DevOps        | Done          | —                                    | Базовая уборка завершена (архитектура стабилизирована). |
-| **P0-2** | Архитектурная консолидация         | Завершить `architecture_overview.md`, подготовить `current_diagram.drawio` и финализировать взаимосвязи сервисов | 2 дня                  | Архитектор + Backend Lead  | In Progress   | Подача обновлённых диаграмм         | Рабочая группа завершает схемы и зависимости. |
-| **P0-3** | Миграция и рефакторинг DocType     | Завершить миграцию кастомных DocType в стандарты ERPNext; убрать устаревшие таблицы и hooks                      | 2 недели               | Backend Team               | Planned       | P0-2, архитектурная карта            | Нужно донести миграции и data-cleanup jobs. |
-| **P0-4** | Безопасность и секреты             | Перевести все секреты в Vault/SSM, внедрить DB-уровень PQC и роле-фильтрацию на SQL                              | 1 неделя               | DevOps + Security Engineer | Planned       | P0-3, секретный менеджер             | Ротация токенов, row-level security. |
-| **P0-5** | Тестирование и автоматизация       | Покрыть основные бизнес-флоу pytest, миграции, автоматические проверки интеграций                                | 1 неделя (параллельно) | QA Lead + Backend          | Planned       | P0-3, P0-4                          | Smoke pytest + bench тесты. |
-| **P1-1** | CI/CD Pipeline                     | GitHub Actions: lint → pytest → bench migrate → build → deploy → notify                                          | 1 неделя               | DevOps                     | Planned       | P0-5, секреты                        | Документировать и собрать workflow. |
-| **P1-2** | Интеграции (Drive/Telegram)        | Завершить проверку Drive API и Telegram бота, внедрить Prometheus метрики и Sentry логирование                   | 1 неделя               | Integrations Engineer      | Planned       | P0-4                                | Добавить health checks и alerts. |
+| Этап     | Название                           | Цель                                                                                                             | Длительность           | Owner                      | Status      | Blocked by                  | Notes                                                   |
+| -------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------------------- | ----------- | --------------------------- | ------------------------------------------------------- |
+| **P0-1** | Очистка и нормализация репозитория | Полностью вычищен мусор, секреты и временные файлы; структура docs/ и legacy/ оформлена                          | ✅ Выполнено           | Архитектор / DevOps        | Done        | —                           | Базовая уборка завершена (архитектура стабилизирована). |
+| **P0-2** | Архитектурная консолидация         | Завершить `architecture_overview.md`, подготовить `current_diagram.drawio` и финализировать взаимосвязи сервисов | 2 дня                  | Архитектор + Backend Lead  | In Progress | Подача обновлённых диаграмм | Рабочая группа завершает схемы и зависимости.           |
+| **P0-3** | Миграция и рефакторинг DocType     | Завершить миграцию кастомных DocType в стандарты ERPNext; убрать устаревшие таблицы и hooks                      | 2 недели               | Backend Team               | Planned     | P0-2, архитектурная карта   | Нужно донести миграции и data-cleanup jobs.             |
+| **P0-4** | Безопасность и секреты             | Перевести все секреты в Vault/SSM, внедрить DB-уровень PQC и роле-фильтрацию на SQL                              | 1 неделя               | DevOps + Security Engineer | Planned     | P0-3, секретный менеджер    | Ротация токенов, row-level security.                    |
+| **P0-5** | Тестирование и автоматизация       | Покрыть основные бизнес-флоу pytest, миграции, автоматические проверки интеграций                                | 1 неделя (параллельно) | QA Lead + Backend          | Planned     | P0-3, P0-4                  | Smoke pytest + bench тесты.                             |
+| **P1-1** | CI/CD Pipeline                     | GitHub Actions: lint → pytest → bench migrate → build → deploy → notify                                          | 1 неделя               | DevOps                     | Planned     | P0-5, секреты               | Документировать и собрать workflow.                     |
+| **P1-2** | Интеграции (Drive/Telegram)        | Завершить проверку Drive API и Telegram бота, внедрить Prometheus метрики и Sentry логирование                   | 1 неделя               | Integrations Engineer      | Planned     | P0-4                        | Добавить health checks и alerts.                        |
+
 ---
-| **P1-3** | Документация и Runbooks            | Финализировать `infrastructure_and_ci.md`, `roles_and_acl.md`, обновить README                                   | 3 дня                  | Tech Writer + Architect    | Planned       | P0-2                                | Обновить runbooks и delivery отчёты. |
-| **P2-1** | Production Deployment              | Развёртывание через Docker / Traefik / PostgreSQL с бэкапами и HTTPS                                             | 1 неделя               | DevOps Lead                | Planned       | P1-1                                | Stage → prod rollout + backups. |
-| **P2-2** | Мониторинг и наблюдаемость         | Prometheus + Grafana + Sentry интеграция и алерты                                                                | 3 дня                  | DevOps + SRE               | Planned       | P1-2                                | Настроить dash/alerts. |
-| **P2-3** | Приёмочные тесты и Go-Live         | Финальная валидация на stage, Smoke и UAT, подготовка отчёта об эксплуатационной готовности                      | 1 неделя               | QA Lead + Project Owner    | Planned       | P2-1, P2-2                          | Smoke test report и sign-off. |
+
+| **P1-3** | Документация и Runbooks | Финализировать `infrastructure_and_ci.md`, `roles_and_acl.md`, обновить README | 3 дня | Tech Writer + Architect | Planned | P0-2 | Обновить runbooks и delivery отчёты. |
+| **P2-1** | Production Deployment | Развёртывание через Docker / Traefik / PostgreSQL с бэкапами и HTTPS | 1 неделя | DevOps Lead | Planned | P1-1 | Stage → prod rollout + backups. |
+| **P2-2** | Мониторинг и наблюдаемость | Prometheus + Grafana + Sentry интеграция и алерты | 3 дня | DevOps + SRE | Planned | P1-2 | Настроить dash/alerts. |
+| **P2-3** | Приёмочные тесты и Go-Live | Финальная валидация на stage, Smoke и UAT, подготовка отчёта об эксплуатационной готовности | 1 неделя | QA Lead + Project Owner | Planned | P2-1, P2-2 | Smoke test report и sign-off. |
 
 ---
 
@@ -34,19 +36,19 @@
 
 ## 🧭 Роли по этапам
 
-| Этап   | Вовлечённые роли |
-| ------ | ---------------- |
-| **P0-1** | Architect, DevOps |
-| **P0-2** | Architect, Backend Lead |
-| **P0-3** | Backend Team, Architect |
-| **P0-4** | Security Engineer, Architect |
-| **P0-5** | QA Lead, Backend Team |
-| **P1-1** | DevOps, Script Manager |
+| Этап     | Вовлечённые роли                                   |
+| -------- | -------------------------------------------------- |
+| **P0-1** | Architect, DevOps                                  |
+| **P0-2** | Architect, Backend Lead                            |
+| **P0-3** | Backend Team, Architect                            |
+| **P0-4** | Security Engineer, Architect                       |
+| **P0-5** | QA Lead, Backend Team                              |
+| **P1-1** | DevOps, Script Manager                             |
 | **P1-2** | Integrations Engineer, Office Manager, Tech Writer |
-| **P1-3** | Tech Writer, Architect |
-| **P2-1** | DevOps Lead, SRE |
-| **P2-2** | DevOps, SRE, Support |
-| **P2-3** | QA Lead, Project Owner |
+| **P1-3** | Tech Writer, Architect                             |
+| **P2-1** | DevOps Lead, SRE                                   |
+| **P2-2** | DevOps, SRE, Support                               |
+| **P2-3** | QA Lead, Project Owner                             |
 
 Эта таблица отражает связь между этапами и ответственностью; роли соответствуют описанию из `docs/roles_and_acl.md` и текущим обязанностям команд.
 
@@ -87,7 +89,6 @@
 - Terraform: создание окружений (dev/stage/prod).
 - Ansible playbooks для bench / postgres / traefik.
 - GitHub Actions pipeline:
-
   - Lint → Tests → Build → Deploy → Notify.
 
 - Резервное копирование через `site_ops.py` + S3/Vault.

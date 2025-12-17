@@ -21,7 +21,6 @@
 - Blackbox exporter probe config: `monitoring/blackbox/example-probe.yml`.
 - Operational guidance: see `docs/runbooks/monitoring.md`.
 
-## Секреты: Vault/SSM, примеры .env.*.example
+## Секреты: Vault/SSM, примеры .env.\*.example
 
 ## DR/Backups: расписание, шифрование, test-restore
-

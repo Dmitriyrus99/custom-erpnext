@@ -3,17 +3,14 @@
 The following API methods are available for admins to diagnose Google Drive synchronization and trigger retries.
 
 - Get sync status for a document
-
   - `GET /api/method/ferum_custom.api.admin_tools.get_file_sync_status?doctype=File&name=<FILE_NAME>`
   - `GET /api/method/ferum_custom.api.admin_tools.get_file_sync_status?doctype=Custom%20Attachment&name=<ATT_NAME>`
 
   Response:
-
   - `drive_file_id`, `drive_web_link`, `sync_needed` (boolean)
   - For Custom Attachment: `file_url`, `linked_doctype`, `linked_docname`
 
 - Trigger sync for a document
-
   - `POST /api/method/ferum_custom.api.admin_tools.trigger_file_sync`
   - Body: `doctype=File|Custom Attachment`, `name=<NAME>`
 

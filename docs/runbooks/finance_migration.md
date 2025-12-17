@@ -24,7 +24,7 @@
 - Отменить флаг `enable_standard_finance` — система возвращается к старому поведению, но новые Sales Invoice/Payment Entry уже созданы.
 - Поделать `"Ferum Custom"` документацию/автоматизацию согласно новой схеме (например, scripts/шаблоны).
 
-- Для пакетного прогонки используйте helper helper:  
+- Для пакетного прогонки используйте helper helper:
   ```bash
   bench --site <site> execute \\
     ferum_custom.ferum_custom.domain.finance.scripts.migrate_finance.migrate_finance_records \\

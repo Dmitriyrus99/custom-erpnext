@@ -11,6 +11,7 @@ This runbook describes how to deploy the Frappe stack with the new CI/CD workflo
   - Optional `DEPLOY_BRANCH` (default `main`) and `DEPLOY_BACKUP_FILE` (default `backups/latest.dump`).
 
 During the `[deploy]` job the workflow:
+
 1. Logs into GitHub Container Registry and builds/pushes the Docker image defined in `apps/ferum_custom/Dockerfile`.
 2. Connects to the production host, pulls the latest branch, and invokes `./scripts/deploy.sh deploy <image>` with the pushed image.
 

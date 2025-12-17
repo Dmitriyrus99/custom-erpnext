@@ -1,4 +1,3 @@
-
 version: "1.0"
 name: "Deploy ERP Schema Rebuild for MariaDB (Ferum Customizations)"
 model: "gpt-5"
@@ -15,7 +14,6 @@ input_files:
     purpose: Исходное описание схемы, сгенерированное Gemini.
 
 steps:
-
   - name: "1️⃣ Разбор YAML схемы и генерация SQL-файлов"
     action: |
       - Считать разделы: schema_definition, performance_optimizations, business_logic, analytics_layer.

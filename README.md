@@ -39,6 +39,7 @@ Refer to the project's `docs/` directory for detailed setup instructions, includ
 Unit and integration tests are located in `apps/ferum_custom/ferum_custom/tests/` and `apps/ferum_custom/telegram_bot/telegram_bot/tests/`.
 
 Run tests using:
+
 ```bash
 ./env/bin/pytest apps/ferum_custom/ferum_custom/tests
 ./env/bin/pytest apps/ferum_custom/telegram_bot/telegram_bot/tests
