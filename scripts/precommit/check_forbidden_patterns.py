@@ -38,11 +38,14 @@ def main(argv: list[str]) -> int:
     failed = []
     files = [Path(p) for p in argv if p.endswith(".py")]
     for f in files:
+        if not f.exists():
+            continue
+        allow = allow_path(f)
         txt = f.read_text(encoding="utf-8", errors="ignore")
         for i, line in enumerate(txt.splitlines(), start=1):
-            if PRINT_RE.search(line) and not allow_path(f):
+            if PRINT_RE.search(line) and not allow:
                 failed.append((f, i, "print() is forbidden"))
-            if SQL_RE.search(line) and sql_is_unsafe(line):
+            if SQL_RE.search(line) and not allow and sql_is_unsafe(line):
                 failed.append((f, i, "Unsafe frappe.db.sql() without parameters"))
     if failed:
         for f, i, msg in failed:

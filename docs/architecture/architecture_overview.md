@@ -51,7 +51,7 @@ graph TD
 - **Goal:** Transition from custom `Service Request` to standard `Issue`.
 - **Current State:** Hybrid.
   - **Input:** API `/create_issue` creates an `Issue` but supports legacy fields.
-  - **Logic:** `apps/ferum_custom/ferum_custom/domain/service/` handles business logic.
+  - **Logic:** `apps/apps/ferum_custom/ferum_custom/domain/service/` handles business logic.
   - **Entities:**
     - `Issue` (Standard) — Main ticket.
     - `Service Request` (Legacy) — Deprecated, mapped to Issue.

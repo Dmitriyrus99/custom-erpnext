@@ -40,7 +40,7 @@
 
 ## Row-permission tests
 
-Добавьте `apps/ferum_custom/ferum_custom/tests/test_permissions.py` с кейсами:
+Добавьте `apps/apps/ferum_custom/ferum_custom/tests/test_permissions.py` с кейсами:
 
 1. Service Engineer видит и редактирует только заявки/отчёты, связанные с его `Service Object` / `Project`.
 2. Chief Accountant видит все `Invoice`/`Payment` своей компании, но не может менять чужие.
@@ -50,7 +50,7 @@
 Тесты запускаются командой:
 
 ```bash
-./env/bin/pytest apps/ferum_custom/ferum_custom/tests/test_permissions.py
+./env/bin/pytest apps/apps/ferum_custom/ferum_custom/tests/test_permissions.py
 ```
 
 ## Row-level security implementation
@@ -72,5 +72,5 @@
 
 Дополнительно:
 
-- Обновите `ferum_custom/permissions.py` и `hooks.py` после тестов, чтобы row-level security стала частью приложения.
+- Обновите `apps/ferum_custom/ferum_custom/permissions.py` и `hooks.py` после тестов, чтобы row-level security стала частью приложения.
 - При добавлении новых ролевых ограничений — регистрируйте их в этом документе, чтобы команды и тесты всегда имели актуальный источник правды.

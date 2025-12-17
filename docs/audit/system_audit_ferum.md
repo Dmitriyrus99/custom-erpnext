@@ -10,15 +10,15 @@
 
 Входные данные (найденные в репозитории)
 
-- `apps/ferum_custom/ferum_custom/docs/*` (архитектура, безопасность, интеграции, ER‑модель, матрица ролей, RU‑документы).
-- Код интеграций: `ferum_custom/ferum_custom/ferum_custom/integrations/*` (Drive/Telegram).
-- Бизнес‑логика: `ferum_custom/ferum_custom/ferum_custom/doctype/*` (Service Project/Request/Report/Invoice и дочерние).
-- API: `apps/ferum_custom/ferum_custom/api/*` (auth, service, attachments, reports, metrics, telegram_bot).
-- Hookи/CRON: `apps/ferum_custom/ferum_custom/hooks.py`.
+- `apps/apps/ferum_custom/ferum_custom/docs/*` (архитектура, безопасность, интеграции, ER‑модель, матрица ролей, RU‑документы).
+- Код интеграций: `apps/ferum_custom/ferum_custom/ferum_custom/integrations/*` (Drive/Telegram).
+- Бизнес‑логика: `apps/ferum_custom/ferum_custom/ferum_custom/doctype/*` (Service Project/Request/Report/Invoice и дочерние).
+- API: `apps/apps/ferum_custom/ferum_custom/api/*` (auth, service, attachments, reports, metrics, telegram_bot).
+- Hookи/CRON: `apps/apps/ferum_custom/apps/ferum_custom/ferum_custom/hooks.py`.
 
 Отсутствующие артефакты (из audit_prompt.md)
 
-- «Модель бизнес.docx», «Архитектура системы.docx», «Данный ответ объединяет … .docx», «Бизнес.docx» не обнаружены как .docx. Использованы эквиваленты из `apps/ferum_custom/ferum_custom/docs/` (в т.ч. `Архитектура системы Многофирменная.txt`, RU‑разделы) и исходный код как основной контекст. При необходимости уточнить нюансы бизнес‑модели — отметить ниже в предположениях.
+- «Модель бизнес.docx», «Архитектура системы.docx», «Данный ответ объединяет … .docx», «Бизнес.docx» не обнаружены как .docx. Использованы эквиваленты из `apps/apps/ferum_custom/ferum_custom/docs/` (в т.ч. `Архитектура системы Многофирменная.txt`, RU‑разделы) и исходный код как основной контекст. При необходимости уточнить нюансы бизнес‑модели — отметить ниже в предположениях.
 
 Ключевые предположения
 

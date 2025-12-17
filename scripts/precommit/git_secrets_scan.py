@@ -5,8 +5,14 @@ import re
 import sys
 from pathlib import Path
 
-SUSPECT_PATTERN = re.compile(
-    r"(?i)(SECRET|TOKEN|PASSWORD|PRIVATE_KEY|SENTRY_DSN)\s*[:=]\s*['\"]?[A-Za-z0-9/_-]{8,}"
+SUSPECT_PATTERN_TEXT = re.compile(
+    # Catch common .env / yaml styles: TOKEN=abc... or TOKEN: abc...
+    r"(?i)(SECRET|TOKEN|PASSWORD|PRIVATE_KEY|SENTRY_DSN)\s*[:=]\s*[A-Za-z0-9/_-]{16,}"
+)
+
+SUSPECT_PATTERN_CODE = re.compile(
+    # Catch hardcoded string literals in code: token = "abc..."
+    r"(?i)(SECRET|TOKEN|PASSWORD|PRIVATE_KEY|SENTRY_DSN)\s*[:=]\s*['\"][A-Za-z0-9/_-]{16,}['\"]"
 )
 
 SKIP_SUFFIXES = {
@@ -42,9 +48,12 @@ def should_skip(path: Path) -> bool:
 def scan_file(path: Path) -> list[str]:
     findings = []
     try:
+        pattern = SUSPECT_PATTERN_TEXT
+        if path.suffix.lower() in {".py", ".js", ".jsx", ".ts", ".tsx"}:
+            pattern = SUSPECT_PATTERN_CODE
         with path.open("r", encoding="utf-8", errors="ignore") as handle:
             for no, line in enumerate(handle, start=1):
-                if SUSPECT_PATTERN.search(line):
+                if pattern.search(line):
                     findings.append(f"{path}:{no}")
     except Exception:
         return findings

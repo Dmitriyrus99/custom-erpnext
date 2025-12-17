@@ -8,6 +8,7 @@ extend-exclude = "(apps/erpnext/|apps/frappe/|services/|docs/|monitoring/|legacy
 profile = "black"
 multi_line_output = 3
 line_length = 100
+known_first_party = ["ferum_custom", "telegram_bot"]
 skip_gitignore = true
 skip = ["env", ".venv", "node_modules", "sites"]
 
@@ -30,7 +31,7 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B"]
+select = ["E", "F", "W", "B"]
 # Keep E203 ignored for Black compatibility; remove W503 to avoid parser issues
 ignore = ["E203", "E402", "E501"]
 

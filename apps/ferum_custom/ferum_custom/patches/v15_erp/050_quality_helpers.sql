@@ -1,0 +1,2 @@
+-- Optional: helper views or functions to log data issues programmatically
+-- Intentionally left minimal for now.

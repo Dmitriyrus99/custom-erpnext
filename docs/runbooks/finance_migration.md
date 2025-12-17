@@ -17,7 +17,7 @@
 
 - `domain/finance/bridge.py`/`payments.py` — ядро логики, можно вызывать вручную через `bench execute` для отдельных записей для тестов.
 - После миграции и полного перевода платежей можно удалить `Payment Allocation`/`Invoice` (или держать как архивные).
-- Обновления нужно проверять `ferum_custom/tests/test_finance_flows.py`.
+- Обновления нужно проверять `apps/ferum_custom/ferum_custom/tests/test_finance_flows.py`.
 
 ## Проверка и откат
 

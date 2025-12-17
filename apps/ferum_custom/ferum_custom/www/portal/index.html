@@ -1,0 +1,80 @@
+<div class="container">
+	<h2>{{ _("My Issues") }}</h2>
+	<ul class="nav nav-tabs mb-3">
+		<li class="nav-item">
+			<a class="nav-link active" href="#" data-status="">{{ _("All") }}</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="#" data-status="Open">{{ _("Open") }}</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="#" data-status="Replied">{{ _("Replied") }}</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="#" data-status="On Hold">{{ _("On Hold") }}</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="#" data-status="Resolved">{{ _("Resolved") }}</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="#" data-status="Closed">{{ _("Closed") }}</a>
+		</li>
+	</ul>
+	<div id="sr-list"></div>
+	<p class="mt-3">
+		<a class="btn btn-sm btn-primary" href="/portal/new-issue">{{ _("Create New Issue") }}</a>
+		<a class="btn btn-sm btn-outline-secondary" href="/portal/closed"
+			>{{ _("My Closed Requests") }}</a
+		>
+	</p>
+</div>
+<script>
+	frappe.ready(() => {
+		const el = document.getElementById("sr-list");
+		let currentStatus = "";
+		const load = () => {
+			const status = currentStatus || null;
+			frappe
+				.call({
+					method: "ferum_custom.api.service.list_service_requests",
+					args: { start: 0, page_length: 20, status },
+				})
+				.then((r) => {
+					const rows = (r.message && r.message.data) || [];
+					if (!rows.length) {
+						el.innerHTML = `<p>${__("No issues yet.")}</p>`;
+						return;
+					}
+					const now = new Date();
+					el.innerHTML =
+						"<ul>" +
+						rows
+							.map((x) => {
+								let style = "";
+								if (
+									x.sla_deadline &&
+									["Resolved", "Closed"].indexOf(x.status) === -1
+								) {
+									const due = new Date(x.sla_deadline);
+									if (due < now) style = ' style="color:#c92a2a;"'; // red for overdue
+								}
+								return `<li${style}><a href="/portal/service-request?name=${
+									x.name
+								}">${x.name}</a> - ${x.title || ""} - ${x.status}</li>`;
+							})
+							.join("") +
+						"</ul>";
+				});
+		};
+		document.querySelectorAll(".nav-link[data-status]").forEach((a) => {
+			a.addEventListener("click", (e) => {
+				e.preventDefault();
+				document.querySelectorAll(".nav-link").forEach((x) => x.classList.remove("active"));
+				a.classList.add("active");
+				currentStatus = a.getAttribute("data-status") || "";
+				load();
+			});
+		});
+		load();
+	});
+</script>

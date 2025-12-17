@@ -7,10 +7,10 @@
 
 - Кастомное приложение `apps/ferum_custom` поверх ERPNext/Frappe.
 - Ключевые области:
-  - API: `ferum_custom/ferum_custom/api/*` (service, telegram_bot, auth, attachments).
-  - Домейн: `ferum_custom/ferum_custom/domain/service/*` (Issue/Service Request логика).
+  - API: `apps/ferum_custom/ferum_custom/api/*` (service, telegram_bot, auth, attachments).
+  - Домейн: `apps/ferum_custom/ferum_custom/domain/service/*` (Issue/Service Request логика).
   - Telegram бот: `apps/ferum_custom/telegram_bot/telegram_bot/*` (+ webhook API).
-  - Патчи/миграции: `ferum_custom/ferum_custom/patches/**`, реестр `patches.txt`.
+  - Патчи/миграции: `apps/ferum_custom/ferum_custom/patches/**`, реестр `patches.txt`.
   - Настройки: DocType `Ferum Custom Settings`, поля для Telegram/JWT.
   - Интеграции: Telegram Bot API, JWT API (`enable_jwt`), Drive/Telegram упоминания в tests/notifications.
 
@@ -84,6 +84,6 @@
 
 ## 10. Быстрые чек-листы
 
-- Запуск тестов: `./env/bin/pytest apps/ferum_custom/ferum_custom/tests -q`
+- Запуск тестов: `./env/bin/pytest apps/apps/ferum_custom/ferum_custom/tests -q`
 - Миграции: `bench --site <site> migrate`
 - Бот: systemd `ferum-telegram-bot.service`, health: `/tg-bot/healthz`

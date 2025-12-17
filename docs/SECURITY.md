@@ -18,8 +18,8 @@ This document captures the security contract for Ferum Custom — from secrets t
 
 ## Tests
 
-- Permission rules are covered by `apps/ferum_custom/ferum_custom/tests/test_permissions.py`. Run `./env/bin/pytest apps/ferum_custom/ferum_custom/tests/test_permissions.py` after touching PQC logic.
-- Additional QA: run `./env/bin/pytest apps/ferum_custom/ferum_custom/tests/test_service_requests.py` to ensure Portal tokens + JWT also respect the same company/customer boundaries.
+- Permission rules are covered by `apps/apps/ferum_custom/ferum_custom/tests/test_permissions.py`. Run `./env/bin/pytest apps/apps/ferum_custom/ferum_custom/tests/test_permissions.py` after touching PQC logic.
+- Additional QA: run `./env/bin/pytest apps/apps/ferum_custom/ferum_custom/tests/test_service_requests.py` to ensure Portal tokens + JWT also respect the same company/customer boundaries.
 
 ## Monitoring hardening
 

@@ -8,21 +8,21 @@ This document summarises the current implementation of the two priority integrat
 
 **Entry points**
 
-- Service Report PDF export enqueues a Drive upload (`apps/ferum_custom/ferum_custom/ferum_custom/doctype/service_report/service_report.py#L118`).
-- Custom Attachment background job mirrors ERP `File` objects to Drive folders (`apps/ferum_custom/ferum_custom/ferum_custom/doctype/custom_attachment/custom_attachment.py#L8`).
-- ERP File hook uploads newly attached files (`apps/ferum_custom/ferum_custom/ferum_custom/integrations/drive_file.py#L26`).
-- Daily backup job pushes SQL backups to Drive (`apps/ferum_custom/ferum_custom/ferum_custom/site_ops.py#L180`).
+- Service Report PDF export enqueues a Drive upload (`apps/apps/ferum_custom/ferum_custom/ferum_custom/doctype/service_report/service_report.py#L118`).
+- Custom Attachment background job mirrors ERP `File` objects to Drive folders (`apps/apps/ferum_custom/ferum_custom/ferum_custom/doctype/custom_attachment/custom_attachment.py#L8`).
+- ERP File hook uploads newly attached files (`apps/apps/ferum_custom/ferum_custom/ferum_custom/integrations/drive_file.py#L26`).
+- Daily backup job pushes SQL backups to Drive (`apps/apps/ferum_custom/ferum_custom/ferum_custom/site_ops.py#L180`).
 
 **Configuration**
 
-- Drive credentials are loaded from the `Ferum Custom Settings` singleton (`apps/ferum_custom/ferum_custom/ferum_custom/settings.py#L11`).
-- `google_service_account_json` is stored as an ERPNext `File`; service account info is cached with `lru_cache` (`apps/ferum_custom/ferum_custom/ferum_custom/integrations/google.py#L19`).
+- Drive credentials are loaded from the `Ferum Custom Settings` singleton (`apps/apps/ferum_custom/ferum_custom/ferum_custom/settings.py#L11`).
+- `google_service_account_json` is stored as an ERPNext `File`; service account info is cached with `lru_cache` (`apps/apps/ferum_custom/ferum_custom/ferum_custom/integrations/google.py#L19`).
 - Root folder is configured via the `google_drive_root_folder_id` field (`ferum_custom_settings.json`).
 
 **Behaviour**
 
-- Upload routine builds folder hierarchy per customer/project and updates/creates files atomically with retry/backoff (`apps/ferum_custom/ferum_custom/ferum_custom/integrations/drive.py#L90`).
-- On failure, errors are logged and best-effort email alerts are sent to System Manager / Chief Accountant (`apps/ferum_custom/ferum_custom/ferum_custom/integrations/drive.py#L160`).
+- Upload routine builds folder hierarchy per customer/project and updates/creates files atomically with retry/backoff (`apps/apps/ferum_custom/ferum_custom/ferum_custom/integrations/drive.py#L90`).
+- On failure, errors are logged and best-effort email alerts are sent to System Manager / Chief Accountant (`apps/apps/ferum_custom/ferum_custom/ferum_custom/integrations/drive.py#L160`).
 - `delete_file` removes remote objects when `Custom Attachment` records are deleted (`drive.py#L179` and `custom_attachment.py#L20`).
 - Ferum Custom Settings exposes a healthcheck button that reads `drive.healthcheck()` (`drive.py#L203`).
 
@@ -55,24 +55,24 @@ This document summarises the current implementation of the two priority integrat
 
 **Entry points**
 
-- Central send helper with retries and allowlist enforcement (`apps/ferum_custom/ferum_custom/ferum_custom/integrations/telegram.py#L58`).
-- Business logic sends broadcasts on new service requests, SLA breaches, subcontractor invoices (`apps/ferum_custom/ferum_custom/ferum_custom/doctype/service_request/service_request.py#L149`, `apps/ferum_custom/ferum_custom/ferum_custom/doctype/invoice/invoice.py#L84`).
-- Webhook endpoint handles commands `/new_request`, `/start_work`, `/ping`, and photo attachments (`apps/ferum_custom/ferum_custom/api/telegram_bot.py#L116`).
+- Central send helper with retries and allowlist enforcement (`apps/apps/ferum_custom/ferum_custom/ferum_custom/integrations/telegram.py#L58`).
+- Business logic sends broadcasts on new service requests, SLA breaches, subcontractor invoices (`apps/apps/ferum_custom/ferum_custom/ferum_custom/doctype/service_request/service_request.py#L149`, `apps/apps/ferum_custom/ferum_custom/ferum_custom/doctype/invoice/invoice.py#L84`).
+- Webhook endpoint handles commands `/new_request`, `/start_work`, `/ping`, and photo attachments (`apps/apps/ferum_custom/ferum_custom/api/telegram_bot.py#L116`).
 
 **Configuration & security**
 
 - `Ferum Custom Settings` stores `telegram_bot_token`, `telegram_default_chat_id`, and a `telegram_webhook_secret`.
 - Webhook authorisation validates Telegram's `X-Telegram-Bot-Api-Secret-Token` header when set (preferred),
   falling back to a shared `secret` query parameter for backward compatibility
-  (`apps/ferum_custom/ferum_custom/api/telegram_bot.py#L316`).
+  (`apps/apps/ferum_custom/ferum_custom/api/telegram_bot.py#L316`).
 - No IP allowlist or Telegram signature verification is performed.
 
 **Behaviour**
 
-- `send_message` retries up to 3 times with exponential delay and blocks non-allowlisted chats (`apps/ferum_custom/ferum_custom/ferum_custom/integrations/telegram.py#L58`).
-- Webhook commands now check the admin username allowlist for privileged actions (`apps/ferum_custom/ferum_custom/api/telegram_bot.py#L308`).
-- Photo attachments are downloaded via Bot API and saved as ERP `File` + `Custom Attachment`, then Drive upload is triggered (`apps/ferum_custom/ferum_custom/api/telegram_bot.py#L236`).
-- Healthcheck helper powers the `/ping` command and the “Check Telegram” button in settings (`apps/ferum_custom/ferum_custom/ferum_custom/integrations/telegram.py#L110`).
+- `send_message` retries up to 3 times with exponential delay and blocks non-allowlisted chats (`apps/apps/ferum_custom/ferum_custom/ferum_custom/integrations/telegram.py#L58`).
+- Webhook commands now check the admin username allowlist for privileged actions (`apps/apps/ferum_custom/ferum_custom/api/telegram_bot.py#L308`).
+- Photo attachments are downloaded via Bot API and saved as ERP `File` + `Custom Attachment`, then Drive upload is triggered (`apps/apps/ferum_custom/ferum_custom/api/telegram_bot.py#L236`).
+- Healthcheck helper powers the `/ping` command and the “Check Telegram” button in settings (`apps/apps/ferum_custom/ferum_custom/ferum_custom/integrations/telegram.py#L110`).
 
 **Checklist status**
 
