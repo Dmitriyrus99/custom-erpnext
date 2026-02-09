@@ -2,7 +2,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",
     "caniuse-lite": "^1.0.30001760",
-    "eslint": "^8.57.1",
+    "eslint": "^10.0.0",
     "prettier": "^3.7.4"
   }
 }
